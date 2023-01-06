@@ -1,0 +1,59 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+```{r}
+hospital_activity <- read_csv("Hospital activity page.csv") %>% 
+  janitor::clean_names()
+```
+
+```{r}
+hospital_activity %>% 
+  distinct(admission_type)
+```
+
+```{r}
+admissions <- c("Elective Inpatients",
+                "Emergency Inpatients",
+                "Transfers", 
+                "All Day cases", 
+                "Not Specified")
+```
+
+```{r}
+hospital_activity_plus <- hospital_activity %>% 
+  mutate(year = str_sub(quarter, start = 1, end = 4), .after = id) %>% 
+  mutate(qtr = str_sub(quarter, start = 5, end = 6), .after = year)
+```
+
+```{r}
+hospital_admit_wider <- hospital_activity_plus %>% 
+  filter(admission_type %in% admissions) %>% 
+  filter(year >= 2019) %>% 
+  group_by(year, qtr, admission_type) %>% 
+  summarise(admissions = sum(episodes)) %>% 
+  pivot_wider(names_from = admission_type, values_from = admissions) %>% 
+  janitor::clean_names() %>% 
+  mutate(total_admissions = sum(c_across(all_day_cases:transfers)) , .after = qtr)
+
+hospital_admit_wider %>% 
+  ggplot() +
+  aes(x = qtr, y = total_admissions, group = year, colour = year) + 
+  geom_line() + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(legend.title = element_blank()) +
+  labs(
+    x = "quarter", 
+    y = "admissions\n", 
+    title = "Hospital admissions"
+  )
+  
+```
+
+
+
