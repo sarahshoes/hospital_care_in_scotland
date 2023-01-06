@@ -2,3 +2,33 @@
 title: "Investigating Data"
 output: html_notebook
 ---
+
+Looking at wider covid impacts data
+its weekly and related to 2018/19 baseline
+
+```{r}
+library("tidyverse")
+library("janitor")
+```
+
+
+```{r}
+weekly_admissions <- read.csv("Covid admissions by health board and speciality.csv")
+weekly_admissions <- clean_names(weekly_admissions)
+```
+
+data cleaning
+```{r}
+weekly_admissions <- weekly_admissions %>% 
+  rename("speciality"= "specialty") %>% 
+  rename("speciality_qf"= "specialty_qf") 
+```
+
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+ggplot() +
+aes(x=x_id, y = number_admissions, group = speciality)+
+geom_line()
+```
+
