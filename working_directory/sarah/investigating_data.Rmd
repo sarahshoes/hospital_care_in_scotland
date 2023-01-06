@@ -26,9 +26,33 @@ weekly_admissions <- weekly_admissions %>%
 
 ```{r}
 weekly_admissions %>% 
-  filter(admission_type == "All") %>% 
-ggplot() +
-aes(x=x_id, y = number_admissions, group = speciality)+
-geom_line()
+  distinct(hb)
 ```
 
+```{r}
+weekly_admissions %>% 
+  distinct(admission_type)
+```
+
+```{r}
+weekly_admissions %>% 
+  distinct(speciality)
+```
+
+
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+ggplot() +
+aes(x=x_id, y = number_admissions, group = hb) +
+geom_line()
+```
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+ggplot() +
+aes(x=x_id, y = number_admissions, group = hb) +
+geom_bar(stat=none)
+```
