@@ -9,6 +9,7 @@ its weekly and related to 2018/19 baseline
 ```{r}
 library("tidyverse")
 library("janitor")
+library("lubridate")
 ```
 
 
@@ -22,6 +23,15 @@ data cleaning
 weekly_admissions <- weekly_admissions %>% 
   rename("speciality"= "specialty") %>% 
   rename("speciality_qf"= "specialty_qf") 
+```
+
+
+```{r}
+weekly_admissions <- weekly_admissions %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending))
 ```
 
 ```{r}
@@ -38,6 +48,70 @@ weekly_admissions %>%
 weekly_admissions %>% 
   distinct(speciality)
 ```
+calculate totals
+```{r}
+total_admissions <- weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  group_by(wdate) %>% 
+  summarise(all_admissions = sum(number_admissions), 
+           all_avg20182019 = sum(average20182019)
+           ) %>%
+  mutate(all_percent_variation = all_admissions/all_avg20182019) %>% 
+  arrange(desc(all_admissions))
+```
+
+```{r}
+total_admissions %>% 
+ggplot() +
+aes(x=wdate, y = all_admissions) +
+geom_line(colour='red') 
+```
+weekly hospital admissions hover around 28000
+expect 336,000 per quarter?
+
+```{r}
+total_admissions %>% 
+ggplot() +  
+aes(x=wdate, y = all_avg20182019) +
+geom_line(colour='blue')
+```
+pre=pandemic hospital admissions hovered around 31000
+expect 372,000 per quarter
+
+```{r}
+total_admissions %>% 
+ggplot() +
+aes(x=wdate, y = all_percent_variation) +
+geom_line()
+```
+Overall(all speciality, all admissions, all healthboards) admissions are only at 90% of pre-pandemic levels
+
+
+Now look to see which health boards are struggling the most
+
+```{r}
+all_admissions_byhb <- weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  group_by(hb) %>% 
+  summarise(mean_percnt_var = mean(percent_variation),
+            min_percnt_var = min(percent_variation),
+            max_percnt_var = max(percent_variation)
+           ) %>%
+  #mutate(all_percent_variation = all_admissions/all_avg20182019)  
+  arrange(desc(max_percnt_var))
+all_admissions_byhb
+```
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  ggplot() +
+  aes(x=wdate, y=percent_variation, group=hb) +
+  geom_line()+
+  facet_wrap(~hb)
+```
 
 
 ```{r}
@@ -53,6 +127,17 @@ weekly_admissions %>%
   filter(admission_type == "All") %>% 
   filter(speciality=="All") %>% 
 ggplot() +
-aes(x=x_id, y = number_admissions, group = hb) +
-geom_bar(stat=none)
+aes(x=wdate, y = number_admissions, fill=hb) +
+geom_col()
 ```
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, fill=hb) +
+geom_col()
+```
+
+
+
