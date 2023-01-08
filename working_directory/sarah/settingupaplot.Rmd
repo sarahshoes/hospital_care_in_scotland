@@ -1,0 +1,63 @@
+---
+title: "setting up a plot"
+output: html_notebook
+---
+
+example code to make a timeseries plot look pretty
+
+
+```{r}
+library("tidyverse")
+library("janitor")
+library("lubridate")
+```
+
+load in datafiles
+```{r}
+covid_cases <- read_csv("admissions_ageband_week.csv")
+covid_cases <- clean_names(covid_cases)
+```
+
+make sure you are plotting a date value
+```{r}
+covid_cases  <- covid_cases  %>% 
+  mutate(wdate = ymd(week_ending)) 
+```
+
+code for a basic plot
+```{r}
+covid_cases %>% 
+  filter(age_band == "Total") %>% 
+ggplot() +
+aes(x=wdate, y = admissions) +
+geom_line() 
+```
+
+
+```{r}
+plotlim <- as.Date(c("2019-12-01","2022-12-31")) 
+ylimits <- c(5,1069)
+p <-  ggplot(covid_cases %>% 
+  filter(age_band == "Total")) +
+aes(x=wdate, y = admissions) +
+geom_line() +   
+#add dashed lines to show the boundaries 
+geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted") + 
+geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted") + 
+geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted") + 
+geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted") + 
+geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted") + 
+geom_vline(xintercept=ymd(20230401),color="gray",linetype="dotted") +   
+scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short()) +
+xlab("Date") +   
+ylab("Hospital Admissions with Covid") +
+#add gray shaded rectangles to note winter
+annotate("rect", xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)), 
+         xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
+         ymin=c(ylimits[1],ylimits[1],ylimits[1],ylimits[1]), 
+         ymax=c(ylimits[2],ylimits[2],ylimits[2],ylimits[2]), 
+         alpha=0.2, fill="gray") 
+#extract ylimits from plot
+#ylimits = layer_scales(p)$y$get_limits()
+p
+```
