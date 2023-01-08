@@ -117,10 +117,29 @@ waiting_times %>%
   filter(date >= "2020-01-01") %>% 
   group_by(date) %>% 
   summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
+  mutate(year = year(date),
+         month = month(date), .after = date) %>% 
+  left_join(avg_2018_2019, by = "month") %>% 
+  mutate(percent_variation = (1 - num_meeting_target_by_month/avg_2018_2019)*100) %>% 
   
+  ggplot(aes(date, percent_variation)) + 
+  geom_col()
 
 
 ```
+
+Q Is it valid to say the number meeting target was higher if the volume of people overall was much lower? Should it all be done in percentage?
+A No because it is the number that needs dealt with and A&E should be able to meet targets for BUT the graph above isn't telling us anything useful
+
+
+Calculate percentage meeting target
+
+```{r}
+
+
+
+```
+
 
 
 
