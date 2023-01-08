@@ -1,10 +1,14 @@
 ---
-title: "Investigating Data"
+title: "Investigating Data - Covid Wider Impacts"
 output: html_notebook
+editor_options: 
+  chunk_output_type: console
 ---
 
 Looking at wider covid impacts data
-its weekly and related to 2018/19 baseline
+weekly variability - related to 2018/19 baseline
+
+revised version - now extracting all Scotland more easily.
 
 ```{r}
 library("tidyverse")
@@ -12,10 +16,19 @@ library("janitor")
 library("lubridate")
 ```
 
+```{r}
+hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- clean_names(hb_codes)
+```
+
 
 ```{r}
-weekly_admissions <- read.csv("Covid admissions by health board and speciality.csv")
+weekly_admissions <- read_csv("Covid admissions by health board and speciality.csv")
 weekly_admissions <- clean_names(weekly_admissions)
+```
+```{r}
+weekly_admissions_demog <- read_csv("Covid admissions by health board, age and sex.csv")
+weekly_admissions_demog <- clean_names(weekly_admissions_demog)
 ```
 
 data cleaning
@@ -25,18 +38,29 @@ weekly_admissions <- weekly_admissions %>%
   rename("speciality_qf"= "specialty_qf") 
 ```
 
+merge hbnames into data
+```{r}
+weekly_admissions <- left_join(weekly_admissions,hb_codes) 
+```
+
+
 
 ```{r}
 weekly_admissions <- weekly_admissions %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
   mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
-  mutate(wdate = ymd(week_ending))
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0))
 ```
 
 ```{r}
 weekly_admissions %>% 
-  distinct(hb)
+  distinct(hb_name)
 ```
 
 ```{r}
@@ -48,44 +72,60 @@ weekly_admissions %>%
 weekly_admissions %>% 
   distinct(speciality)
 ```
-calculate totals
+calculate totals (just a sense check to see if adding all hb's is the same as "all scotland")
 ```{r}
 total_admissions <- weekly_admissions %>% 
-  filter(admission_type == "All") %>% 
+  filter(admission_type == "Emergency") %>% 
   filter(speciality=="All") %>% 
+  filter(hb_name != "All Scotland") %>% 
   group_by(wdate) %>% 
   summarise(all_admissions = sum(number_admissions), 
            all_avg20182019 = sum(average20182019)
            ) %>%
-  mutate(all_percent_variation = all_admissions/all_avg20182019) %>% 
+  mutate(all_percent_variation = (100*(all_admissions-all_avg20182019)/all_avg20182019)) %>% 
   arrange(desc(all_admissions))
 ```
 
+Now (just to check - extract same parameter using 'all scotland')
+```{r}
+total_admissions2 <- weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  filter(hb_name == "All Scotland") 
+```
+
+plot calculated total admissions
 ```{r}
 total_admissions %>% 
 ggplot() +
 aes(x=wdate, y = all_admissions) +
-geom_line(colour='red') 
+geom_line(colour='red') +
+geom_line(aes(x=total_admissions2$wdate, y = total_admissions2$number_admissions),colour='green', linetype="dotted") 
 ```
-weekly hospital admissions hover around 28000
-expect 336,000 per quarter?
+weekly hospital admissions hover around 14000 per week
+expect 168,000 per quarter?
 
 ```{r}
 total_admissions %>% 
 ggplot() +  
 aes(x=wdate, y = all_avg20182019) +
-geom_line(colour='blue')
+geom_line(colour='blue') +  
+geom_line(aes(x=total_admissions2$wdate, y = total_admissions2$average20182019),colour='green', linetype="dotted") 
 ```
-pre=pandemic hospital admissions hovered around 31000
-expect 372,000 per quarter
+pre=pandemic hospital admissions hovered around 15500 per week
+expect 186,000 per quarter
 
 ```{r}
 total_admissions %>% 
 ggplot() +
 aes(x=wdate, y = all_percent_variation) +
-geom_line()
+geom_line() +
+geom_line(aes(x=total_admissions2$wdate, y = total_admissions2$percent_variation),colour='green', linetype="dotted") 
 ```
-Overall(all speciality, all admissions, all healthboards) admissions are only at 90% of pre-pandemic levels
+Overall(all specialities, all admissions, all healthboards) admissions are only at 90% of pre-pandemic levels
+
+The two lines sit over each other so shows that my calculations were correct.
+Can use these calculations when we dont have any averages.
 
 
 Now look to see which health boards are struggling the most
@@ -94,7 +134,7 @@ Now look to see which health boards are struggling the most
 all_admissions_byhb <- weekly_admissions %>% 
   filter(admission_type == "All") %>% 
   filter(speciality=="All") %>% 
-  group_by(hb) %>% 
+  group_by(hb_name) %>% 
   summarise(mean_percnt_var = mean(percent_variation),
             min_percnt_var = min(percent_variation),
             max_percnt_var = max(percent_variation)
@@ -107,19 +147,33 @@ all_admissions_byhb
 weekly_admissions %>% 
   filter(admission_type == "All") %>% 
   filter(speciality=="All") %>% 
-  ggplot() +
-  aes(x=wdate, y=percent_variation, group=hb) +
-  geom_line()+
-  facet_wrap(~hb)
+  group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=hb_name, y=percent_variation)+
+  geom_boxplot()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
 
 
 ```{r}
 weekly_admissions %>% 
   filter(admission_type == "All") %>% 
   filter(speciality=="All") %>% 
+  ggplot() +
+  aes(x=wdate, y=percent_variation, group=hb) +
+  geom_line()+
+  facet_wrap(~hb)
+```
+What is S92000003 (found answer - its the code for "All Scotland") 
+How is NA calculated - still need to check??
+
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
 ggplot() +
-aes(x=x_id, y = number_admissions, group = hb) +
+aes(x=wdate, y = number_admissions, group = hb) +
 geom_line()
 ```
 ```{r}
@@ -138,6 +192,47 @@ ggplot() +
 aes(x=wdate, y = percent_variation, fill=hb) +
 geom_col()
 ```
+? what about different departments?
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "Emergency") %>% 
+  filter(speciality=="All") %>% 
+  group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=hb_name, y=percent_variation)+
+  geom_boxplot()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
 
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "Emergency") %>% 
+  filter(speciality=="Accident & Emergency") %>% 
+ group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=hb_name, y=percent_variation)+
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+crisis calculator
+
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  #filter(admission_type =="Emergency") %>% 
+  #filter(speciality=="Accident & Emergency") %>% 
+  #filter(year == 2020) %>% 
+  filter(iswinter) %>%
+  group_by(hb_name) %>% 
+  summarise(pcnt_bad_days = sum(above_thresh)/n()*7, mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=hb_name, y=mean_percentvar) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#Section2 - repeat for demographic data
 
