@@ -1,0 +1,640 @@
+---
+title: "Investigating Data - Covid Wider Impacts"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+Looking at wider covid impacts data
+weekly variability - related to 2018/19 baseline
+
+revised version - now extracting all Scotland more easily.
+
+```{r}
+library("tidyverse")
+library("janitor")
+library("lubridate")
+```
+
+```{r}
+hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- clean_names(hb_codes)
+```
+
+load in datafiles
+
+```{r}
+weekly_admissions_spec <- read_csv("Covid admissions by health board and speciality.csv")
+weekly_admissions_spec <- clean_names(weekly_admissions_spec)
+
+weekly_admissions_dep <- read_csv("Covid admissions by health board and deprivation.csv")
+weekly_admissions_dep <- clean_names(weekly_admissions_dep)
+
+weekly_admissions_demog <- read_csv("Covid admissions by health board, age and sex.csv")
+weekly_admissions_demog <- clean_names(weekly_admissions_demog)
+```
+
+data cleaning
+note probably more cleaning needed before we finalise
+I changed the spelling but it turns out both spellings are correct!
+
+```{r}
+weekly_admissions_spec <- weekly_admissions_spec %>% 
+  rename("speciality"= "specialty") %>% 
+  rename("speciality_qf"= "specialty_qf") 
+```
+
+merge hbnames into datafiles
+```{r}
+weekly_admissions_spec <- left_join(weekly_admissions_spec,hb_codes)
+weekly_admissions_demog <- left_join(weekly_admissions_demog,hb_codes)
+weekly_admissions_dep <- left_join(weekly_admissions_dep,hb_codes) 
+```
+
+do the analysis needed for identifying qinter and 'crisis'
+
+```{r}
+weekly_admissions_spec <- weekly_admissions_spec %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0))
+```
+
+```{r}
+weekly_admissions_demog <- weekly_admissions_demog %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0))
+```
+
+```{r}
+weekly_admissions_dep <- weekly_admissions_dep %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0))
+```
+
+take a look at what is in each dataset
+
+```{r}
+weekly_admissions_spec %>% 
+  distinct(hb_name)
+```
+14 health boards plus 'all scotland' and an NA - need to work out what to do with this
+
+```{r}
+weekly_admissions_spec %>% 
+  distinct(admission_type)
+```
+Data neatly divided into emergency and planned
+```{r}
+weekly_admissions_spec %>% 
+  distinct(speciality)
+```
+note that some groupings are also combined. need to take a closer look at what these mean.
+
+```{r}
+weekly_admissions_demog %>% 
+  distinct(age_group)
+```
+7 age groups and "all ages"
+
+```{r}
+weekly_admissions_demog %>% 
+  distinct(sex)
+```
+just male - female and all
+
+```{r}
+weekly_admissions_dep %>% 
+  distinct(simd_quintile)
+```
+note there is no 'all' category in this dataset
+
+plot total admissions - you should get the same overall trends from each dataset
+```{r}
+weekly_admissions_demog %>% 
+  filter(age_group == "All ages") %>% 
+  filter(sex =="All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions) +
+geom_line(colour='red') 
+```
+
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions) +
+geom_line(colour='red') 
+```
+same graph as above!
+
+weekly hospital admissions hover around 14000 per week
+expect 168,000 per quarter?
+
+pre=pandemic hospital admissions hovered around 15500 per week
+expect 186,000 per quarter
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation) +
+geom_line(colour='red') 
+```
+
+Overall(all specialities, all admissions, all healthboards) admissions are only at 90% of pre-pandemic levels
+
+
+quick look at demographics
+
+```{r}
+weekly_admissions_demog %>% 
+  filter(sex == "All") %>% 
+  filter(age_group != "All ages") %>% 
+  filter(hb_name =="All Scotland") %>% 
+  filter(admission_type == "All") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions, color = age_group) +
+geom_line() #+
+#scale_colour_brewer(palette = "Set2") 
+```
+age plot shows some variation between age groups.
+
+quick look at sex differences
+```{r}
+weekly_admissions_demog %>% 
+  filter(sex != "All") %>% 
+  filter(age_group == "All ages") %>% 
+  filter(hb_name =="All Scotland") %>% 
+  filter(admission_type == "All") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, color = sex) +
+geom_line() #+
+#scale_colour_brewer(palette = "Set2") 
+```
+
+quick look at index of deprivation. 1 is most deprived and 5 is least deprived
+
+```{r}
+weekly_admissions_dep %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, color = as.factor(simd_quintile)) +
+geom_line() 
+```
+something happening in 2022 - why is there divergence between 1 and 5?
+
+
+
+look at admissions type
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type != "All") %>% 
+  filter(speciality=="All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, colour = admission_type) +
+geom_line()
+```
+need to check what the 'spike' in planned at end of 2021 is related to
+
+quick look at specialities
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality !="All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, colour=speciality) +
+geom_line()
+```
+take a closer look at paediatrics
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality !="All") %>% 
+  filter(str_detect(speciality,"Paed")) %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions, colour=speciality) +
+geom_line()
+```
+
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality !="All") %>% 
+  filter(str_detect(speciality,"Paed")) %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, colour=speciality) +
+geom_line()
+```
+take a closer look at medical
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality !="All") %>% 
+  filter(str_detect(speciality,"Medical")) %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, colour=speciality) +
+geom_line()
+```
+simpler plot of specialities
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "Planned") %>% 
+  filter(speciality !="Medical (incl. Cardiology & Cancer)") %>% 
+  filter(!str_detect(speciality,"Paed")) %>% 
+  filter(speciality !="All") %>% 
+  filter(speciality !="Accident & Emergency") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, colour=speciality) +
+geom_line() +
+scale_colour_brewer(palette = "Set1") 
+```
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "Emergency") %>% 
+  filter(speciality !="Medical (incl. Cardiology & Cancer)") %>% 
+  filter(!str_detect(speciality,"Paed")) %>% 
+  filter(speciality !="All") %>% 
+  filter(speciality !="Accident & Emergency") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = percent_variation, colour=speciality) +
+geom_line() +
+scale_colour_brewer(palette = "Set1") 
+```
+boxplot for different specialities? some values greater than 8000% (i have filtered them out ) indicates we need some more work on data cleaning!
+
+```{r}
+weekly_admissions_spec %>% 
+  #filter(admission_type == "All") %>% 
+  #filter(speciality!="All") %>% 
+  #filter(hb_name =="NHS Region Unknown") %>% 
+  #group_by(speciality) %>% 
+  #need to take a good look at what these values are!
+  filter(percent_variation>500) 
+```
+
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality!="All") %>% 
+  group_by(speciality) %>% 
+  #need to take a good look at what these values are!
+  filter(percent_variation<8000) %>% 
+  ggplot()+
+  aes(x=speciality, y=percent_variation)+
+  geom_boxplot()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+some specialities have faced higher admission levels than others.
+
+
+Now look by health boards 
+
+```{r}
+all_admissions_byhb <- weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  group_by(hb_name) %>% 
+  summarise(mean_percnt_var = mean(percent_variation),
+            min_percnt_var = min(percent_variation),
+            max_percnt_var = max(percent_variation)
+           ) %>%
+  #mutate(all_percent_variation = all_admissions/all_avg20182019)  
+  arrange(desc(max_percnt_var))
+all_admissions_byhb
+```
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=wdate, y=percent_variation, colour = hb_name)+
+  geom_line()
+```
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=hb_name, y=percent_variation)+
+  geom_boxplot()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+for some health boards a significant number of admissions levels are above the levels seen in 2018-19. could we parhaps try and use this as an indicator?
+
+Need to think more carefully about what the data in 'region unknown' means 
+
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  ggplot() +
+  aes(x=wdate, y=percent_variation, colour=hb_name) +
+  geom_line()+
+  facet_wrap(~hb_name)
+```
+How is NA calculated - still need to check??
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality == "All") %>% 
+  filter(hb_name != "All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions, colour = hb_name) +
+geom_line()
+```
+admission values shows all health boards - health boards vary massively in size and admission numbers but mostly same overall pattern.
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="Accident & Emergency") %>% 
+  #take a good look at what these values are!
+  filter(percent_variation<8000) %>% 
+  group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=hb_name, y=percent_variation)+
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+do only certain health boards have an A+E dept?
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "Emergency") %>% 
+  #filter(speciality=="Accident & Emergency") %>% 
+  #take a good look at what these values are!
+  filter(percent_variation<8000) %>% 
+  group_by(hb_name) %>% 
+  ggplot()+
+  aes(x=hb_name, y=percent_variation)+
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+first attempt at a 'crisis' calculation
+
+```{r}
+weekly_admissions %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  #filter(admission_type =="Emergency") %>% 
+  #filter(speciality=="Accident & Emergency") %>% 
+  #filter(year == 2020) %>% 
+  filter(iswinter) %>%
+  group_by(hb_name) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>%
+  ggplot() +
+  aes(x=hb_name, y=mean_percentvar) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="All") %>% 
+  filter(admission_type =="All") %>% 
+  #filter(year == 2021) %>% 
+  #filter(iswinter) %>%
+  group_by(hb_name) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>%
+  ggplot() +
+  aes(x=hb_name, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="All") %>% 
+  filter(admission_type =="Emergency") %>% 
+  #filter(speciality=="Accident & Emergency") %>% 
+  #filter(year == 2020) %>% 
+  filter(iswinter) %>%
+  group_by(hb_name) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>%
+  ggplot() +
+  aes(x=hb_name, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+take a look by health board
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="All") %>% 
+  filter(admission_type =="Emergency") %>% 
+  #filter(speciality=="Accident & Emergency") %>% 
+  #filter(year == 2020) %>% 
+  #filter(iswinter) %>%
+  group_by(hb_name) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>%
+  ggplot() +
+  aes(x=hb_name, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+quick look at winter v summer
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="Accident & Emergency") %>% 
+  filter(admission_type =="All") %>% 
+  group_by(iswinter, year) %>% 
+  summarise(pcnt_bad_days = sum(above_thresh)/n()*7, mean_percentvar =mean(percent_variation)) 
+```
+  no obvious big discrepancy in winter admissions for this parameter
+  winters of 2020 and 2022 are 'worse' than summers, percentages are small and maybe not          significant? 
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="All") %>% 
+  filter(admission_type =="All") %>% 
+  group_by(iswinter, year) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=iswinter, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(~year)
+```
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="All") %>% 
+  filter(admission_type =="Emergency") %>% 
+  group_by(iswinter, year) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=iswinter, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(~year)
+```
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality=="Accident & Emergency") %>% 
+  filter(admission_type =="Emergency") %>% 
+  group_by(iswinter, year) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=year, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(~iswinter)
+```
+
+
+#Section2 - repeat for demographic data
+
+bad days by age group
+
+```{r}
+weekly_admissions_demog %>% 
+  filter(sex=="All") %>% 
+  filter(admission_type =="All") %>% 
+  filter(hb_name=="All Scotland") %>% 
+  #filter(year == "2021") %>% 
+  #filter(iswinter) %>% 
+  group_by(age_group) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar = mean(percent_variation), 
+            #trying a diff calc just to show its the same
+            percent_variation = 100*(sum(number_admissions)-sum(average20182019))
+                             /sum(average20182019)) 
+```
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality !="All") %>% 
+  filter(admission_type =="All") %>% 
+  filter(hb_name == "All Scotland") %>% 
+  group_by(speciality) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=speciality, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+
+
+```{r}
+weekly_admissions_demog %>% 
+  filter(sex=="All") %>% 
+  filter(admission_type =="All") %>% 
+  filter(hb_name=="All Scotland") %>% 
+  group_by(age_group) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=age_group, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+```{r}
+weekly_admissions_demog %>% 
+  filter(age_group=="All ages") %>% 
+  filter(admission_type =="All") %>% 
+  filter(hb_name=="All Scotland") %>% 
+  group_by(sex) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=sex, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+no obvious difference between sexes
+
+```{r}
+weekly_admissions_dep %>% 
+  filter(admission_type =="All") %>% 
+  filter(hb_name=="All Scotland") %>% 
+  group_by(simd_quintile, year) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, 
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_variation)) %>% 
+  ggplot() +
+  aes(x=simd_quintile, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  facet_grid(~year)
+```
