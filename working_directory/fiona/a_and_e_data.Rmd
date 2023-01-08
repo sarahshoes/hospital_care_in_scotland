@@ -1,0 +1,143 @@
+---
+title: "First Investigation of A&E Data"
+output:
+  html_document:
+    toc: yes
+    toc_float: true
+    toc_depth: '2'
+    highlight: tango
+    df_print: paged
+---
+
+A&E Data Mart User Guide
+https://www.isdscotland.org/Health-Topics/Emergency-Care/Emergency-Department-Activity/Data-Quality/AE2-User-Guide_V1-3.pdf
+
+There are two types of data submitted to the A&E datamart: episode and aggregate level
+data. Episode level data is now submitted from all Emergency Departments in Scotland,
+and a growing number of community A&E departments and Minor Injury Units. Small A&E
+sites may submit aggregate data which contains only the number of attendances and the
+number who spent 4 hours or less in the department. This data can only be used to
+monitor monthly activity and the compliance with the 4 hour standard. 
+
+Two types of file can be submitted to the A&E data mart;
+Episode – a detailed file containing a record for each patient
+Aggregate – a summary file containing a record for each location
+
+**Important information to include in data bias and reliability section of report**
+https://publichealthscotland.scot/publications/ae-activity-and-waiting-times/ae-activity-and-waiting-times-month-ending-30-november-2022/
+How these different urgent and emergency care services operate and the way space such as trolleyed areas are used can vary both by hospital (depending on the facilities available and how services have been set up to meet local demand) and also over time (depending on how many people need urgent or emergency care at different times). These differences could impact on the consistency and comparability of A&E statistics and it is important to bear this in mind when comparing statistics for different areas or hospitals, or looking at trend data over time.
+
+**Data Dictionary**
+https://www.opendata.nhs.scot/dataset/monthly-emergency-department-activity-and-waiting-times/resource/2a4adc0a-e8e3-4605-9ade-61e13a85b3b9
+
+Attendances are only reported at aggregate level for minor injury units and smaller A&E departments. 
+The columsn labelled QF in the data give the symbol which explains why data is missing (I think). The qualifier "z" is entered for most (if not all) the missing data in this dataset and it means "not applicable".
+
+number_meeting_target_aggregate - the number of attendances that are admitted, transferred or discharged wthin 4 hours of arrival at aggregate level
+
+discharge_destination_admission_to_same - The number of attendances that were admitted to the same NHS heathcare provider/hospital. (Episode level data only)
+
+discharge_destination_other_speciality - The number of attendances that were discharged to a Private healthcare provider and the number of attendances that died. (Episode level data only)
+
+discharge_destination_residence - 	The number of attendances that were discharged to a Private residence, residential institution or temporary residence. (Episode level data only)
+
+discharge_destination_transfer - The number of attendances that were transferred to another NHS healthcare provider/hospital. (Episode level data only)
+
+discharge_destination_unknown - The number of attendances where the discharge destination was Other or Not Known. (Episode level data only)
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+data <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/data/Monthly A&E activity and waiting times.csv")
+
+data <- janitor::clean_names(data)
+```
+
+
+```{r}
+data <- data %>% 
+  rename(date = month) %>% 
+#  mutate(year = str_extract(date, "[0-9]{4}"),
+#         month = str_sub(date, -2, -1)) %>% 
+  mutate(date = ym(date))
+
+```
+
+
+
+```{r}
+data %>% 
+  filter(date > "2019-01-01") %>% 
+  group_by(date) %>% 
+  summarise(attendances_agg = sum(number_of_attendances_aggregate, na.rm = TRUE),
+            attendances_episode = sum(number_of_attendances_episode, na.rm = TRUE)) %>% 
+  ggplot() +
+  geom_line(aes(date, attendances_agg)) +
+  geom_line(aes(date, attendances_episode), colour = "blue") +
+  labs(title = "Number of Attendances Aggregate (black) and Episodes (blue)",
+       y = "Number of Attendances") +
+  scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
+```
+
+This needs to be percentage meeting target
+```{r}
+data %>% 
+  filter(date > "2019-01-01") %>% 
+  group_by(date) %>% 
+  summarise(prop_meeting_target_agg = 
+              (sum(number_meeting_target_aggregate, na.rm = TRUE) / 
+              sum(number_of_attendances_aggregate, na.rm = TRUE)) * 100,
+            prop_meeting_target_episode = 
+              (sum(number_meeting_target_episode, na.rm = TRUE) / 
+              sum(number_of_attendances_episode, na.rm = TRUE)) * 100) %>% 
+  ggplot() +
+  geom_line(aes(date, prop_meeting_target_agg)) +
+  geom_line(aes(date, prop_meeting_target_episode), colour = "blue") +
+  labs(title = "Percentage Meeting 4 h Target Aggregate (black) and Episodes (blue)",
+       y = "Percentage Meeting Target") +
+  scale_y_continuous(limits = c(0, 100), n.breaks = 10)
+```
+
+```{r}
+discharge_data <- data %>% 
+  select(date, hbt, treatment_location, department_type, 
+         number_of_attendances_aggregate, number_of_attendances_episode,
+         number_meeting_target_aggregate, number_meeting_target_episode,
+         discharge_destination_admission_to_same,
+         discharge_destination_other_specialty,
+         discharge_destination_residence,
+         discharge_destination_transfer,
+         discharge_destination_unknown) %>% 
+    mutate(total_discharge = sum(discharge_destination_admission_to_same,
+         discharge_destination_other_specialty,
+         discharge_destination_residence,
+         discharge_destination_transfer,
+         discharge_destination_unknown, na.rm = TRUE))
+```
+
+```{r}
+discharge_data %>% 
+  filter(date > "2019-01-01") %>% 
+  group_by(date) %>% 
+  summarise(admitted_same_hospital = 
+              discharge_destination_admission_to_same / total_discharge, 
+            residence = 
+              discharge_destination_residence / total_discharge, 
+            transfer = 
+              discharge_destination_transfer / total_discharge, 
+            other_speciality_inc_death = 
+              discharge_destination_other_specialty / total_discharge,
+            unknown = 
+              discharge_destination_unknown / total_discharge) %>% 
+  ggplot() +
+  geom_line(aes(date, admitted_same_hospital)) +
+  geom_line(aes(date, residence), colour = "blue") +
+  labs(title = "Number Meeting 4 h Target Aggregate (black) and Episodes (blue)",
+       y = "Number Meeting Target") 
+ # scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
+```
+
