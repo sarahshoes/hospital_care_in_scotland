@@ -1,0 +1,119 @@
+---
+title: "Investigating Data - Covid Cases"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+Looking at weekly covid cases
+weekly variability 
+
+
+```{r}
+library("tidyverse")
+library("janitor")
+library("lubridate")
+```
+
+```{r}
+hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- clean_names(hb_codes)
+```
+
+load in datafiles
+
+```{r}
+covid_cases <- read_csv("admissions_ageband_week.csv")
+covid_cases <- clean_names(covid_cases)
+
+```
+
+data cleaning
+
+```{r}
+
+```
+
+merge hbnames into datafiles
+```{r}
+covid_cases <- left_join(covid_cases,hb_codes)
+```
+
+do the analysis needed for identifying winter and 'crisis'
+
+```{r}
+covid_cases <- covid_cases %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+```
+
+take a look at what is in dataset
+
+```{r}
+covid_cases %>% 
+  distinct(hb_name)
+```
+14 health boards we don't have an "all scotland" so ill make one.
+
+```{r}
+all_covid_cases <- covid_cases %>% 
+  group_by(week_ending, age_band) %>% 
+  mutate(all_scotland = sum(admissions)) %>% 
+  distinct(week_ending)
+```
+need to work out how to add this to the file to the other one
+
+```{r}
+covid_cases %>% 
+  filter(age_band == "Total") %>% 
+ggplot() +
+aes(x=wdate, y = admissions) +
+geom_line() 
+```
+can see that covid cases don't have a simple winter/summer pattern - much more complex
+
+```{r}
+covid_cases %>% 
+  filter(age_band != "Total") %>% 
+ggplot() +
+aes(x=wdate, y = admissions, colour = age_band) +
+geom_line() 
+```
+quick look at demographics
+
+```{r}
+covid_cases %>% 
+  group_by(age_band) %>% 
+ summarise(total = sum(admissions, na.rm = TRUE)) %>% 
+ arrange(desc(total))
+```
+
+boxplot for winter/summer
+```{r}
+covid_cases %>%
+ filter(age_band != "Total") %>%   
+ group_by(year, iswinter) %>% 
+ ggplot()+
+ aes(x=iswinter, y=admissions, fill = hb_name) +  
+ geom_col() +
+facet_grid(~year)
+```
+
+
+Now look by health boards 
+
+
+```{r}
+covid_cases %>% 
+  filter(age_band == "Total") %>% 
+  ggplot()+
+  aes(x=wdate, y=admissions, colour = hb_name)+
+  geom_line()
+```
+

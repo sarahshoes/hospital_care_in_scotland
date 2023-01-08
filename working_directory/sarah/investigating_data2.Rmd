@@ -577,6 +577,7 @@ weekly_admissions_spec %>%
   filter(speciality !="All") %>% 
   filter(admission_type =="All") %>% 
   filter(hb_name == "All Scotland") %>% 
+  #filter(year =="2022") %>% 
   group_by(speciality) %>% 
   summarise(count_bad_days = sum(above_thresh), 
             count_days = n()*7, 
