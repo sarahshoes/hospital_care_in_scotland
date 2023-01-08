@@ -1,0 +1,53 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+covid_admissions <- read_csv("Covid admissions by health board and speciality.csv") %>% 
+  janitor::clean_names()
+
+glimpse(covid_admissions)
+```
+
+```{r}
+covid_admissions_new <- covid_admissions %>% 
+  mutate(week_ending = ymd(week_ending)) %>% 
+  mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
+  mutate(month = month(week_ending, label = TRUE), .after = year)
+```
+
+```{r}
+covid_admissions_summary <- covid_admissions_new %>% 
+  filter(admission_type == "All") %>% 
+  group_by(year, month) %>% 
+  summarise(admissions = sum(number_admissions)) 
+
+covid_admissions_summary
+```
+```{r}
+covid_admissions_summary %>% 
+  ggplot() +
+  aes(x = month, y = admissions, group = year, colour = year) +
+  geom_line() +
+  scale_y_continuous(labels = scales::comma) +
+  theme(legend.title = element_blank()) +
+  labs(
+    x = "", 
+    y = "admissions\n", 
+    title = "Hospital admissions"
+  )  
+```
+
+
+
+
+
+
+
+
