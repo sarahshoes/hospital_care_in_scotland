@@ -29,7 +29,7 @@ library(shiny)
 
 
 
-hb <- st_read(here::here("working_directory/fiona/UK_covid_reporting_regions/UK_covid_reporting_regions.shp"))
+hb <- st_read(here::here("map_files/UK_covid_reporting_regions/UK_covid_reporting_regions.shp"))
 
 health_boards <- c("Ayrshire and Arran", "Borders", "Dumfries and Galloway",
                    "Fife", "Forth Valley", "Grampian", "Greater Glasgow and Clyde", 
