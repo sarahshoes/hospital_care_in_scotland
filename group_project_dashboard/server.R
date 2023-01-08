@@ -1,31 +1,21 @@
 library(shiny)
 
 # Define server logic required to draw a histogram
-function(input, output) {
+server <- function(input, output) {
 
-#   output&map <- renderLeaflet({
+   output$map <- renderLeaflet({
      
-#     leaflet(scottish_hb) %>% 
-       # addTiles adds scotland map from OpenStreetMap  
- #      addTiles() %>% 
-       # addPolygons adds health board shape from shapefile
-#       addPolygons(
-#         popup = ~name)
-#   }) 
-  
-  
-  
-  output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2]
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white',
-         xlab = 'Waiting time to next eruption (in mins)',
-         main = 'Histogram of waiting times')
-  })
-  
+     leaflet(scottish_hb) %>% 
+# addTiles adds scotland map from OpenStreetMap  
+       addTiles() %>% 
+# addPolygons adds health board shape from shapefile
+       addPolygons(color = "black", weight = 1) %>% 
+# fit scotland onto map using fitBounds once we know the dimensions of the map
+      fitBounds(lng1 = -0.867, lng2 = -4.867, lat1 = 54.8, lat2 = 60.4167)
+   }) 
+
+# add names of health boards with addLabelOnlyMarkers but need to calculate
+# centroid data with lat and lon values and make new dataframe
   
 }
 
