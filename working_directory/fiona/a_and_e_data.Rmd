@@ -59,13 +59,70 @@ data <- janitor::clean_names(data)
 
 
 ```{r}
+data %>% 
+  mutate(year = year(date),
+         month = month(date)) %>% 
+  distinct(year)
+```
+
+
+
+```{r}
 data <- data %>% 
   rename(date = month) %>% 
 #  mutate(year = str_extract(date, "[0-9]{4}"),
 #         month = str_sub(date, -2, -1)) %>% 
   mutate(date = ym(date))
+  
+data <- data %>%   
+  select(-ends_with("qf")) %>% 
+  filter(date >= "2018-01-01")
 
 ```
+
+
+
+```{r}
+waiting_times <- data %>% 
+  select(-id, -country, -starts_with("disch"))
+
+  
+discharge_data <- data %>% 
+  select(-id, -country, -starts_with("num"), -starts_with("attend"))
+```
+
+
+##Waiting Times
+
+Use aggregate numbers in first place as there is more data for this
+Only discharge numbers for episodes though 
+
+Creating 2018/2019 averages by month
+```{r}
+avg_2018_2019 <- waiting_times %>% 
+  filter(date < "2020-01-01") %>% 
+  group_by(date) %>%
+  summarise(total = sum(number_meeting_target_aggregate)) %>%
+# Tried tidying this up by creating year and month columns in original waiting_times dataframe but they disappear during the summarise function above. Am sure there must be a way to dry this code out. 
+  mutate(year = year(date),
+         month = month(date)) %>% 
+  group_by(month) %>% 
+  summarise(avg_2018_2019 = mean(total))
+```
+
+
+Adding 2018/2019 averages into waiting times dataframe 
+```{r}
+waiting_times %>% 
+  filter(date >= "2020-01-01") %>% 
+  group_by(date) %>% 
+  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
+  
+
+
+```
+
+
 
 
 
