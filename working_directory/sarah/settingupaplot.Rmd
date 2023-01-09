@@ -63,7 +63,25 @@ ggplot() +
 aes(x=wdate, y = number_admissions) +
 geom_line() 
 ```
+setup theme for plots
+```{r}
+palette = read_csv("phs_palette.csv")
 
+theme_phs <- 
+    theme(
+        text = element_text(size = 14),
+        title = element_text(size = 14),
+        axis.text = element_text(size = 14),
+        legend.text = element_text(size = 12),
+        # work out how to make graph transparent?
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        legend.background = element_rect(fill = "transparent", colour = NA),
+        legend.box.background = element_rect(fill = "transparent", colour = NA),
+        panel.grid = element_line(colour = "grey90", linetype = "dashed"),
+        legend.position = "bottom"
+    )
+```
 
 ```{r}
 plotlim <- as.Date(c("2020-01-01","2022-12-31")) 
@@ -74,7 +92,7 @@ p <-  ggplot(
   filter(hb_name =="All Scotland")  
   ) +
 aes(x=wdate, y = number_admissions) +
-geom_line() +    
+geom_line(color = palette$colours[2]) +    
 #add dashed lines to show the boundaries 
 geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", size = 1) +   
 geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", size = 1) + 
@@ -86,7 +104,7 @@ scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_
 scale_y_continuous(expand = c(0,0)) +
 xlab("Date") +   
 ylab("Hospital Admissions with Covid") +
-theme_classic()
+theme_phs 
 p
 #extract ylimits from plot
 ylimits = layer_scales(p)$y$get_limits()
@@ -96,7 +114,7 @@ p + annotate("rect", xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(2022
          xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
          ymin=c(ylimits[1],ylimits[1],ylimits[1],ylimits[1]), 
          ymax=c(ylimits[2],ylimits[2],ylimits[2],ylimits[2]), 
-         alpha=0.4, fill="gray") 
+         alpha=0.1, fill=palette$colours[4]) 
 ```
 ## How would we map a plot?
 
@@ -121,5 +139,18 @@ st_stations <- data.frame(lat = c(40.73,40.73,40.709,40.709,40.73),
 stations_stf <- st_stations %>% 
   st_as_sf(coords = c("long","lat"), crs = 4326) 
 
+
+extracting colours from palette
+```{r}
+library(colorfindr)
+## setting up color palette
+# setup colour scheme
+# get colours from citibike logo
+##phspal <- get_colors("PHSlogo.png") %>%  
+##make_palette(n = 6)
+##colours <- phspal # If you rerun this colour selection will change
+##phspal <- as.data.frame(colours)
+#write_csv(phspal,"phs_palette.csv")
+```
 
 
