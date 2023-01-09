@@ -14,50 +14,112 @@ library("lubridate")
 
 load in datafiles
 ```{r}
-covid_cases <- read_csv("admissions_ageband_week.csv")
-covid_cases <- clean_names(covid_cases)
+hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- clean_names(hb_codes)
 ```
 
-make sure you are plotting a date value
 ```{r}
-covid_cases  <- covid_cases  %>% 
-  mutate(wdate = ymd(week_ending)) 
+weekly_admissions_spec <- read_csv("Covid admissions by health board and speciality.csv")
+weekly_admissions_spec <- clean_names(weekly_admissions_spec)
 ```
 
-code for a basic plot
+data cleaning
+note probably more cleaning needed before we finalise
+I changed the spelling but it turns out both spellings are correct!
+
 ```{r}
-covid_cases %>% 
-  filter(age_band == "Total") %>% 
+weekly_admissions_spec <- weekly_admissions_spec %>% 
+  rename("speciality"= "specialty") %>% 
+  rename("speciality_qf"= "specialty_qf") 
+```
+
+merge hbnames into datafiles
+```{r}
+weekly_admissions_spec <- left_join(weekly_admissions_spec,hb_codes)
+```
+
+do the analysis needed for identifying winter and 'crisis'
+```{r}
+weekly_admissions_spec <- weekly_admissions_spec %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0)) %>% 
+  filter(between(year,2020,2022)) # we are not interested in any 2023 data
+```
+
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
 ggplot() +
-aes(x=wdate, y = admissions) +
+aes(x=wdate, y = number_admissions) +
 geom_line() 
 ```
 
 
 ```{r}
-plotlim <- as.Date(c("2019-12-01","2022-12-31")) 
-ylimits <- c(5,1069)
-p <-  ggplot(covid_cases %>% 
-  filter(age_band == "Total")) +
-aes(x=wdate, y = admissions) +
-geom_line() +   
+plotlim <- as.Date(c("2020-01-01","2022-12-31")) 
+p <-  ggplot(
+  weekly_admissions_spec %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland")  
+  ) +
+aes(x=wdate, y = number_admissions) +
+geom_line() +    
 #add dashed lines to show the boundaries 
-geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted") + 
-geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted") + 
-geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted") + 
-geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted") + 
-geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted") + 
-geom_vline(xintercept=ymd(20230401),color="gray",linetype="dotted") +   
-scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short()) +
+geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", size = 1) +   
+geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", size = 1) + 
+geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", size = 1 ) + 
+geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", size = 1) + 
+geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", size = 1) + 
+geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", size = 1) + 
+scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short(), expand = c(0,0.01)) +
+scale_y_continuous(expand = c(0,0)) +
 xlab("Date") +   
 ylab("Hospital Admissions with Covid") +
+theme_classic()
+p
+#extract ylimits from plot
+ylimits = layer_scales(p)$y$get_limits()
+xlimits = layer_scales(p)$x$get_limits()
 #add gray shaded rectangles to note winter
-annotate("rect", xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)), 
+p + annotate("rect", xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)), 
          xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
          ymin=c(ylimits[1],ylimits[1],ylimits[1],ylimits[1]), 
          ymax=c(ylimits[2],ylimits[2],ylimits[2],ylimits[2]), 
-         alpha=0.2, fill="gray") 
-#extract ylimits from plot
-#ylimits = layer_scales(p)$y$get_limits()
-p
+         alpha=0.4, fill="gray") 
 ```
+## How would we map a plot?
+
+
+
+```{r}
+library(sf)
+map_scot <- st_read("SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp")
+tx_ll <- st_transform(map_scot, "+proj=longlat +ellps=WGS84 +datum=WGS84")
+
+ggplot(map_scot) +
+ geom_sf() +
+ stat_sf_coordinates(geom = "point", color = "red") +
+ geom_sf_text(aes(label = HBName), size = 3, nudge_x = 600, colour = "black",check_overlap = TRUE) +
+ scale_fill_distiller(palette = "GnBu", type = "seq") +
+ theme_void()
+```
+reminder for myself of of how I plotted long lat onto map before...
+
+st_stations <- data.frame(lat = c(40.73,40.73,40.709,40.709,40.73),
+                               long = c(-74.052,-74.03,-74.03,-74.052,-74.052))
+stations_stf <- st_stations %>% 
+  st_as_sf(coords = c("long","lat"), crs = 4326) 
+
+
+
