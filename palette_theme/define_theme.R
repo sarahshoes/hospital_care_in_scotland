@@ -1,8 +1,5 @@
 # This script will setup a standard theme for all plots
 
-#loads the palette
-palette = read_csv("phs_palette.csv")
-
 #defines a standard theme to apply to plots
 #change theme elements here
 theme_phs <- 

@@ -56,106 +56,51 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
 
 ```{r}
 weekly_admissions_spec %>% 
-  filter(speciality == "All") %>% 
   filter(admission_type == "All") %>% 
-  filter(hb_name =="All Scotland") %>% 
+  filter(speciality == "All") %>% 
+  filter(hb_name != "All Scotland") %>% 
 ggplot() +
-aes(x=wdate, y = number_admissions) +
-geom_line() 
-```
-setup theme for plots
-```{r}
-palette = read_csv("phs_palette.csv")
-
-theme_phs <- 
-    theme(
-        text = element_text(size = 14),
-        title = element_text(size = 14),
-        axis.text = element_text(size = 14),
-        legend.text = element_text(size = 12),
-        # work out how to make graph transparent?
-        panel.background = element_rect(fill = "transparent", colour = NA),
-        plot.background = element_rect(fill = "transparent", colour = NA),
-        legend.background = element_rect(fill = "transparent", colour = NA),
-        legend.box.background = element_rect(fill = "transparent", colour = NA),
-        panel.grid = element_line(colour = "grey90", linetype = "dashed"),
-        legend.position = "bottom"
-    )
+aes(x=wdate, y = number_admissions, colour = hb_name) +
+geom_line()
 ```
 
+
 ```{r}
-plotlim <- as.Date(c("2020-01-01","2022-12-31")) 
-p <-  ggplot(
-  weekly_admissions_spec %>% 
+palette = read_csv(here::here("palette_theme/phs_palette.csv"))
+# load theme
+source(here::here("palette_theme/define_theme.R"))
+#load plotting function
+source(here::here("palette_theme/plot_timeseries.R"))
+```
+#example of creating the basic plot
+```{r}
+weekly_admissions_spec %>% 
+  #filter(admission_type == "All") %>% 
   filter(speciality == "All") %>% 
-  filter(admission_type == "All") %>% 
-  filter(hb_name =="All Scotland")  
-  ) +
-aes(x=wdate, y = number_admissions) +
-geom_line(color = palette$colours[2]) +    
-#add dashed lines to show the boundaries 
-source(here::here(""))
-scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short(), expand = c(0,0.01)) +
-#scale_y_continuous(expand = c(0,0)) +
-xlab("Date") +   
-ylab("Hospital Admissions with Covid") +
-theme_phs 
-p
-#extract ylimits from plot
-ylimits = layer_scales(p)$y$get_limits()
-xlimits = layer_scales(p)$x$get_limits()
-#add gray shaded rectangles to note winter
-p + annotate("rect", 
-          xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)),
-          xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
-         ymin=c(-Inf,-Inf,-Inf,-Inf), 
-         ymax=c(Inf,Inf,Inf,Inf), 
-         alpha=0.1, fill=palette$colours[4]) 
+  filter(hb_name == "All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions, colour = admission_type) +
+geom_line() +
+scale_colour_manual(values = palette$mycolours) 
 ```
-## How would we map a plot?
-
-add_winterlines <- function(p, strings){
- p + geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", size = 1) +   
- p + geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", size = 1) + 
- p +  geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", size = 1 ) + 
-geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", size = 1) + 
-geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", size = 1) + 
-geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", size = 1) + 
-
-
+#example of how it would look when you use the function
 
 ```{r}
-library(sf)
-map_scot <- st_read("SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp")
-tx_ll <- st_transform(map_scot, "+proj=longlat +ellps=WGS84 +datum=WGS84")
-
-ggplot(map_scot) +
- geom_sf() +
- stat_sf_coordinates(geom = "point", color = "red") +
- geom_sf_text(aes(label = HBName), size = 3, nudge_x = 600, colour = "black",check_overlap = TRUE) +
- scale_fill_distiller(palette = "GnBu", type = "seq") +
- theme_void()
+plotdata <- weekly_admissions_spec %>% 
+  #filter(admission_type == "All") %>% 
+  filter(speciality == "All") %>% 
+  filter(hb_name == "All Scotland") 
+plotmapping <- aes(x=wdate, y = number_admissions, colour = admission_type)
+plottitle <- ("Hospital Admissions of people with Covid")
+plotylabel <- ("Number of Hospital Admissions") 
+timeseriesplot(plotdata,plotmapping,plottitle,plotylabel) +
+  # as long as you include a + in the line above you can make further modifications
+  #ggtitle("change the title if you want to")+
+  #e.g add extra lines if you want to
+  geom_hline(yintercept=12000, linewidth = 0.5) 
 ```
-reminder for myself of of how I plotted long lat onto map before...
-
-st_stations <- data.frame(lat = c(40.73,40.73,40.709,40.709,40.73),
-                               long = c(-74.052,-74.03,-74.03,-74.052,-74.052))
-stations_stf <- st_stations %>% 
-  st_as_sf(coords = c("long","lat"), crs = 4326) 
 
 
-extracting colours from palette
-```{r}
-library(colorfindr)
-## setting up color palette
-# setup colour scheme
-# get colours from citibike logo
-phspal <- get_colors("PHSlogo.png") %>%  
-make_palette(n = 6)
-colours <- phspal # If you rerun this colour selection will change
-phspal <- as.data.frame(colours)
 
-#write_csv(phspal,"phs_palette.csv")
-```
 
 
