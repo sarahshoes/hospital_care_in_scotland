@@ -11,7 +11,7 @@ server <- function(input, output) {
 # addPolygons adds health board shape from shapefile
        addPolygons(color = "black", weight = 1) %>% 
 # fit scotland onto map using fitBounds once we know the dimensions of the map
-      fitBounds(lng1 = -0.867, lng2 = -4.867, lat1 = 54.8, lat2 = 60.4167)
+      fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2)
    }) 
 
 # add names of health boards with addLabelOnlyMarkers but need to calculate

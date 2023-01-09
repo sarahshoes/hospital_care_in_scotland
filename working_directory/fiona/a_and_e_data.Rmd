@@ -45,11 +45,49 @@ discharge_destination_transfer - The number of attendances that were transferred
 
 discharge_destination_unknown - The number of attendances where the discharge destination was Other or Not Known. (Episode level data only)
 
-
+## Libraries and Setting up
 ```{r}
 library(tidyverse)
 library(lubridate)
 ```
+
+```{r}
+theme_fc <- function(){
+  
+  theme_minimal() %+replace%   
+    
+    theme(
+      axis.line = element_line(colour = "grey50"),
+      axis.ticks = element_line(colour = "grey50"),
+      plot.title = element_text(size = 16, 
+                                face = "bold", 
+                                colour = "grey30",
+                                margin = margin(b = 12),
+                                hjust = 0),
+      plot.subtitle = element_text(size = 14,  
+                                   colour = "grey30",
+                                   margin = margin(b = 12),
+                                   hjust = 0),
+      axis.title = element_text(size = 12, 
+                                face = "bold", 
+                                colour = "grey30"),
+      axis.title.x = element_text(margin = margin(t = 12)),
+      # chaning the margin on y-axis causes it to flip to horizontal   
+      # axis.title.y = element_text(margin = margin(b = 12)),
+      axis.text = element_text(size = 11, 
+                               colour = "grey30"),
+      legend.title = element_blank(),
+      legend.text = element_text(size = 11, 
+                                 colour = "grey30")
+    )
+}
+
+plot_colours <- c("#446e9b", "#999999", "#3cb521", "#d47500", "#cd0200", "#3399f3",
+                           "#333333", "#6610f2", "yellow", "brown", "peachpuff", "#6f42c1",
+                           "#e83e8c", "#fd7e14", "#20c997", "#000000", "grey50", "#eeeeee")
+```
+
+
 
 ```{r}
 data <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/data/Monthly A&E activity and waiting times.csv")
@@ -57,22 +95,16 @@ data <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_
 data <- janitor::clean_names(data)
 ```
 
-
-```{r}
-data %>% 
-  mutate(year = year(date),
-         month = month(date)) %>% 
-  distinct(year)
-```
-
-
+## Cleaning and Wrangling Data
 
 ```{r}
 data <- data %>% 
   rename(date = month) %>% 
 #  mutate(year = str_extract(date, "[0-9]{4}"),
 #         month = str_sub(date, -2, -1)) %>% 
-  mutate(date = ym(date))
+  mutate(date = ym(date)) %>% 
+    mutate(year = year(date),
+         month = month(date)) 
   
 data <- data %>%   
   select(-ends_with("qf")) %>% 
@@ -85,6 +117,7 @@ data <- data %>%
 ```{r}
 waiting_times <- data %>% 
   select(-id, -country, -starts_with("disch"))
+  
 
   
 discharge_data <- data %>% 
@@ -92,12 +125,28 @@ discharge_data <- data %>%
 ```
 
 
-##Waiting Times
+## Waiting Times
+
+### Number of Attendances
+```{r}
+data %>% 
+  filter(date > "2019-01-01") %>% 
+  group_by(date) %>% 
+  summarise(attendances_agg = sum(number_of_attendances_aggregate, na.rm = TRUE),
+            attendances_episode = sum(number_of_attendances_episode, na.rm = TRUE)) %>% 
+  ggplot() +
+  geom_line(aes(date, attendances_agg)) +
+  geom_line(aes(date, attendances_episode), colour = "blue") +
+  labs(title = "Number of Attendances Aggregate (black) and Episodes (blue)",
+       y = "Number of Attendances") +
+  scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
+```
+
 
 Use aggregate numbers in first place as there is more data for this
 Only discharge numbers for episodes though 
 
-Creating 2018/2019 averages by month
+### 2018/2019 averages by month
 ```{r}
 avg_2018_2019 <- waiting_times %>% 
   filter(date < "2020-01-01") %>% 
@@ -120,63 +169,83 @@ waiting_times %>%
   mutate(year = year(date),
          month = month(date), .after = date) %>% 
   left_join(avg_2018_2019, by = "month") %>% 
-  mutate(percent_variation = (1 - num_meeting_target_by_month/avg_2018_2019)*100) %>% 
+  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
   
   ggplot(aes(date, percent_variation)) + 
-  geom_col()
+  geom_col() +
+  theme_fc() + 
+  labs(title = "Percentage Variation in Number Meeting 4 Hour 
+       Target (Attendance Number)",
+       subtitle = "Compared to 2018 / 2019 Average")
 
 
 ```
 
-Q Is it valid to say the number meeting target was higher if the volume of people overall was much lower? Should it all be done in percentage?
-A No because it is the number that needs dealt with and A&E should be able to meet targets for BUT the graph above isn't telling us anything useful
+Q Is it valid to say the number meeting target was lower if the volume of people overall was much lower? Should it all be done in percentage?
+A No because it is the number that needs dealt with and A&E should be able to meet targets BUT the graph above isn't telling us anything useful.
 
 
-Calculate percentage meeting target
-
-```{r}
-
-
-
-```
-
-
-
-
-
+### Percent meeting target
 
 ```{r}
-data %>% 
-  filter(date > "2019-01-01") %>% 
+waiting_times <- waiting_times %>% 
+  mutate(percent_meeting_target = number_meeting_target_aggregate / 
+           number_of_attendances_aggregate * 100)
+
+waiting_times %>% 
+#  filter(department_type == "Emergency Department") %>% 
   group_by(date) %>% 
-  summarise(attendances_agg = sum(number_of_attendances_aggregate, na.rm = TRUE),
-            attendances_episode = sum(number_of_attendances_episode, na.rm = TRUE)) %>% 
-  ggplot() +
-  geom_line(aes(date, attendances_agg)) +
-  geom_line(aes(date, attendances_episode), colour = "blue") +
-  labs(title = "Number of Attendances Aggregate (black) and Episodes (blue)",
-       y = "Number of Attendances") +
-  scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
+  summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
+  ggplot(aes(date, percent_meeting_target_by_month)) +
+  geom_col(fill = "grey60") +
+  geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
+  theme_fc() +
+  labs(title = "Percentage of Attendances Meeting 4 Hour Target",
+       subtitle = "Data Averaged by Month",
+       y = "% Meeting 4 Hour Target",
+       x = "Date") +
+  geom_rect(aes(xmin = ymd("2020-03-01"), xmax = ymd("2020-06-01"), 
+                ymin = 0, ymax = Inf), 
+                fill = "orange", alpha = 0.01)
+
+```
+When you filter by "Minor Injury Unit or Other" the perecentages are close to 100% across all years. Filtering by "Emergency Department" shows a terrible decline in the % of patients being seen within 4 hours. 
+
+
+### Percentages compared to 2018 / 2019 averages
+
+
+
+
+```{r}
+waiting_times %>% 
+  filter(date >= "2020-01-01") %>% 
+  group_by(date) %>% 
+  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
+  mutate(year = year(date),
+         month = month(date), .after = date) %>% 
+  left_join(avg_2018_2019, by = "month") %>% 
+  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
+  
+  ggplot(aes(date, percent_variation)) + 
+  geom_col() +
+  theme_fc() + 
+  labs(title = "Percentage Variation in Number Meeting 4 Hour 
+       Target (Attendance Number)",
+       subtitle = "Compared to 2018 / 2019 Average")
+
 ```
 
-This needs to be percentage meeting target
-```{r}
-data %>% 
-  filter(date > "2019-01-01") %>% 
-  group_by(date) %>% 
-  summarise(prop_meeting_target_agg = 
-              (sum(number_meeting_target_aggregate, na.rm = TRUE) / 
-              sum(number_of_attendances_aggregate, na.rm = TRUE)) * 100,
-            prop_meeting_target_episode = 
-              (sum(number_meeting_target_episode, na.rm = TRUE) / 
-              sum(number_of_attendances_episode, na.rm = TRUE)) * 100) %>% 
-  ggplot() +
-  geom_line(aes(date, prop_meeting_target_agg)) +
-  geom_line(aes(date, prop_meeting_target_episode), colour = "blue") +
-  labs(title = "Percentage Meeting 4 h Target Aggregate (black) and Episodes (blue)",
-       y = "Percentage Meeting Target") +
-  scale_y_continuous(limits = c(0, 100), n.breaks = 10)
-```
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 discharge_data <- data %>% 
@@ -194,6 +263,14 @@ discharge_data <- data %>%
          discharge_destination_transfer,
          discharge_destination_unknown, na.rm = TRUE))
 ```
+
+
+
+
+
+
+
+
 
 ```{r}
 discharge_data %>% 
