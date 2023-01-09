@@ -113,7 +113,7 @@ xlimits = layer_scales(p)$x$get_limits()
 p + annotate("rect", xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)), 
          xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
          ymin=c(ylimits[1],ylimits[1],ylimits[1],ylimits[1]), 
-         ymax=c(ylimits[2],ylimits[2],ylimits[2],ylimits[2]), 
+         ymax=c(ylimits[2]*1.01,ylimits[2],ylimits[2],ylimits[2]), 
          alpha=0.1, fill=palette$colours[4]) 
 ```
 ## How would we map a plot?
@@ -146,10 +146,11 @@ library(colorfindr)
 ## setting up color palette
 # setup colour scheme
 # get colours from citibike logo
-##phspal <- get_colors("PHSlogo.png") %>%  
-##make_palette(n = 6)
-##colours <- phspal # If you rerun this colour selection will change
-##phspal <- as.data.frame(colours)
+phspal <- get_colors("PHSlogo.png") %>%  
+make_palette(n = 6)
+colours <- phspal # If you rerun this colour selection will change
+phspal <- as.data.frame(colours)
+
 #write_csv(phspal,"phs_palette.csv")
 ```
 

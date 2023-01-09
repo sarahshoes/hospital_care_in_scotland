@@ -8,43 +8,264 @@ library(tidyverse)
 library(lubridate)
 ```
 
-```{r}
-covid_admissions <- read_csv("Covid admissions by health board and speciality.csv") %>% 
+```{r, include=FALSE}
+covid_admissions_spec <- read_csv("Covid admissions by health board and speciality.csv") %>% 
   janitor::clean_names()
 
-glimpse(covid_admissions)
+covid_admissions_dep <- read_csv("Covid admissions by health board and deprivation.csv") %>% 
+  janitor::clean_names()
+
+covid_admissions_demog <- read_csv("Covid admissions by health board, age and sex.csv") %>% 
+  janitor::clean_names()
 ```
 
 ```{r}
-covid_admissions_new <- covid_admissions %>% 
+covid_admissions_spec <- covid_admissions_spec %>% 
   mutate(week_ending = ymd(week_ending)) %>% 
   mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
   mutate(month = month(week_ending, label = TRUE), .after = year)
 ```
 
 ```{r}
-covid_admissions_summary <- covid_admissions_new %>% 
+covid_admissions_spec_summary <- covid_admissions_spec %>% 
+  group_by(year, month, admission_type) %>% 
+  summarise(admissions = sum(number_admissions),
+            pre_pan_avg = sum(average20182019)) %>% 
+  mutate(pcent_change_to_pre_pan_avg = (admissions - pre_pan_avg) / pre_pan_avg * 100) %>% 
+  mutate(made_date = make_datetime(year, month), .after = month)
+  
+covid_admissions_spec_summary
+```
+
+```{r}
+covid_admissions_spec_summary %>% 
   filter(admission_type == "All") %>% 
-  group_by(year, month) %>% 
-  summarise(admissions = sum(number_admissions)) 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg) +
+  geom_line() +
+  scale_y_continuous(limits = c(NA, 10)) +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions (All)"
+  ) + 
+   theme_grey()
+```
+
+```{r}
+covid_admissions_spec_summary %>% 
+  filter(admission_type == "Emergency") %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg) +
+  geom_line() +
+  scale_y_continuous(limits = c(NA, 10)) +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions (Emergency)"
+  ) +
+   theme_grey()
+```
+
+
+```{r}
+covid_admissions_spec_summary %>% 
+  filter(admission_type == "Planned") %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg) +
+  geom_line() +
+  scale_y_continuous(limits = c(NA, 10)) +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions (Elective)"
+  ) +
+   theme_grey()
+```
+
+
+```{r}
+specialties <- c("A&E", "Cardiology", "Medical", "Paediatrics", "Surgery", "Community", "Gynaecology", "Cancer")
+
+covid_admissions_spec_summary <- covid_admissions_spec %>% 
+  mutate(specialty_simple = case_when(
+    specialty == "Accident & Emergency" ~ "A&E", 
+    specialty == "Medical (excl. Cardiology & Cancer)" ~ "Medical", 
+    specialty == "Paediatrics (medical & surgical)" ~ "Paediatrics", 
+    TRUE ~ specialty
+    ), .after = specialty
+  ) %>% 
+  filter(specialty_simple %in% specialties) %>% 
+  group_by(year, specialty_simple, admission_type) %>% 
+  summarise(admissions = sum(number_admissions),
+            pre_pan_avg = sum(average20182019)) %>% 
+  mutate(pcent_change_to_pre_pan_avg = (admissions - pre_pan_avg) / pre_pan_avg * 100) 
 
 covid_admissions_summary
 ```
+
 ```{r}
-covid_admissions_summary %>% 
+covid_admissions_spec_summary %>% 
+  filter(admission_type == "All") %>% 
   ggplot() +
-  aes(x = month, y = admissions, group = year, colour = year) +
+  aes(x = specialty_simple, y = pcent_change_to_pre_pan_avg, fill = year) +
+  geom_col(position = "dodge") +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions (All)"
+  ) + 
+  theme_grey()
+```
+
+```{r}
+covid_admissions_spec_summary %>% 
+  filter(admission_type == "Planned") %>% 
+  ggplot() +
+  aes(x = specialty_simple, y = pcent_change_to_pre_pan_avg, fill = year) +
+  geom_col(position = "dodge") +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions (Elective)"
+  ) + 
+  theme_grey()
+```
+
+```{r}
+covid_admissions_spec_summary %>% 
+  filter(admission_type == "Emergency") %>% 
+  ggplot() +
+  aes(x = specialty_simple, y = pcent_change_to_pre_pan_avg, fill = year) +
+  geom_col(position = "dodge") +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions (Emergency)"
+  ) + 
+  theme_grey()
+```
+
+```{r}
+covid_admissions_dep <- covid_admissions_dep %>% 
+  mutate(week_ending = ymd(week_ending)) %>% 
+  mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
+  mutate(month = month(week_ending, label = TRUE), .after = year) %>% 
+  mutate(deprivation = as.character(simd_quintile))
+```
+
+```{r}
+covid_admissions_dep_summary <- covid_admissions_dep %>% 
+  group_by(year, month, deprivation, admission_type, ) %>% 
+  summarise(admissions = sum(number_admissions),
+            pre_pan_avg = sum(average20182019)) %>% 
+  mutate(pcent_change_to_pre_pan_avg = (admissions - pre_pan_avg) / pre_pan_avg * 100) %>% 
+  mutate(made_date = make_datetime(year, month), .after = month)
+  
+covid_admissions_dep_summary
+```
+
+```{r}
+covid_admissions_dep_summary %>% 
+  filter(admission_type == "All") %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg, group = deprivation, colour = deprivation) +
   geom_line() +
+  scale_y_continuous(limits = c(NA, 10)) +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions by deprivation (All)"
+  ) +
+   theme_grey()
+```
+
+```{r}
+covid_admissions_demog <- covid_admissions_demog %>% 
+  mutate(week_ending = ymd(week_ending)) %>% 
+  mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
+  mutate(month = month(week_ending, label = TRUE), .after = year)
+```
+
+```{r}
+covid_admissions_demog_summary <- covid_admissions_demog %>% 
+  group_by(year, month, age_group, sex, admission_type) %>% 
+  summarise(admissions = sum(number_admissions),
+            pre_pan_avg = sum(average20182019)) %>% 
+  mutate(pcent_change_to_pre_pan_avg = (admissions - pre_pan_avg) / pre_pan_avg * 100) %>% 
+  mutate(made_date = make_datetime(year, month), .after = month)
+  
+covid_admissions_demog_summary
+```
+
+```{r}
+covid_admissions_demog_summary %>% 
+  filter(admission_type == "All") %>% 
+  filter(sex != "All") %>% 
+  filter(age_group == "All ages") %>% 
+  group_by(year, sex) %>% 
+  ggplot() +
+  aes(x = year, y = admissions, fill = sex) +
+  geom_col(position = "dodge") +
   scale_y_continuous(labels = scales::comma) +
-  theme(legend.title = element_blank()) +
   labs(
     x = "", 
     y = "admissions\n", 
-    title = "Hospital admissions"
-  )  
+    title = "Hospital admissions by sex (All)"
+  ) +
+  theme_grey() 
 ```
 
+```{r}
+covid_admissions_demog_summary %>% 
+  filter(admission_type == "All") %>% 
+  filter(sex == "All") %>%
+  filter(age_group != "All ages") %>% 
+  mutate(age = factor(age_group, levels = c("85 and over", "75 - 84", "65 - 74", "45 - 64", "15 - 44", "5 - 14", "Under 5"))) %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg, group = age, colour = age) +
+  geom_line() +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions by age (All)"
+  ) +
+  theme_grey()
+```
 
+```{r}
+covid_admissions_demog_summary %>% 
+  filter(admission_type == "Planned") %>% 
+  filter(sex == "All") %>%
+  filter(age_group != "All ages") %>% 
+  mutate(age = factor(age_group, levels = c("85 and over", "75 - 84", "65 - 74", "45 - 64", "15 - 44", "5 - 14", "Under 5"))) %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg, group = age, colour = age) +
+  geom_line() +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions by age (Elective)"
+  ) +
+  theme_grey()
+```
+
+```{r}
+covid_admissions_demog_summary %>% 
+  filter(admission_type == "Emergency") %>% 
+  filter(sex == "All") %>%
+  filter(age_group != "All ages") %>% 
+  mutate(age = factor(age_group, levels = c("85 and over", "75 - 84", "65 - 74", "45 - 64", "15 - 44", "5 - 14", "Under 5"))) %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg, group = age, colour = age) +
+  geom_line() +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Hospital admissions by age (Emergency)"
+  ) +
+  theme_grey()
+```
 
 
 
