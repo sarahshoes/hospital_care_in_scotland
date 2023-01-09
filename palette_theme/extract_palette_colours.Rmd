@@ -15,7 +15,7 @@ library(tidyverse)
 
 choose how many colours you want
 ```{r}
-ncolours = 7  
+ncolours = 15 
 ```
 
 get colours from Public Health Scotland logo
@@ -27,7 +27,6 @@ make_palette(n = ncolours)
 ```{r}
 mycolours <- custompal
 #could change the order if you want to using this example
-mycolours <- mycolours[c(1,2,3,4,6,7,5)] 
 ```
 # make it into a dataframe so it can be saved
 ```{r}
