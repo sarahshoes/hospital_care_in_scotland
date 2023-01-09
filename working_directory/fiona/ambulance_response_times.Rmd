@@ -1,0 +1,17 @@
+---
+title: "First Investigation of A&E Data"
+output:
+  html_document:
+    toc: yes
+    toc_float: true
+    toc_depth: '2'
+    highlight: tango
+    df_print: paged
+---
+
+Data
+1) Response times weekly from 25th October 2021 broken down by HB
+2) Number of callouts weekly from Jan 2020 - broken down by age, sex, HB etc. 
+3) Yearly figures for purple response times < 6 min and 90th percentile < 15 min for 2017/18 up to 21/22 (not sure why it is divided across 2 years each time)
+
+

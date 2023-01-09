@@ -198,10 +198,10 @@ waiting_times %>%
   group_by(date) %>% 
   summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
   ggplot(aes(date, percent_meeting_target_by_month)) +
-  geom_col(fill = "grey60") +
+  geom_line(fill = "grey60") +
   geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
 # use coord_cartesian to zoom in on y axis not scale_y_continuous() or ylim()
-  coord_cartesian(ylim=c(60,100)) +
+  coord_cartesian(ylim=c(75,100)) +
   theme_fc() +
   labs(title = "Percentage of Attendances Meeting 4 Hour Target",
        subtitle = "Data Averaged by Month",
@@ -276,7 +276,7 @@ A better graph would be above or below the benchmark of 4 hours!
 
 ```{r}
 waiting_times %>% 
-  filter(date >= "2020-01-01") %>% 
+  filter(date >= "2018-01-01") %>% 
   group_by(date) %>% 
   summarise(percent_meeting_target = number_meeting_target_aggregate / 
               number_of_attendances_aggregate * 100) %>% 
@@ -287,7 +287,7 @@ waiting_times %>%
   ggplot(aes(date, avg_percent_var_from_95_by_month)) + 
   geom_col() +
   theme_fc() + 
-  labs(title = "Variation from 95% Target",
+  labs(title = "A&E Waiting Times - Variation from 95% Target",
        subtitle = "Target is 95% Patients Discharged Within 4 Hours",
        y = "Variation from 95%") +
   geom_rect(aes(xmin = ymd("2022-9-15"), xmax = ymd("2023-03-15"), 
@@ -301,9 +301,52 @@ waiting_times %>%
 
 ```
 
+Updated graph after group discussion.
+
+Calculate 2018 / 2019 average
+
+```{r}
+waiting_times %>% 
+  filter(date >= "2018-01-01" & date <= "2019-01-01") %>% 
+  summarise(average_percent_meeting_target = mean(percent_meeting_target))
+
+```
+Average percent meeting target across 2018 and 2019 is 96.99%
 
 
+```{r}
+waiting_times %>% 
+#  filter(department_type == "Emergency Department") %>% 
+#  filter(hbt == "S08000020") %>% 
+  filter(date >= "2020-01-01") %>% 
+  group_by(date) %>% 
+  summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
+  ggplot(aes(date, percent_meeting_target_by_month)) +
+  geom_line(fill = "grey60") +
+  geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
+  geom_hline(yintercept = 97, colour = "blue", linetype = "dashed") +
+# use coord_cartesian to zoom in on y axis not scale_y_continuous() or ylim()
+  coord_cartesian(ylim=c(75,100)) +
+  theme_fc() +
+  labs(title = "Percentage of Attendances Meeting 4 Hour Target",
+       subtitle = "Data Averaged by Month",
+       y = "% Meeting 4 Hour Target",
+       x = "Date") +
+  geom_rect(aes(xmin = ymd("2022-9-15"), xmax = ymd("2023-03-15"), 
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2021-9-15"), xmax = ymd("2022-03-15"), 
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2020-9-15"), xmax = ymd("2021-03-15"), 
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2020-01-01"), xmax = ymd("2020-03-15"), 
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) 
+#  geom_rect(aes(xmin = ymd("2018-9-15"), xmax = ymd("2019-03-15"), 
+#                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+#  geom_rect(aes(xmin = ymd("2017-12-15"), xmax = ymd("2018-03-15"), 
+#                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01)
 
+
+```
 
 
 
