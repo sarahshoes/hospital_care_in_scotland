@@ -62,9 +62,9 @@ theme_fc <- function(){
       plot.title = element_text(size = 16, 
                                 face = "bold", 
                                 colour = "grey30",
-                                margin = margin(b = 12),
+                                margin = margin(b = 8),
                                 hjust = 0),
-      plot.subtitle = element_text(size = 14,  
+      plot.subtitle = element_text(size = 12,  
                                    colour = "grey30",
                                    margin = margin(b = 12),
                                    hjust = 0),
@@ -90,7 +90,7 @@ plot_colours <- c("#446e9b", "#999999", "#3cb521", "#d47500", "#cd0200", "#3399f
 
 
 ```{r}
-data <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/data/Monthly A&E activity and waiting times.csv")
+data <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/downloaded_data/Monthly A&E activity and waiting times.csv")
 
 data <- janitor::clean_names(data)
 ```
@@ -194,19 +194,37 @@ waiting_times <- waiting_times %>%
 
 waiting_times %>% 
 #  filter(department_type == "Emergency Department") %>% 
+#  filter(hbt == "S08000020") %>% 
   group_by(date) %>% 
   summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
   ggplot(aes(date, percent_meeting_target_by_month)) +
   geom_col(fill = "grey60") +
   geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
+# use coord_cartesian to zoom in on y axis not scale_y_continuous() or ylim()
+  coord_cartesian(ylim=c(60,100)) +
   theme_fc() +
   labs(title = "Percentage of Attendances Meeting 4 Hour Target",
        subtitle = "Data Averaged by Month",
        y = "% Meeting 4 Hour Target",
        x = "Date") +
-  geom_rect(aes(xmin = ymd("2020-03-01"), xmax = ymd("2020-06-01"), 
+         geom_rect(aes(xmin = ymd("2022-9-15"), xmax = ymd("2023-03-15"), 
                 ymin = 0, ymax = Inf), 
-                fill = "orange", alpha = 0.01)
+                fill = "skyblue", alpha = 0.01) +
+   geom_rect(aes(xmin = ymd("2021-9-15"), xmax = ymd("2022-03-15"), 
+                ymin = 0, ymax = Inf), 
+                fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2020-9-15"), xmax = ymd("2021-03-15"), 
+                ymin = 0, ymax = Inf), 
+                fill = "skyblue", alpha = 0.01) +
+    geom_rect(aes(xmin = ymd("2019-9-15"), xmax = ymd("2020-03-15"), 
+                ymin = 0, ymax = Inf), 
+                fill = "skyblue", alpha = 0.01) +
+      geom_rect(aes(xmin = ymd("2018-9-15"), xmax = ymd("2019-03-15"), 
+                ymin = 0, ymax = Inf), 
+                fill = "skyblue", alpha = 0.01) +
+        geom_rect(aes(xmin = ymd("2017-12-15"), xmax = ymd("2018-03-15"), 
+                ymin = 0, ymax = Inf), 
+                fill = "skyblue", alpha = 0.01)
 
 ```
 When you filter by "Minor Injury Unit or Other" the perecentages are close to 100% across all years. Filtering by "Emergency Department" shows a terrible decline in the % of patients being seen within 4 hours. 
@@ -214,25 +232,72 @@ When you filter by "Minor Injury Unit or Other" the perecentages are close to 10
 
 ### Percentages compared to 2018 / 2019 averages
 
+#### 2018/2019 averages by month
+```{r}
+avg_percent_2018_2019 <- waiting_times %>% 
+  filter(date < "2020-01-01") %>% 
+  group_by(date) %>%
+  summarise(percent_meeting_target = number_meeting_target_aggregate / 
+              number_of_attendances_aggregate * 100) %>%
+# Tried tidying this up by creating year and month columns in original waiting_times dataframe but they disappear during the summarise function above. Am sure there must be a way to dry this code out. 
+  mutate(year = year(date),
+         month = month(date)) %>% 
+  group_by(month) %>% 
+  summarise(avg_2018_2019 = mean(percent_meeting_target))
+```
 
 
+Adding 2018/2019 percent averages into waiting times dataframe 
+```{r}
+waiting_times %>% 
+  filter(date >= "2020-01-01") %>% 
+  group_by(date) %>% 
+  summarise(percent_meeting_target = number_meeting_target_aggregate / 
+              number_of_attendances_aggregate * 100) %>% 
+  mutate(year = year(date),
+         month = month(date), .after = date) %>% 
+  left_join(avg_percent_2018_2019, by = "month") %>% 
+#  group_by(date) %>% 
+  mutate(percent_variation = ((percent_meeting_target - avg_2018_2019)
+                              /avg_2018_2019)*100) %>% 
+  group_by(date) %>% 
+  summarise(avg_percent_by_month = mean(percent_variation)) %>% 
+  
+  ggplot(aes(date, avg_percent_by_month)) + 
+  geom_col() +
+  theme_fc() + 
+  labs(title = "Percentage Variation in Percent Meeting 4 Hour Target",
+       subtitle = "Compared to 2018 / 2019 Average")
+
+```
+The graph above looks good but it is a massive manipulation of the data. 
+
+A better graph would be above or below the benchmark of 4 hours!
 
 ```{r}
 waiting_times %>% 
   filter(date >= "2020-01-01") %>% 
   group_by(date) %>% 
-  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
-  mutate(year = year(date),
-         month = month(date), .after = date) %>% 
-  left_join(avg_2018_2019, by = "month") %>% 
-  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
+  summarise(percent_meeting_target = number_meeting_target_aggregate / 
+              number_of_attendances_aggregate * 100) %>% 
+  mutate(percent_variation_from_95pc = (percent_meeting_target - 95)) %>% 
+  group_by(date) %>% 
+  summarise(avg_percent_var_from_95_by_month = mean(percent_variation_from_95pc)) %>% 
   
-  ggplot(aes(date, percent_variation)) + 
+  ggplot(aes(date, avg_percent_var_from_95_by_month)) + 
   geom_col() +
   theme_fc() + 
-  labs(title = "Percentage Variation in Number Meeting 4 Hour 
-       Target (Attendance Number)",
-       subtitle = "Compared to 2018 / 2019 Average")
+  labs(title = "Variation from 95% Target",
+       subtitle = "Target is 95% Patients Discharged Within 4 Hours",
+       y = "Variation from 95%") +
+  geom_rect(aes(xmin = ymd("2022-9-15"), xmax = ymd("2023-03-15"), 
+                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2021-9-15"), xmax = ymd("2022-03-15"), 
+                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2020-9-15"), xmax = ymd("2021-03-15"), 
+                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+  geom_rect(aes(xmin = ymd("2020-01-01"), xmax = ymd("2020-03-15"), 
+                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01)
 
 ```
 
@@ -247,50 +312,8 @@ waiting_times %>%
 
 
 
-```{r}
-discharge_data <- data %>% 
-  select(date, hbt, treatment_location, department_type, 
-         number_of_attendances_aggregate, number_of_attendances_episode,
-         number_meeting_target_aggregate, number_meeting_target_episode,
-         discharge_destination_admission_to_same,
-         discharge_destination_other_specialty,
-         discharge_destination_residence,
-         discharge_destination_transfer,
-         discharge_destination_unknown) %>% 
-    mutate(total_discharge = sum(discharge_destination_admission_to_same,
-         discharge_destination_other_specialty,
-         discharge_destination_residence,
-         discharge_destination_transfer,
-         discharge_destination_unknown, na.rm = TRUE))
-```
 
 
 
 
-
-
-
-
-
-```{r}
-discharge_data %>% 
-  filter(date > "2019-01-01") %>% 
-  group_by(date) %>% 
-  summarise(admitted_same_hospital = 
-              discharge_destination_admission_to_same / total_discharge, 
-            residence = 
-              discharge_destination_residence / total_discharge, 
-            transfer = 
-              discharge_destination_transfer / total_discharge, 
-            other_speciality_inc_death = 
-              discharge_destination_other_specialty / total_discharge,
-            unknown = 
-              discharge_destination_unknown / total_discharge) %>% 
-  ggplot() +
-  geom_line(aes(date, admitted_same_hospital)) +
-  geom_line(aes(date, residence), colour = "blue") +
-  labs(title = "Number Meeting 4 h Target Aggregate (black) and Episodes (blue)",
-       y = "Number Meeting Target") 
- # scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
-```
 
