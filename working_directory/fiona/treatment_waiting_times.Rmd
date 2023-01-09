@@ -1,0 +1,128 @@
+---
+title: "Waiting Times"
+output:
+  html_document:
+    toc: yes
+    toc_float: true
+    toc_depth: '2'
+    highlight: tango
+    df_print: paged
+---
+
+
+Stage of treatment waiting times
+https://www.opendata.nhs.scot/dataset/stage-of-treatment-waiting-times
+See link for data dictionary
+
+There is data for completed and ongoing waits. The issue with using completed waits is that it is skewed towards faster treatment for more urgent cases. I suppose the opposited could be said for ongoing waits. So which to use. Possible to use both?
+
+Median - Median wait (days) of patients seen within the quarter
+90th_percentile - 90th percentile wait (days) of patients seen within the quarter
+
+The data includes all the health boards plus all of scotland (no data recorded for this for some quarters in 2017 and 2018). The Jubilee hospital also has a separate code - not clear if its data is also included under Glasgow health board. 
+
+
+```{r}
+library(tidyverse)
+```
+
+# Completed Waits
+
+```{r}
+completed_waits <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/downloaded_data/sot_performance_completed_waits_sep22.csv")
+
+completed_waits <- janitor::clean_names(completed_waits)
+```
+## Cleaning Data
+
+```{r}
+completed_waits <- completed_waits %>% 
+#  rename(date = month) %>% 
+#  mutate(year = str_extract(date, "[0-9]{4}"),
+#         month = str_sub(date, -2, -1)) %>% 
+  mutate(quarter_ending = ymd(quarter_ending)) %>% 
+    mutate(year = year(quarter_ending),
+         month = month(quarter_ending)) 
+
+completed_waits <- completed_waits %>%   
+  select(-ends_with("qf"))
+#  filter(quarter_ending >= "2018-01-01")
+```
+
+## Number of Patients Seen
+
+```{r}
+completed_waits %>% 
+  filter(!hbt == "S92000003") %>% 
+  group_by(quarter_ending) %>% 
+  summarise(total_seen_by_date = sum(number_seen, na.rm = TRUE)) %>% 
+  ggplot(aes(quarter_ending, total_seen_by_date)) + 
+  geom_line()
+
+```
+What is going on with this data?? Why the huge dip from Q2 2017 to Q1 2019??
+
+## Median number of days waited
+
+```{r}
+completed_waits %>% 
+  group_by(quarter_ending) %>% 
+  summarise(mean_median = mean(median, na.rm = TRUE)) %>% 
+  ggplot(aes(quarter_ending, mean_median)) + 
+  geom_line() +
+  labs(title = "Median Number of Days Waited",
+       x = "Date",
+       y = "Median Number of Days Waited")
+```
+
+## Number waiting over 12 weeks
+
+```{r}
+completed_waits %>% 
+  group_by(quarter_ending) %>% 
+  summarise(total_over_12w = sum(waited_over12weeks, na.rm = TRUE)) %>% 
+  ggplot(aes(quarter_ending, total_over_12w)) + 
+  geom_line() +
+  labs(title = "Number of Patients Waiting Over 12 Weeks",
+       x = "Date",
+       y = "Number of Patients")
+```
+
+# Ongoing Waits
+
+```{r}
+ongoing_waits <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/downloaded_data/sot_performance_ongoing_waits_sep22.csv")
+
+ongoing_waits <- janitor::clean_names(ongoing_waits)
+```
+```{r}
+ongoing_waits <- ongoing_waits %>% 
+#  rename(date = month) %>% 
+#  mutate(year = str_extract(date, "[0-9]{4}"),
+#         month = str_sub(date, -2, -1)) %>% 
+  mutate(month_ending = ymd(month_ending)) %>% 
+    mutate(year = year(month_ending),
+         month = month(month_ending)) 
+
+ongoing_waits <- ongoing_waits %>%   
+  select(-ends_with("qf"))
+#  filter(quarter_ending >= "2018-01-01")
+```
+
+
+
+## Number of Patients Seen
+
+```{r}
+ongoing_waits %>% 
+  filter(hbt == "SB0801") %>% 
+  group_by(month_ending) %>% 
+  summarise(total_waiting_by_date = sum(number_waiting, na.rm = TRUE)) %>% 
+  ggplot(aes(month_ending, total_waiting_by_date)) + 
+  geom_line()
+```
+```{r}
+ongoing_waits %>% 
+  distinct(hbt)
+```
+
