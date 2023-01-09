@@ -94,14 +94,9 @@ p <-  ggplot(
 aes(x=wdate, y = number_admissions) +
 geom_line(color = palette$colours[2]) +    
 #add dashed lines to show the boundaries 
-geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", size = 1) +   
-geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", size = 1) + 
-geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", size = 1 ) + 
-geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", size = 1) + 
-geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", size = 1) + 
-geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", size = 1) + 
+source(here::here(""))
 scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short(), expand = c(0,0.01)) +
-scale_y_continuous(expand = c(0,0)) +
+#scale_y_continuous(expand = c(0,0)) +
 xlab("Date") +   
 ylab("Hospital Admissions with Covid") +
 theme_phs 
@@ -110,13 +105,22 @@ p
 ylimits = layer_scales(p)$y$get_limits()
 xlimits = layer_scales(p)$x$get_limits()
 #add gray shaded rectangles to note winter
-p + annotate("rect", xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)), 
-         xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
-         ymin=c(ylimits[1],ylimits[1],ylimits[1],ylimits[1]), 
-         ymax=c(ylimits[2]*1.01,ylimits[2],ylimits[2],ylimits[2]), 
+p + annotate("rect", 
+          xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)),
+          xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
+         ymin=c(-Inf,-Inf,-Inf,-Inf), 
+         ymax=c(Inf,Inf,Inf,Inf), 
          alpha=0.1, fill=palette$colours[4]) 
 ```
 ## How would we map a plot?
+
+add_winterlines <- function(p, strings){
+ p + geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", size = 1) +   
+ p + geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", size = 1) + 
+ p +  geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", size = 1 ) + 
+geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", size = 1) + 
+geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", size = 1) + 
+geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", size = 1) + 
 
 
 
