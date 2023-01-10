@@ -4,21 +4,30 @@ library(sf)
 library(tidyverse)
 library(leaflet)
 library(shiny)
+library(lubridate)
 
 
-# READ IN DATA
-
-# data <- read_csv("filepath.csv")
-
-
+# Plot theme and function to prepare plot
+source(here::here("palette_theme/define_theme.R"))
+source(here::here("palette_theme/plot_timeseries.R"))
 
 
+# A&E WAITING TIMES
 
-# PREPARE PLOTS AND / OR TABLES
+waiting_times <- read_csv(here::here("clean_data/a_and_e_data_clean.csv")) %>% 
+  janitor::clean_names()
+
+# Adding percent meeting target column to dataframe
+waiting_times <- waiting_times %>% 
+  mutate(percent_meeting_target = number_meeting_target_aggregate / 
+           number_of_attendances_aggregate * 100)  
+
+# Calculate average percent meeting target across all rows for 2018 and 2019
+avg_2018_2019 <- waiting_times %>%  
+  filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
+  summarise(average_percent_meeting_target = mean(percent_meeting_target))
 
 
-
-# CREATE FUNCTIONS
 
 
 
@@ -26,8 +35,6 @@ library(shiny)
 
 # shapefile sourced from 
 # https://github.com/tomwhite/covid-19-uk-data/issues/18
-
-
 
 hb <- st_read(here::here("map_files/UK_covid_reporting_regions/UK_covid_reporting_regions.shp"))
 

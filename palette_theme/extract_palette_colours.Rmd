@@ -1,0 +1,39 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+code to allow a cutom pallette to be extracted. 
+only run this if you want to edit the palette definition
+to save the new palette definition remember to uncomment line 39
+
+library to extract a palette
+```{r}
+library(colorfindr)
+library(tidyverse)
+```
+
+choose how many colours you want
+```{r}
+ncolours = 15 
+```
+
+get colours from Public Health Scotland logo
+```{r}
+custompal <- get_colors("PHSlogo.png") %>%  
+make_palette(n = ncolours)
+```
+
+```{r}
+mycolours <- custompal
+#could change the order if you want to using this example
+```
+# make it into a dataframe so it can be saved
+```{r}
+custompal <- as.data.frame(mycolours)
+```
+
+# when palette had been finalised save it 
+```{r}
+#write_csv(custompal,"phs_palette.csv")
+```

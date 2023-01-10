@@ -1,0 +1,272 @@
+---
+title: "Investigating Data - Delyed Discharge"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+Looking at weekly delayed discharge data
+
+```{r}
+library("tidyverse")
+library("janitor")
+library("lubridate")
+library("snakecase")
+```
+
+```{r}
+hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- clean_names(hb_codes)
+```
+setup plots
+```{r}
+palette = read_csv(here::here("palette_theme/phs_palette.csv"))
+# load theme
+source(here::here("palette_theme/define_theme.R"))
+#load plotting function
+source(here::here("palette_theme/plot_timeseries.R"))
+```
+
+
+
+
+
+load in datafiles
+
+```{r}
+delayed_discharge <- read_csv("Delayed discharge bed days by health board.csv")
+delayed_discharge <- clean_names(delayed_discharge)
+
+```
+
+data cleaning
+```{r}
+delayed_discharge <- delayed_discharge %>% 
+  rename(hb = hbt) %>% #use standardised names
+  rename(hbqf = hbtqf) 
+```
+
+merge hbnames into datafiles
+```{r}
+delayed_discharge <- left_join(delayed_discharge,hb_codes)
+```
+
+```{r}
+delayed_discharge <-delayed_discharge %>% 
+  mutate(year = as.integer(str_sub(month_of_delay,1,4))) %>% 
+  mutate(month = as.integer(str_sub(month_of_delay,5,6))) %>% 
+  mutate(mdate = ym(month_of_delay)) %>% 
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>%  
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+```
+
+take a look at what is in dataset
+```{r}
+delayed_discharge %>% 
+  distinct(hb_name) 
+```
+14 health boards and All Scotland
+
+calculate totals
+
+```{r}
+all_delayed_discharge <- delayed_discharge %>% 
+  filter(reason_for_delay != "All Delay Reasons") %>% 
+  filter(hb_name == "All Scotland") %>% 
+  group_by(mdate) %>%
+  summarise(total =  sum(number_of_delayed_bed_days)) %>% 
+  mutate(year = year(mdate)) %>% 
+  mutate(month = month(mdate)) %>% 
+  mutate(iswinter=ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+```
+
+```{r}
+all_delayed_discharge %>% 
+ggplot()+
+  aes(x=mdate, y=total) +
+  geom_line()
+```
+so we have data for pre-pandemic
+and data for after pandemic.
+
+# look at pre-pandemic
+was there a summer/winter pattern?
+looking at delayed discharge = higher values is less favourable
+
+```{r}
+all_delayed_discharge %>% 
+  filter(year<2020) %>% 
+  ggplot() +
+  aes(x=iswinter,y=total)+
+  geom_boxplot() +
+  facet_wrap(~year(mdate))
+```
+#calculate 2018-2019 levels
+```{r}
+pre_pandemic_avg <- all_delayed_discharge %>% 
+  filter(between(year,2018,2019)) %>% 
+  group_by(month) %>% 
+  summarise(avg_20182019 =  mean(total)) 
+```
+
+#merge this column back into all data
+```{r}
+all_delayed_discharge <- left_join(all_delayed_discharge,pre_pandemic_avg) 
+
+all_delayed_discharge <- all_delayed_discharge %>% 
+  mutate(percent_var = 100*(total-avg_20182019)/avg_20182019)
+```
+```{r}
+all_delayed_discharge %>% 
+  filter(year>=2020) %>% 
+ggplot()+
+  aes(x=mdate, y=percent_var) +
+  geom_line()
+```
+```{r}
+plotdata <- all_delayed_discharge %>% 
+  filter(year>=2020) 
+plotmapping <- aes(x=mdate, y=percent_var) 
+plottitle <- ("Number of delayed bed days - All Reasons")
+plotylabel <- ("% change relative to 2018/19") 
+timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+```
+# investigate variability across health boards
+
+
+```{r}
+discharge_delays_by_hb <- delayed_discharge %>% 
+  filter(reason_for_delay == "All Delay Reasons") %>% 
+  filter(hb_name != "All Scotland") %>% 
+  group_by(mdate, hb_name) %>%
+  # summing across all age groups
+  summarise(total =  sum(number_of_delayed_bed_days)) %>% 
+  mutate(year = year(mdate)) %>% 
+  mutate(month = month(mdate)) %>% 
+  mutate(iswinter=ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+```
+Merge Orkney/Sheltand/WesternIsles
+Very low values in these two healthboards make stats analysis difficult
+therefore merging them with western isles is recommended.
+
+```{r}
+discharge_delays_by_hb %>% 
+  group_by(hb_name) %>% 
+  summarise(mean = mean(total)) %>% 
+  arrange(desc(mean))
+```
+
+merge orkney,shetland and western isles
+```{r}
+discharge_delays_by_hb <- discharge_delays_by_hb %>% 
+   pivot_wider(values_from = "total", names_from = "hb_name") 
+
+discharge_delays_by_hb <- clean_names(discharge_delays_by_hb)
+
+discharge_delays_by_hb <- discharge_delays_by_hb %>% 
+   mutate(nhs_ork_shet_wi = 
+            rowSums(across(c(nhs_orkney,
+                             nhs_shetland,
+                             nhs_western_isles), na.rm = TRUE))) %>%
+   select(-nhs_orkney) %>% 
+   select(-nhs_shetland) %>% 
+   select(-nhs_western_isles) 
+  
+discharge_delays_by_hb <- discharge_delays_by_hb %>% 
+   pivot_longer(cols = starts_with("nhs"), names_to = "hb_name", values_to = "total") %>%    mutate(hb_name = to_title_case(hb_name)) %>% 
+   mutate(hb_name = str_replace(hb_name,"Nhs","NHS"))
+
+```
+
+
+```{r}
+discharge_delays_by_hb  %>% 
+  ggplot() +
+  aes(x=mdate,y=total,colour = hb_name) +
+  geom_line()
+```
+#calculate 2018-2019 levels
+```{r}
+pre_pandemic_avg_by_hb <- discharge_delays_by_hb  %>% 
+  filter(between(year,2016,2019)) %>% 
+  group_by(hb_name) %>% 
+  summarise(avg_20182019 =  mean(total, na.rm=TRUE)) 
+```
+#merge this column back into all data
+```{r}
+discharge_delays_by_hb <- left_join(discharge_delays_by_hb,pre_pandemic_avg_by_hb) 
+
+discharge_delays_by_hb <- discharge_delays_by_hb %>% 
+  mutate(percent_var = 100*((total-avg_20182019)/avg_20182019)) %>% 
+  mutate(percent_var = ifelse(total==0,NA_integer_,percent_var))
+```
+
+# look at pre-pandemic
+was there a summer/winter pattern at hb level?
+looking at delayed discharge = higher values is less favourable
+
+```{r}
+discharge_delays_by_hb  %>% 
+  filter(year<2020) %>% 
+  ggplot() +
+  aes(x=iswinter,y=percent_var)+
+  geom_boxplot() +
+  facet_wrap(~hb_name)
+```
+
+```{r}
+discharge_delays_by_hb  %>% 
+  filter(year>=2020) %>% 
+  ggplot()+
+  aes(x=mdate, y=percent_var, colour = hb_name) +
+  geom_line()
+```
+
+
+
+### now look by age band!
+
+
+```{r}
+delayed_discharge %>% 
+  group_by(age_band) %>% 
+ggplot() +
+aes(x=wdate, y = admissions, colour = age_band) +
+geom_line() 
+```
+
+
+
+
+```{r}
+delayed_discharge %>% 
+  group_by(age_band) %>% 
+ summarise(total = sum(admissions, na.rm = TRUE)) %>% 
+ arrange(desc(total))
+```
+
+boxplot for winter/summer
+```{r}
+delayed_discharge %>%
+ filter(age_band != "Total") %>%   
+ group_by(year, iswinter) %>% 
+ ggplot()+
+ aes(x=iswinter, y=admissions, fill = hb_name) +  
+ geom_col() +
+facet_grid(~year)
+```
+
+
+Now look by health boards 
+
+
+```{r}
+delayed_discharge %>% 
+  filter(age_band == "Total") %>% 
+  ggplot()+
+  aes(x=wdate, y=admissions, colour = hb_name)+
+  geom_line()+
+  geom_line(aes(x=all_delayed_discharge$wdate, y =all_delayed_discharge$all_ages, colour = "red"))
+```
+

@@ -121,171 +121,25 @@ discharge_data %>%
 
 
 ```
+Was wondering if this data might show an increase in people being admitted to hospital in recent times but this is not showing in the data. I suppose if we look at percentage numbers it might show something but it doesn't seem to be an obvious trend so best to leave for now. 
 
 
-```{r}
-
-filter(date > "2020-01-01") %>% 
-  group_by(date) %>% 
-  summarise(attendances_agg = sum(number_of_attendances_aggregate, na.rm = TRUE),
-            attendances_episode = sum(number_of_attendances_episode, na.rm = TRUE)) %>% 
-  ggplot() +
-  geom_line(aes(date, attendances_agg)) +
-  geom_line(aes(date, attendances_episode), colour = "blue") +
-  labs(title = "Number of Attendances Aggregate (black) and Episodes (blue)",
-       y = "Number of Attendances") +
-  scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
-```
-
-
-Use aggregate numbers in first place as there is more data for this
-Only discharge numbers for episodes though 
-
-### 2018/2019 averages by month
-```{r}
-avg_2018_2019 <- waiting_times %>% 
-  filter(date < "2020-01-01") %>% 
-  group_by(date) %>%
-  summarise(total = sum(number_meeting_target_aggregate)) %>%
-# Tried tidying this up by creating year and month columns in original waiting_times dataframe but they disappear during the summarise function above. Am sure there must be a way to dry this code out. 
-  mutate(year = year(date),
-         month = month(date)) %>% 
-  group_by(month) %>% 
-  summarise(avg_2018_2019 = mean(total))
-```
-
-
-Adding 2018/2019 averages into waiting times dataframe 
-```{r}
-waiting_times %>% 
-  filter(date >= "2020-01-01") %>% 
-  group_by(date) %>% 
-  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
-  mutate(year = year(date),
-         month = month(date), .after = date) %>% 
-  left_join(avg_2018_2019, by = "month") %>% 
-  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
-  
-  ggplot(aes(date, percent_variation)) + 
-  geom_col() +
-  theme_fc() + 
-  labs(title = "Percentage Variation in Number Meeting 4 Hour 
-       Target (Attendance Number)",
-       subtitle = "Compared to 2018 / 2019 Average")
-
-
-```
-
-Q Is it valid to say the number meeting target was lower if the volume of people overall was much lower? Should it all be done in percentage?
-A No because it is the number that needs dealt with and A&E should be able to meet targets BUT the graph above isn't telling us anything useful.
-
-
-### Percent meeting target
-
-```{r}
-waiting_times <- waiting_times %>% 
-  mutate(percent_meeting_target = number_meeting_target_aggregate / 
-           number_of_attendances_aggregate * 100)
-
-waiting_times %>% 
-#  filter(department_type == "Emergency Department") %>% 
-  group_by(date) %>% 
-  summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
-  ggplot(aes(date, percent_meeting_target_by_month)) +
-  geom_col(fill = "grey60") +
-  geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
-  theme_fc() +
-  labs(title = "Percentage of Attendances Meeting 4 Hour Target",
-       subtitle = "Data Averaged by Month",
-       y = "% Meeting 4 Hour Target",
-       x = "Date") +
-  geom_rect(aes(xmin = ymd("2020-03-01"), xmax = ymd("2020-06-01"), 
-                ymin = 0, ymax = Inf), 
-                fill = "orange", alpha = 0.01)
-
-```
-When you filter by "Minor Injury Unit or Other" the perecentages are close to 100% across all years. Filtering by "Emergency Department" shows a terrible decline in the % of patients being seen within 4 hours. 
-
-
-### Percentages compared to 2018 / 2019 averages
-
-
-
-
-```{r}
-waiting_times %>% 
-  filter(date >= "2020-01-01") %>% 
-  group_by(date) %>% 
-  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
-  mutate(year = year(date),
-         month = month(date), .after = date) %>% 
-  left_join(avg_2018_2019, by = "month") %>% 
-  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
-  
-  ggplot(aes(date, percent_variation)) + 
-  geom_col() +
-  theme_fc() + 
-  labs(title = "Percentage Variation in Number Meeting 4 Hour 
-       Target (Attendance Number)",
-       subtitle = "Compared to 2018 / 2019 Average")
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-discharge_data <- data %>% 
-  select(date, hbt, treatment_location, department_type, 
-         number_of_attendances_aggregate, number_of_attendances_episode,
-         number_meeting_target_aggregate, number_meeting_target_episode,
-         discharge_destination_admission_to_same,
-         discharge_destination_other_specialty,
-         discharge_destination_residence,
-         discharge_destination_transfer,
-         discharge_destination_unknown) %>% 
-    mutate(total_discharge = sum(discharge_destination_admission_to_same,
-         discharge_destination_other_specialty,
-         discharge_destination_residence,
-         discharge_destination_transfer,
-         discharge_destination_unknown, na.rm = TRUE))
-```
-
-
-
-
-
-
-
-
+Representing data on a stacked bar chart
 
 ```{r}
 discharge_data %>% 
-  filter(date > "2019-01-01") %>% 
-  group_by(date) %>% 
-  summarise(admitted_same_hospital = 
-              discharge_destination_admission_to_same / total_discharge, 
-            residence = 
-              discharge_destination_residence / total_discharge, 
-            transfer = 
-              discharge_destination_transfer / total_discharge, 
-            other_speciality_inc_death = 
-              discharge_destination_other_specialty / total_discharge,
-            unknown = 
-              discharge_destination_unknown / total_discharge) %>% 
-  ggplot() +
-  geom_line(aes(date, admitted_same_hospital)) +
-  geom_line(aes(date, residence), colour = "blue") +
-  labs(title = "Number Meeting 4 h Target Aggregate (black) and Episodes (blue)",
-       y = "Number Meeting Target") 
- # scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
+  pivot_longer(discharge_destination_admission_to_same:discharge_destination_unknown,
+    names_to = "discharge_destination", values_to = "number_of_people") %>% 
+  group_by(year, discharge_destination) %>% 
+  summarise(total = sum(number_of_people, na.rm = TRUE)) %>% 
+  
+  ggplot(aes(year, total)) + 
+  geom_col(aes(fill = discharge_destination), position = "fill")
+  
+
+
+
+
 ```
 
+I don't think there is anything interesting here to explore further
