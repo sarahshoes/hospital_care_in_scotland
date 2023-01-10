@@ -3,7 +3,7 @@ library(tidyverse)
 library(lubridate)
 
 # data
-stay_length <- read_csv("Inpatient and day case activity by board of treatment, age and sex.csv") %>% 
+stay_length <- read_csv("raw_data/Inpatient and day case activity by board of treatment, age and sex.csv") %>% 
   janitor::clean_names()
 
 # create date field
@@ -20,7 +20,7 @@ stay_length <- stay_length %>%
 
 # calculate average pre-pandemic stay length by hb, month, admission and age
 stay_length_pre_pandemic_avg <- stay_length %>% 
-  filter(year %in% c(2017, 2018)) %>% 
+  filter(year %in% c(2018, 2019)) %>% 
   group_by(hb, month_num, admission_type, age) %>% 
   summarise(average20182019 = mean(average_length_of_stay, na.rm = TRUE))
 
@@ -28,5 +28,5 @@ stay_length_pre_pandemic_avg <- stay_length %>%
 stay_length <- left_join(stay_length, stay_length_pre_pandemic_avg)
 
 # write clean data to file
-write_csv(stay_length, "clean_data/beds_qtrly_pre_pandemic_clean.csv")
+write_csv(stay_length, "clean_data/stay_length_clean.csv")
 
