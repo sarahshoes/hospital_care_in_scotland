@@ -23,7 +23,11 @@ covid_admissions_demog <- read_csv("Covid admissions by health board, age and se
 covid_admissions_spec <- covid_admissions_spec %>% 
   mutate(week_ending = ymd(week_ending)) %>% 
   mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
-  mutate(month = month(week_ending, label = TRUE), .after = year)
+  mutate(month = month(week_ending, label = TRUE), .after = year) %>% 
+  filter(hb != "S92000003") %>% # Scotland HB
+  filter(hb != "NA") # NA health boards
+
+glimpse(covid_admissions_spec)
 ```
 
 ```{r}
@@ -101,7 +105,7 @@ covid_admissions_spec_summary <- covid_admissions_spec %>%
             pre_pan_avg = sum(average20182019)) %>% 
   mutate(pcent_change_to_pre_pan_avg = (admissions - pre_pan_avg) / pre_pan_avg * 100) 
 
-covid_admissions_summary
+covid_admissions_spec_summary
 ```
 
 ```{r}
@@ -151,7 +155,9 @@ covid_admissions_dep <- covid_admissions_dep %>%
   mutate(week_ending = ymd(week_ending)) %>% 
   mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
   mutate(month = month(week_ending, label = TRUE), .after = year) %>% 
-  mutate(deprivation = as.character(simd_quintile))
+  mutate(deprivation = as.character(simd_quintile)) %>% 
+  filter(hb != "S92000003") %>% # Scotland HB
+  filter(hb != "NA") # NA health boards
 ```
 
 ```{r}
@@ -184,7 +190,9 @@ covid_admissions_dep_summary %>%
 covid_admissions_demog <- covid_admissions_demog %>% 
   mutate(week_ending = ymd(week_ending)) %>% 
   mutate(year = as.character(year(week_ending), .after = week_ending)) %>%  
-  mutate(month = month(week_ending, label = TRUE), .after = year)
+  mutate(month = month(week_ending, label = TRUE), .after = year) %>% 
+  filter(hb != "S92000003") %>% # Scotland HB
+  filter(hb != "NA") # NA health boards
 ```
 
 ```{r}

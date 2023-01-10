@@ -41,6 +41,10 @@ hospital_admit_wider <- hospital_activity_plus %>%
   janitor::clean_names() %>% 
   mutate(total_admissions = sum(c_across(all_day_cases:transfers)) , .after = qtr)
 
+hospital_admit_wider
+```
+
+```{r}
 hospital_admit_wider %>% 
   ggplot() +
   aes(x = qtr, y = total_admissions, group = year, colour = year) + 

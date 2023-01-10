@@ -1,0 +1,179 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r, include=FALSE}
+qtrly_hosp_beds <- read_csv("table_data (beds data to June 2022).csv") %>% 
+  janitor::clean_names()
+```
+
+```{r}
+qtrly_hosp_beds <- qtrly_hosp_beds %>% 
+  mutate(year = paste0("20", str_sub(time_period, start = 11, end = 12)), .after = time_period) %>% 
+  mutate(month_end = str_sub(time_period, start = 7, end = 9), .after = year) %>% 
+  mutate(month_num = case_when(
+    month_end == "Mar" ~ 3, 
+    month_end == "Jun" ~ 6, 
+    month_end == "Sep" ~ 9, 
+    month_end == "Dec" ~ 12), .after = month_end
+  ) %>% 
+  mutate(made_date = make_datetime(year, month_num), .after = month_num)
+
+glimpse(qtrly_hosp_beds)
+```
+
+```{r}
+qtrly_hosp_beds_pivot <- qtrly_hosp_beds %>% 
+  pivot_longer(cols = c(specialty, 
+                        quarterly_available_staffed_bed_days, 
+                        quarterly_occupied_bed_days, 
+                        daily_average_available_staffed_beds, 
+                        daily_average_occupied_beds, 
+                        percentage_occupancy), 
+              names_to = "Metric",
+              values_to = time_period)
+
+qtrly_hosp_beds_pivot
+```
+
+```{r}
+qtrly_hosp_beds_pivot <- qtrly_hosp_beds %>% 
+  group_by(time_period, year)
+  
+  
+  pivot_wider(names_from = time_period, 
+              values_from = c(specialty, 
+                        quarterly_available_staffed_bed_days, 
+                        quarterly_occupied_bed_days, 
+                        daily_average_available_staffed_beds, 
+                        daily_average_occupied_beds, 
+                        percentage_occupancy))
+```
+
+
+
+
+```{r}
+qtrly_hosp_beds %>% 
+  filter(geography_level == "Scotland") %>% 
+  filter(specialty == "All Acute") %>% 
+  ggplot() +
+  aes(x = made_date, y = percentage_occupancy) +
+  geom_line() +
+  geom_hline(yintercept = 85, colour = "red") +
+  annotate("text", min(qtrly_hosp_beds$made_date), 85, vjust = + 2, hjust = 0, 
+           label = "85% risk threshold", colour = "red") +
+  labs(
+    x = "", 
+    y = "% occupancy\n", 
+    title = "Hospital bed occupancy\n"
+  ) + 
+   theme_grey()
+```
+
+```{r, include=FALSE}
+length_stay_demog <- read_csv("Inpatient and day case activity by board of treatment, age and sex.csv") %>% 
+  janitor::clean_names()
+
+glimpse(length_stay_demog)
+```
+
+```{r}
+length_stay_demog <- length_stay_demog %>% 
+  mutate(year = str_sub(quarter, start = 1, end = 4), .after = quarter) %>% 
+  mutate(month_num = case_when(
+    str_sub(quarter, start = 5, end = 6) == "Q1" ~ 3, 
+    str_sub(quarter, start = 5, end = 6) == "Q2" ~ 6, 
+    str_sub(quarter, start = 5, end = 6) == "Q3" ~ 9, 
+    str_sub(quarter, start = 5, end = 6) == "Q4" ~ 12, 
+    ), .after = year
+  ) %>% 
+  mutate(made_date = make_datetime(year, month_num), .after = month_num)
+
+length_stay_demog
+```
+
+```{r}
+length_stay_demog_admission <- length_stay_demog %>% 
+  filter(hb == "S92000003") %>% # Scotland HB
+  group_by(year, month_num, made_date, admission_type) %>% 
+  summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
+
+length_stay_demog_summ
+```
+
+```{r}
+length_stay_demog_admission %>% 
+  filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+  ggplot() +
+  aes(x = made_date, y = avg_stay, group = admission_type, colour = admission_type) +
+  geom_line() +
+  labs(
+    x = "", 
+    y = "average length of hospital stay (days)\n", 
+    title = "Length of hospital stay (admission type)", 
+    colour = NULL
+  ) +
+   theme_grey()
+```
+
+```{r}
+length_stay_demog_age <- length_stay_demog %>% 
+  filter(hb == "S92000003") %>% # Scotland HB
+  group_by(year, month_num, made_date, age, admission_type) %>% 
+  summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
+
+length_stay_demog_age
+```
+
+```{r}
+length_stay_demog_age %>% 
+  filter(admission_type == "All Inpatients") %>% 
+  mutate(age = factor(age, levels = c("90 years and over", "80-89 years", "70-79 years",
+                                      "60-69 years", "50-59 years", "40-49 years",
+                                      "30-39 years", "20-29 years", "10-19 years", "0-9 years"))) %>% 
+  ggplot() +
+  aes(x = made_date, y = avg_stay, group = age, colour = age) +
+  geom_line() +
+  labs(
+    x = "", 
+    y = "average length of hospital stay (days)\n", 
+    title = "Length of hospital stay (age of patient)", 
+    colour = NULL
+  ) +
+   theme_grey()
+```
+
+```{r, include=FALSE}
+delayed_discharge <- read_csv("Delayed discharge bed days by health board.csv") %>% 
+  janitor::clean_names() 
+
+glimpse(delayed_discharge)
+```
+
+```{r}
+delayed_discharge <- delayed_discharge %>% 
+   mutate(month_of_delay = ym(month_of_delay))
+
+delayed_discharge
+```
+
+```{r}
+delayed_discharge_summ <- delayed_discharge %>% 
+  filter(hbt == "S92000003") %>% # Scotland HB
+  group_by(month_of_delay, age_group, reason_for_delay) %>% 
+  summarise(avg_daily_beds_delay = sum(average_daily_number_of_delayed_beds))
+
+delayed_discharge_summ
+```
+
+
+
+
+
