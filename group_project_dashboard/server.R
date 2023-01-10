@@ -45,7 +45,7 @@ server <- function(input, output) {
    
       output$discharge_delays <- renderPlot({
       plotdata <- delayed_discharge %>% 
-         filter(reason_for_delay == "All Delay Reasons") %>% 
+         filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
          filter(hb_name %in% input$dd_health_board) %>% 
          filter(age_group %in% input$dd_age_group)
       plotmapping <- aes(x=mdate, y=percent_var) 
