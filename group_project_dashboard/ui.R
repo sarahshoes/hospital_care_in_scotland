@@ -35,7 +35,7 @@ ui <- fluidPage(
                       checkboxGroupInput(inputId = "dd_reason_for_delay",
                                          label = "Select Delay Reason",
                                          choices = unique(delayed_discharge$reason_for_delay,
-                                                          selected = "All (18plus)")
+                                                          selected = "All Delay Reasons")
                       ),
                       checkboxGroupInput(inputId = "dd_age_group",
                                   label = "Select Age Group",
