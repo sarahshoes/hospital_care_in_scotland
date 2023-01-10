@@ -12,6 +12,10 @@ health_boards <- read_csv("health_board_codes.csv") %>%
 beds_qtrly <- left_join(beds_qtrly, health_boards, by = "hb")
 
 # create date
+
+
+
+
 beds_qtrly_summ <- beds_qtrly %>% 
   mutate(year = str_sub(quarter, start = 1, end = 4), .after = quarter) %>% 
   mutate(month_num = case_when(
