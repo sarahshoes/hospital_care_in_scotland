@@ -42,6 +42,18 @@ server <- function(input, output) {
        annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
                 label = "2018/2019 Average", colour = "blue")
    })
+   
+      output$discharge_delays <- renderPlot({
+      plotdata <- delayed_discharge %>% 
+         filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
+         filter(hb_name %in% input$dd_health_board) %>% 
+         filter(age_group %in% input$dd_age_group)
+      plotmapping <- aes(x=mdate, y=percent_var) 
+      plottitle <- ("Number of delayed bed days - by xxx")
+      plotylabel <- ("% change relative to 2018/19") 
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+   })
+   
 }
 
 

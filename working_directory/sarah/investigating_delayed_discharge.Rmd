@@ -6,7 +6,7 @@ editor_options:
 ---
 
 Looking at weekly delayed discharge data
-what paraeters are available?
+what parameters are available?
 https://www.isdscotland.org/health-topics/health-and-social-community-care/delayed-discharges/guidelines/docs/Background-of-delayed-discharge-information-and-glossary-of-terms.pdf
 
 by age 
@@ -199,7 +199,61 @@ plottitle <- ("Number of delayed bed days - by reason")
 plotylabel <- ("% change relative to 2018/19") 
 timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
 ```
-look at data by delay_reason
+look at data by health boards
+```{r}
+delayed_discharge %>% 
+  filter(hb_name =="NHS Orkney") %>% 
+  filter(age_group == "All (18plus)") %>% 
+  filter(reason_for_delay == "All Delay Reasons") %>% 
+  ggplot() +
+  aes(x=mdate, y=number_of_delayed_bed_days, colour=hb_name) +
+  geom_line()
+```
+
+look at data by health boards
+```{r}
+delayed_discharge %>% 
+  filter(hb_name !="All Scotland") %>% 
+  filter(age_group == "All (18plus)") %>% 
+  filter(reason_for_delay == "All Delay Reasons") %>% 
+  ggplot() +
+  aes(x=mdate, y=percent_var, colour=hb_name) +
+  geom_line()
+```
+
+use function to make this as a standard plot
+```{r}
+plotdata <- delayed_discharge %>% 
+  filter(hb_name !="All Scotland") %>% 
+  filter(hb_name !="NHS Orkney") %>% #temporary fix until I check merge
+  filter(age_group == "All (18plus)") %>% 
+  filter(reason_for_delay == "All Delay Reasons") 
+plotmapping <-  aes(x=mdate, y=percent_var, colour=hb_name)
+plottitle <- ("Number of delayed bed days - by reason")
+plotylabel <- ("% change relative to 2018/19") 
+timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+```
+
+
+
+Now look at winter/summer - was there a pattern pre=pandemic?
+
+by health board
+```{r}
+delayed_discharge %>% 
+  filter(reason_for_delay == "All Delay Reasons") %>% 
+  filter(hb_name != "All Scotland") %>% 
+  filter(age_group == "All (18plus)") %>% 
+  filter(year<2020) %>% 
+  ggplot() +
+  aes(x=iswinter,y=number_of_delayed_bed_days)+
+  geom_boxplot() +
+  facet_grid(~hb_name, scale = "free_y")
+```
+
+
+
+by age group
 ```{r}
 delayed_discharge %>% 
   filter(reason_for_delay != "All Delay Reasons") %>% 
@@ -209,76 +263,50 @@ delayed_discharge %>%
   ggplot() +
   aes(x=iswinter,y=number_of_delayed_bed_days)+
   geom_boxplot() +
-  facet_wrap(~year(mdate))
+  facet_grid(~age_group, scale = "free_y")
 ```
 
 
-
+Now look at winter/summer - was there a pattern pre=pandemic?
+by delay reason?
 ```{r}
-all_delayed_discharge %>% 
-  filter(year>=2020) %>% 
-ggplot()+
-  aes(x=mdate, y=percent_var) +
-  geom_line()
-```
-```{r}
-plotdata <- delayed_discharge %>% 
-  filter(reason_for_delay = "All Delay Reasons") %>% 
+delayed_discharge %>% 
+  filter(reason_for_delay != "All Delay Reasons") %>% 
   filter(hb_name == "All Scotland") %>% 
-  filter(age_group == "All (18plus)") #%>% 
-  #filter(year>=2020) 
-plotmapping <- aes(x=mdate, y=percent_var) 
-plottitle <- ("Number of delayed bed days - All Reasons")
-plotylabel <- ("% change relative to 2018/19") 
-timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
-```
-
-```{r}
-plotdata <- delayed_discharge %>% 
-  filter(reason_for_delay == "All Delay Reasons") %>% 
-  filter(hb_name != "All Scotland") %>% 
-  filter(age_group == "All (18plus)") 
-plotmapping <- aes(x=mdate, y=percent_var, colour = hb_name) 
-plottitle <- ("Number of delayed bed days - by Health Board")
-plotylabel <- ("% change relative to 2018/19") 
-timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+  filter(age_group == "All (18plus)") %>% 
+  filter(year<2020) %>% 
+  ggplot() +
+  aes(x=iswinter,y=number_of_delayed_bed_days)+
+  geom_boxplot() +
+  facet_grid(~reason_for_delay, scale = "free_y")
 ```
 
 
 
-# investigate variability across health boards
 
 
-```{r}
-discharge_delays_by_hb <- delayed_discharge %>% 
-  filter(reason_for_delay == "All Delay Reasons") %>% 
-  filter(hb_name != "All Scotland") %>% 
-  group_by(mdate, hb_name) %>%
-  # summing across all age groups
-  summarise(total =  sum(number_of_delayed_bed_days)) %>% 
-  mutate(year = year(mdate)) %>% 
-  mutate(month = month(mdate)) %>% 
-  mutate(iswinter=ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
-```
 Merge Orkney/Sheltand/WesternIsles
 Very low values in these two healthboards make stats analysis difficult
 therefore merging them with western isles is recommended.
 
 ```{r}
-discharge_delays_by_hb %>% 
+as_tibble(delayed_discharge) %>% 
+  filter(reason_for_delay != "All Delay Reasons") %>% 
+  filter(hb_name != "All Scotland") %>% 
+  filter(age_group == "All (18plus)") %>% 
   group_by(hb_name) %>% 
-  summarise(mean = mean(total)) %>% 
-  arrange(desc(mean))
+  summarise(mean = mean(number_of_delayed_bed_days)) %>% 
+  arrange(mean)
 ```
 
-merge orkney,shetland and western isles
+merge orkney,shetland and western isles - deosnt work yet!
 ```{r}
-discharge_delays_osw <- delayed_discharge %>% 
-   pivot_wider(values_from = "total", names_from = "hb_name") 
+delayed_discharge_osw <- as_tibble(delayed_discharge) %>% 
+   pivot_wider(values_from = "number_of_delayed_bed_days", names_from = c("hb_name","age_group","reason_for_delay")) 
 
-discharge_delays_by_hb <- clean_names(discharge_delays_by_hb)
+delayed_discharge_osw  <- clean_names(delayed_discharge_osw )
 
-discharge_delays_by_hb <- discharge_delays_by_hb %>% 
+delayed_discharge_osw  <- delayed_discharge_osw  %>% 
    mutate(nhs_ork_shet_wi = 
             rowSums(across(c(nhs_orkney,
                              nhs_shetland,
@@ -287,54 +315,23 @@ discharge_delays_by_hb <- discharge_delays_by_hb %>%
    select(-nhs_shetland) %>% 
    select(-nhs_western_isles) 
   
-discharge_delays_by_hb <- discharge_delays_by_hb %>% 
-   pivot_longer(cols = starts_with("nhs"), names_to = "hb_name", values_to = "total") %>%    mutate(hb_name = to_title_case(hb_name)) %>% 
-   mutate(hb_name = str_replace(hb_name,"Nhs","NHS"))
+delayed_discharge_osw  <- delayed_discharge_osw  %>% 
+   pivot_longer(cols = c("all_scotland",starts_with("nhs")), names_to = "hb_name", values_to = "number_of_delayed_bed_days") %>%    mutate(hb_name = to_title_case(hb_name)) %>% 
+   mutate(hb_name = str_replace(hb_name,"Nhs","NHS")) %>% 
+   mutate(hb_name = str_replace(hb_name,"all scotland","All Scotland")) %>% 
+   drop_na(number_of_delayed_bed_days)
 ```
 
-
+look at data by health boards
 ```{r}
-discharge_delays_by_hb  %>% 
+delayed_discharge_osw %>% 
+  mutate(hb_name = str_replace(hb_name,"all scotland","All Scotland"))
+  filter(hb_name !="All Scotland") %>% 
+  filter(age_group == "All (18plus)") %>% 
+  filter(reason_for_delay == "All Delay Reasons") %>% 
   ggplot() +
-  aes(x=mdate,y=total,colour = hb_name) +
+  aes(x=mdate, y=number_of_delayed_bed_days, colour=hb_name) +
   geom_line()
 ```
-#calculate 2018-2019 levels
-```{r}
-pre_pandemic_avg_by_hb <- discharge_delays_by_hb  %>% 
-  filter(between(year,2016,2019)) %>% 
-  group_by(hb_name) %>% 
-  summarise(avg_20182019 =  mean(total, na.rm=TRUE)) 
-```
-#merge this column back into all data
-```{r}
-discharge_delays_by_hb <- left_join(discharge_delays_by_hb,pre_pandemic_avg_by_hb) 
-
-discharge_delays_by_hb <- discharge_delays_by_hb %>% 
-  mutate(percent_var = 100*((total-avg_20182019)/avg_20182019)) %>% 
-  mutate(percent_var = ifelse(total==0,NA_integer_,percent_var))
-```
-
-# look at pre-pandemic
-was there a summer/winter pattern at hb level?
-looking at delayed discharge = higher values is less favourable
-
-```{r}
-discharge_delays_by_hb  %>% 
-  filter(year<2020) %>% 
-  ggplot() +
-  aes(x=iswinter,y=percent_var)+
-  geom_boxplot() +
-  facet_wrap(~hb_name)
-```
-
-```{r}
-discharge_delays_by_hb  %>% 
-  filter(year>=2020) %>% 
-  ggplot()+
-  aes(x=mdate, y=percent_var, colour = hb_name) +
-  geom_line()
-```
-
 
 
