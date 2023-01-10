@@ -1,5 +1,5 @@
 ---
-title: "First Investigation of A&E Data"
+title: "A&E Waiting Times"
 output:
   html_document:
     toc: yes
@@ -52,261 +52,126 @@ library(lubridate)
 ```
 
 ```{r}
-theme_fc <- function(){
-  
-  theme_minimal() %+replace%   
-    
-    theme(
-      axis.line = element_line(colour = "grey50"),
-      axis.ticks = element_line(colour = "grey50"),
-      plot.title = element_text(size = 16, 
-                                face = "bold", 
-                                colour = "grey30",
-                                margin = margin(b = 8),
-                                hjust = 0),
-      plot.subtitle = element_text(size = 12,  
-                                   colour = "grey30",
-                                   margin = margin(b = 12),
-                                   hjust = 0),
-      axis.title = element_text(size = 12, 
-                                face = "bold", 
-                                colour = "grey30"),
-      axis.title.x = element_text(margin = margin(t = 12)),
-      # chaning the margin on y-axis causes it to flip to horizontal   
-      # axis.title.y = element_text(margin = margin(b = 12)),
-      axis.text = element_text(size = 11, 
-                               colour = "grey30"),
-      legend.title = element_blank(),
-      legend.text = element_text(size = 11, 
-                                 colour = "grey30")
-    )
-}
-
-plot_colours <- c("#446e9b", "#999999", "#3cb521", "#d47500", "#cd0200", "#3399f3",
-                           "#333333", "#6610f2", "yellow", "brown", "peachpuff", "#6f42c1",
-                           "#e83e8c", "#fd7e14", "#20c997", "#000000", "grey50", "#eeeeee")
-```
-
-
-
-```{r}
-data <- read_csv("/Users/fionacarson/Documents/codeclan_work/codeclan_work/week_08/codeclan_group_project/downloaded_data/Monthly A&E activity and waiting times.csv")
-
-data <- janitor::clean_names(data)
-```
-
-## Cleaning and Wrangling Data
-
-```{r}
-data <- data %>% 
-  rename(date = month) %>% 
-#  mutate(year = str_extract(date, "[0-9]{4}"),
-#         month = str_sub(date, -2, -1)) %>% 
-  mutate(date = ym(date)) %>% 
-    mutate(year = year(date),
-         month = month(date)) 
-  
-data <- data %>%   
-  select(-ends_with("qf")) %>% 
-  filter(date >= "2018-01-01")
+source(here::here("palette_theme/define_theme.R"))
+source(here::here("palette_theme/plot_timeseries.R"))
 
 ```
 
-
-
 ```{r}
-waiting_times <- data %>% 
-  select(-id, -country, -starts_with("disch"))
-  
-
-  
-discharge_data <- data %>% 
-  select(-id, -country, -starts_with("num"), -starts_with("attend"))
+waiting_times <- read_csv(here::here("clean_data/a_and_e_data_clean.csv")) %>% 
+  janitor::clean_names()
 ```
 
 
-## Waiting Times
+When you filter by "Minor Injury Unit or Other" the percentages are close to 100% across all years. Filtering by "Emergency Department" shows a terrible decline in the % of patients being seen within 4 hours. 
 
-### Number of Attendances
+
+
+
+Calculate 2018 / 2019 average percent meeting target
 ```{r}
-data %>% 
-  filter(date > "2019-01-01") %>% 
-  group_by(date) %>% 
-  summarise(attendances_agg = sum(number_of_attendances_aggregate, na.rm = TRUE),
-            attendances_episode = sum(number_of_attendances_episode, na.rm = TRUE)) %>% 
-  ggplot() +
-  geom_line(aes(date, attendances_agg)) +
-  geom_line(aes(date, attendances_episode), colour = "blue") +
-  labs(title = "Number of Attendances Aggregate (black) and Episodes (blue)",
-       y = "Number of Attendances") +
-  scale_y_continuous(limits = c(0, 160000), n.breaks = 10)
-```
-
-
-Use aggregate numbers in first place as there is more data for this
-Only discharge numbers for episodes though 
-
-### 2018/2019 averages by month
-```{r}
-avg_2018_2019 <- waiting_times %>% 
-  filter(date < "2020-01-01") %>% 
-  group_by(date) %>%
-  summarise(total = sum(number_meeting_target_aggregate)) %>%
-# Tried tidying this up by creating year and month columns in original waiting_times dataframe but they disappear during the summarise function above. Am sure there must be a way to dry this code out. 
-  mutate(year = year(date),
-         month = month(date)) %>% 
-  group_by(month) %>% 
-  summarise(avg_2018_2019 = mean(total))
-```
-
-
-Adding 2018/2019 averages into waiting times dataframe 
-```{r}
-waiting_times %>% 
-  filter(date >= "2020-01-01") %>% 
-  group_by(date) %>% 
-  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
-  mutate(year = year(date),
-         month = month(date), .after = date) %>% 
-  left_join(avg_2018_2019, by = "month") %>% 
-  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
-  
-  ggplot(aes(date, percent_variation)) + 
-  geom_col() +
-  theme_fc() + 
-  labs(title = "Percentage Variation in Number Meeting 4 Hour 
-       Target (Attendance Number)",
-       subtitle = "Compared to 2018 / 2019 Average")
-
-
-```
-
-Q Is it valid to say the number meeting target was lower if the volume of people overall was much lower? Should it all be done in percentage?
-A No because it is the number that needs dealt with and A&E should be able to meet targets BUT the graph above isn't telling us anything useful.
-
-
-### Percent meeting target
-
-```{r}
+# Adding percent meeting target column to dataframe
 waiting_times <- waiting_times %>% 
   mutate(percent_meeting_target = number_meeting_target_aggregate / 
-           number_of_attendances_aggregate * 100)
+              number_of_attendances_aggregate * 100)  
 
+# Calculate average percent meeting target across all rows for 2018 and 2019
+avg_2018_2019 <- waiting_times %>%  
+  filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
+  summarise(average_percent_meeting_target = mean(percent_meeting_target))
+```
+
+Average percent meeting target across 2018 and 2019 is 96.66%
+
+```{r}
 waiting_times %>% 
 #  filter(department_type == "Emergency Department") %>% 
-#  filter(hbt == "S08000020") %>% 
+#  filter(hbt == "Highlands") %>% 
+  filter(date >= "2020-01-01") %>% 
   group_by(date) %>% 
   summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
+  
   ggplot(aes(date, percent_meeting_target_by_month)) +
-  geom_col(fill = "grey60") +
+  geom_line(fill = "grey60") +
   geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
+  geom_hline(yintercept = 97, colour = "blue", linetype = "dashed") +
 # use coord_cartesian to zoom in on y axis not scale_y_continuous() or ylim()
-  coord_cartesian(ylim=c(60,100)) +
-  theme_fc() +
+  coord_cartesian(ylim=c(75,100)) +
+  theme_phs +
   labs(title = "Percentage of Attendances Meeting 4 Hour Target",
        subtitle = "Data Averaged by Month",
        y = "% Meeting 4 Hour Target",
        x = "Date") +
-         geom_rect(aes(xmin = ymd("2022-9-15"), xmax = ymd("2023-03-15"), 
-                ymin = 0, ymax = Inf), 
-                fill = "skyblue", alpha = 0.01) +
-   geom_rect(aes(xmin = ymd("2021-9-15"), xmax = ymd("2022-03-15"), 
-                ymin = 0, ymax = Inf), 
-                fill = "skyblue", alpha = 0.01) +
-  geom_rect(aes(xmin = ymd("2020-9-15"), xmax = ymd("2021-03-15"), 
-                ymin = 0, ymax = Inf), 
-                fill = "skyblue", alpha = 0.01) +
-    geom_rect(aes(xmin = ymd("2019-9-15"), xmax = ymd("2020-03-15"), 
-                ymin = 0, ymax = Inf), 
-                fill = "skyblue", alpha = 0.01) +
-      geom_rect(aes(xmin = ymd("2018-9-15"), xmax = ymd("2019-03-15"), 
-                ymin = 0, ymax = Inf), 
-                fill = "skyblue", alpha = 0.01) +
-        geom_rect(aes(xmin = ymd("2017-12-15"), xmax = ymd("2018-03-15"), 
-                ymin = 0, ymax = Inf), 
-                fill = "skyblue", alpha = 0.01)
-
-```
-When you filter by "Minor Injury Unit or Other" the perecentages are close to 100% across all years. Filtering by "Emergency Department" shows a terrible decline in the % of patients being seen within 4 hours. 
-
-
-### Percentages compared to 2018 / 2019 averages
-
-#### 2018/2019 averages by month
-```{r}
-avg_percent_2018_2019 <- waiting_times %>% 
-  filter(date < "2020-01-01") %>% 
-  group_by(date) %>%
-  summarise(percent_meeting_target = number_meeting_target_aggregate / 
-              number_of_attendances_aggregate * 100) %>%
-# Tried tidying this up by creating year and month columns in original waiting_times dataframe but they disappear during the summarise function above. Am sure there must be a way to dry this code out. 
-  mutate(year = year(date),
-         month = month(date)) %>% 
-  group_by(month) %>% 
-  summarise(avg_2018_2019 = mean(percent_meeting_target))
-```
-
-
-Adding 2018/2019 percent averages into waiting times dataframe 
-```{r}
-waiting_times %>% 
-  filter(date >= "2020-01-01") %>% 
-  group_by(date) %>% 
-  summarise(percent_meeting_target = number_meeting_target_aggregate / 
-              number_of_attendances_aggregate * 100) %>% 
-  mutate(year = year(date),
-         month = month(date), .after = date) %>% 
-  left_join(avg_percent_2018_2019, by = "month") %>% 
-#  group_by(date) %>% 
-  mutate(percent_variation = ((percent_meeting_target - avg_2018_2019)
-                              /avg_2018_2019)*100) %>% 
-  group_by(date) %>% 
-  summarise(avg_percent_by_month = mean(percent_variation)) %>% 
-  
-  ggplot(aes(date, avg_percent_by_month)) + 
-  geom_col() +
-  theme_fc() + 
-  labs(title = "Percentage Variation in Percent Meeting 4 Hour Target",
-       subtitle = "Compared to 2018 / 2019 Average")
-
-```
-The graph above looks good but it is a massive manipulation of the data. 
-
-A better graph would be above or below the benchmark of 4 hours!
-
-```{r}
-waiting_times %>% 
-  filter(date >= "2020-01-01") %>% 
-  group_by(date) %>% 
-  summarise(percent_meeting_target = number_meeting_target_aggregate / 
-              number_of_attendances_aggregate * 100) %>% 
-  mutate(percent_variation_from_95pc = (percent_meeting_target - 95)) %>% 
-  group_by(date) %>% 
-  summarise(avg_percent_var_from_95_by_month = mean(percent_variation_from_95pc)) %>% 
-  
-  ggplot(aes(date, avg_percent_var_from_95_by_month)) + 
-  geom_col() +
-  theme_fc() + 
-  labs(title = "Variation from 95% Target",
-       subtitle = "Target is 95% Patients Discharged Within 4 Hours",
-       y = "Variation from 95%") +
   geom_rect(aes(xmin = ymd("2022-9-15"), xmax = ymd("2023-03-15"), 
-                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
   geom_rect(aes(xmin = ymd("2021-9-15"), xmax = ymd("2022-03-15"), 
-                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
   geom_rect(aes(xmin = ymd("2020-9-15"), xmax = ymd("2021-03-15"), 
-                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
   geom_rect(aes(xmin = ymd("2020-01-01"), xmax = ymd("2020-03-15"), 
-                ymin = -Inf, ymax = Inf), fill = "skyblue", alpha = 0.01)
+                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) 
+#  geom_rect(aes(xmin = ymd("2018-9-15"), xmax = ymd("2019-03-15"), 
+#                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01) +
+#  geom_rect(aes(xmin = ymd("2017-12-15"), xmax = ymd("2018-03-15"), 
+#                ymin = 0, ymax = Inf), fill = "skyblue", alpha = 0.01)
+
 
 ```
 
+```{r}
+monthly_target_data <- waiting_times %>% 
+#  filter(department_type == "Emergency Department") %>% 
+#  filter(hbt == "Highlands") %>% 
+  filter(date >= "2020-01-01") %>% 
+  group_by(date) %>% 
+  summarise(percent_meeting_target_by_month = mean(percent_meeting_target))
 
 
 
+timeseriesplot(monthly_target_data, aes(date, percent_meeting_target_by_month),
+               "Percentage of Attendances Meeting 4 Hour Target", 
+               "% Meeting 4 Hour Target") +
+  labs(subtitle = "Data Averaged By Month") +
+  theme(axis.text = element_text(size = 12)) +
+  # Make sure only whole percent number shows on y-axis (not e.g. 92.5%)
+  scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
+  geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
+  geom_hline(yintercept = 97, colour = "blue", linetype = "dashed") +
+  annotate(geom = "text", x = as.Date("2022-08-01"), y = 94.5, 
+           label = "NHS 95% Target", colour = "red") +
+    annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
+           label = "2018/2019 Average", colour = "blue")
+  
+```
 
 
+```{r}
+timeseriesplot <- function(plotdata,plotmapping,plottitle,plotylabel){
+  plotlim <- as.Date(c("2020-01-01","2022-12-31")) 
+  ggplot(plotdata,plotmapping) +
+    geom_line() +    
+    # add dashed lines to show the boundaries 
+    geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", linewidth = 0.5) +                                   geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) +
+    scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short(), expand = c(0,0)) +
+#    scale_y_continuous(expand = c(0,0)) +
+    xlab("Date") +   
+    ylab(plotylabel) +
+    ggtitle(plottitle) +  
+    theme_phs +
+    #add rectangles to denote winter
+    annotate("rect", 
+             xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)),
+             xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
+             ymin=c(-Inf,-Inf,-Inf,-Inf), 
+             ymax=c(Inf,Inf,Inf,Inf), 
+             alpha=0.1, fill="gray")
+}
 
+```
 
 
 
