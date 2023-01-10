@@ -130,9 +130,18 @@ monthly_target_data <- waiting_times %>%
 
 timeseriesplot(monthly_target_data, aes(date, percent_meeting_target_by_month),
                "Percentage of Attendances Meeting 4 Hour Target", 
-               "% Meeting 4 Hour Target")
-
-
+               "% Meeting 4 Hour Target") +
+  labs(subtitle = "Data Averaged By Month") +
+  theme(axis.text = element_text(size = 12)) +
+  # Make sure only whole percent number shows on y-axis (not e.g. 92.5%)
+  scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
+  geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
+  geom_hline(yintercept = 97, colour = "blue", linetype = "dashed") +
+  annotate(geom = "text", x = as.Date("2022-08-01"), y = 94.5, 
+           label = "NHS 95% Target", colour = "red") +
+    annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
+           label = "2018/2019 Average", colour = "blue")
+  
 ```
 
 
@@ -148,7 +157,7 @@ timeseriesplot <- function(plotdata,plotmapping,plottitle,plotylabel){
     geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
     geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) +
     scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short(), expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
+#    scale_y_continuous(expand = c(0,0)) +
     xlab("Date") +   
     ylab(plotylabel) +
     ggtitle(plottitle) +  
