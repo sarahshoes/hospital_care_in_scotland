@@ -17,7 +17,9 @@ ui <- fluidPage(
                column(width = 6,
                       checkboxGroupInput(inputId = "minor_or_emerg_dept",
                                          label = "Select Department Type",
-                                         choices = unique(waiting_times$department_type)
+                                         choices = unique(waiting_times$department_type),
+                                         selected = c("Minor Injury Unit or Other",
+                                                      "Emergency Department")
                                          ),
                       selectInput(inputId = "health_board",
                                   label = "Select Health Board",
