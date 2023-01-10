@@ -8,35 +8,44 @@ library(tidyverse)
 library(lubridate)
 ```
 
+
+### BEDS
+
 ```{r, include=FALSE}
-qtrly_hosp_beds <- read_csv("table_data (beds data to June 2022).csv") %>% 
+beds_qtrly <- read_csv("Beds by board of treatment and specialty.csv") %>% 
   janitor::clean_names()
 ```
 
 ```{r}
-qtrly_hosp_beds <- qtrly_hosp_beds %>% 
-  mutate(year = paste0("20", str_sub(time_period, start = 11, end = 12)), .after = time_period) %>% 
-  mutate(month_end = str_sub(time_period, start = 7, end = 9), .after = year) %>% 
-  mutate(month_num = case_when(
-    month_end == "Mar" ~ 3, 
-    month_end == "Jun" ~ 6, 
-    month_end == "Sep" ~ 9, 
-    month_end == "Dec" ~ 12), .after = month_end
-  ) %>% 
-  mutate(made_date = make_datetime(year, month_num), .after = month_num)
+health_boards <- read_csv("health_board_codes.csv") %>% 
+  janitor::clean_names()
 
-glimpse(qtrly_hosp_beds)
+beds_qtrly <- left_join(beds_qtrly, health_boards, by = "hb")
 ```
 
 ```{r}
-qtrly_hosp_beds %>% 
-  filter(geography_level == "Scotland") %>% 
-  filter(specialty == "All Acute") %>% 
+beds_qtrly <- beds_qtrly %>% 
+  mutate(year = str_sub(quarter, start = 1, end = 4), .after = quarter) %>% 
+  mutate(month_num = case_when(
+    str_sub(quarter, start = 5, end = 6) == "Q1" ~ 3, 
+    str_sub(quarter, start = 5, end = 6) == "Q2" ~ 6, 
+    str_sub(quarter, start = 5, end = 6) == "Q3" ~ 9, 
+    str_sub(quarter, start = 5, end = 6) == "Q4" ~ 12, 
+    ), .after = year
+  ) %>% 
+  mutate(made_date = make_datetime(year, month_num), .after = month_num)
+```
+
+```{r}
+# bed occupancy plot
+beds_qtrly %>% 
+  filter(hb == "S92000003") %>% # Scotland HB
+  filter(specialty_name == "All Acute") %>% 
   ggplot() +
   aes(x = made_date, y = percentage_occupancy) +
   geom_line() +
   geom_hline(yintercept = 85, colour = "red") +
-  annotate("text", min(qtrly_hosp_beds$made_date), 85, vjust = + 2, hjust = 0, 
+  annotate("text", min(beds_qtrly$made_date), 85, vjust = + 2, hjust = 0, 
            label = "85% risk threshold", colour = "red") +
   labs(
     x = "", 
@@ -46,15 +55,16 @@ qtrly_hosp_beds %>%
    theme_grey()
 ```
 
-```{r, include=FALSE}
-length_stay_demog <- read_csv("Inpatient and day case activity by board of treatment, age and sex.csv") %>% 
-  janitor::clean_names()
 
-glimpse(length_stay_demog)
+### LENGTH OF STAY
+
+```{r, include=FALSE}
+stay_length <- read_csv("Inpatient and day case activity by board of treatment, age and sex.csv") %>% 
+  janitor::clean_names()
 ```
 
 ```{r}
-length_stay_demog <- length_stay_demog %>% 
+stay_length <- stay_length %>% 
   mutate(year = str_sub(quarter, start = 1, end = 4), .after = quarter) %>% 
   mutate(month_num = case_when(
     str_sub(quarter, start = 5, end = 6) == "Q1" ~ 3, 
@@ -65,21 +75,66 @@ length_stay_demog <- length_stay_demog %>%
   ) %>% 
   mutate(made_date = make_datetime(year, month_num), .after = month_num)
 
-length_stay_demog
+stay_length
 ```
 
 ```{r}
-length_stay_demog_admission <- length_stay_demog %>% 
+# average pre-pandemic stay length
+stay_length_pre_pandemic_avg <- stay_length %>% 
+  filter(year %in% c(2018, 2019)) %>% 
+  group_by(hb, month_num, admission_type, age) %>% 
+  summarise(average20182019 = mean(average_length_of_stay, na.rm = TRUE))
+
+stay_length_pre_pandemic_avg
+```
+
+```{r}
+# join average to stay_length file
+stay_length <- left_join(stay_length, stay_length_pre_pandemic_avg)
+```
+
+```{r}
+# summarise for plot of % change to pre-pandemic
+stay_length_summ <- stay_length %>% 
   filter(hb == "S92000003") %>% # Scotland HB
+  filter(year > 2019) %>% 
+  filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+  group_by(year, month_num, made_date, admission_type) %>% 
+  summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE), 
+            pre_pan_avg = sum(average20182019, na.rm = TRUE)) %>% 
+  mutate(pcent_change_to_pre_pan_avg = (avg_stay - pre_pan_avg) / pre_pan_avg * 100)
+
+stay_length_summ
+```
+
+```{r}
+# plot % change relative to 2018/19 for average stay
+stay_length_summ %>% 
+  ggplot() +
+  aes(x = made_date, y = pcent_change_to_pre_pan_avg, 
+      group = admission_type, colour = admission_type) +
+  geom_line() +
+  scale_y_continuous(limits = c(NA, 15)) +
+  labs(
+    x = "", 
+    y = "% change relative to 2018/19\n", 
+    title = "Length of hospital stay (admission type)", 
+    colour = NULL
+  ) +
+   theme_grey()
+```
+
+```{r}
+# summarise for plot of stay length values by admission type
+stay_length_summ <- stay_length %>% 
+  filter(hb == "S92000003") %>% # Scotland HB
+  filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
   group_by(year, month_num, made_date, admission_type) %>% 
   summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
-
-length_stay_demog_summ
 ```
 
 ```{r}
-length_stay_demog_admission %>% 
-  filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+stay_length_summ %>% 
   ggplot() +
   aes(x = made_date, y = avg_stay, group = admission_type, colour = admission_type) +
   geom_line() +
@@ -92,21 +147,22 @@ length_stay_demog_admission %>%
    theme_grey()
 ```
 
+### LENGTH OF STAY - AGE
+
 ```{r}
-length_stay_demog_age <- length_stay_demog %>% 
+# summarise for plot of stay length values by age category
+stay_length_summ <- stay_length %>% 
   filter(hb == "S92000003") %>% # Scotland HB
-  group_by(year, month_num, made_date, age, admission_type) %>% 
-  summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
-
-length_stay_demog_age
-```
-
-```{r}
-length_stay_demog_age %>% 
   filter(admission_type == "All Inpatients") %>% 
   mutate(age = factor(age, levels = c("90 years and over", "80-89 years", "70-79 years",
                                       "60-69 years", "50-59 years", "40-49 years",
                                       "30-39 years", "20-29 years", "10-19 years", "0-9 years"))) %>% 
+  group_by(year, month_num, made_date, age, admission_type) %>% 
+  summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
+```
+
+```{r}
+stay_length_summ %>% 
   ggplot() +
   aes(x = made_date, y = avg_stay, group = age, colour = age) +
   geom_line() +
@@ -119,28 +175,7 @@ length_stay_demog_age %>%
    theme_grey()
 ```
 
-```{r, include=FALSE}
-delayed_discharge <- read_csv("Delayed discharge bed days by health board.csv") %>% 
-  janitor::clean_names() 
 
-glimpse(delayed_discharge)
-```
-
-```{r}
-delayed_discharge <- delayed_discharge %>% 
-   mutate(month_of_delay = ym(month_of_delay))
-
-delayed_discharge
-```
-
-```{r}
-delayed_discharge_summ <- delayed_discharge %>% 
-  filter(hbt == "S92000003") %>% # Scotland HB
-  group_by(month_of_delay, age_group, reason_for_delay) %>% 
-  summarise(avg_daily_beds_delay = sum(average_daily_number_of_delayed_beds))
-
-delayed_discharge_summ
-```
 
 
 
