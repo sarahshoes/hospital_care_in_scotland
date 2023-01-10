@@ -12,11 +12,11 @@ library("tsibble")
 library("tsibbledata")
 
 #read in healthboard codes
-hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- read_csv(here::here("downloaded_data/health_board_codes.csv"))
 hb_codes <- clean_names(hb_codes)
 
 #load in datafiles
-delayed_discharge <- read_csv("Delayed discharge bed days by health board.csv")
+delayed_discharge <- read_csv(here::here("raw_data/Delayed discharge bed days by health board.csv"))
 delayed_discharge <- clean_names(delayed_discharge)
 
 #data cleaning
@@ -27,14 +27,21 @@ delayed_discharge <- delayed_discharge %>%
 #merge hbnames into datafiles
 delayed_discharge <- left_join(delayed_discharge,hb_codes)
 
-delayed_discharge <-delayed_discharge %>% 
-  mutate(year = as.integer(str_sub(month_of_delay,1,4))) %>% 
-  mutate(month = as.integer(str_sub(month_of_delay,5,6))) %>% 
-  mutate(mdate = ym(month_of_delay)) %>% 
+delayed_discharge <- delayed_discharge %>% 
+  select(-country) %>% 
+  select(-starts_with("hb_date")) %>% 
+  select(-ends_with("qf")) %>% 
+  select(-starts_with("average_daily")) %>% 
+  mutate(mdate = ym(month_of_delay), .after = month_of_delay) %>% 
+  mutate(year = as.integer(str_sub(month_of_delay,1,4)), .after = mdate) %>% 
+  mutate(month = as.integer(str_sub(month_of_delay,5,6)), .after = year) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE), .after=month) %>%
+  select(-month_of_delay) %>% 
+  #tidying paramenter names
   mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
-  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>%  
-  mutate(age_group = ifelse(age_group=="18plus","All (18plus)",age_group)) %>%  
-  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>%
+  mutate(age_group = ifelse(age_group=="18plus","All (18plus)",age_group)) %>%   
+  relocate(hb_name, .after = hb)
 
 #calculate 2018-2019 levels
 pre_pandemic_avg <- delayed_discharge %>% 
