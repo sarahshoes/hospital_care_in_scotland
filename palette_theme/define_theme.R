@@ -6,7 +6,7 @@ theme_phs <-
   theme(
     text = element_text(size = 14),
     title = element_text(size = 14),
-    axis.text = element_text(size = 14),
+    axis.text = element_text(size = 12),
     legend.text = element_text(size = 12),
     panel.background = element_rect(fill = "transparent", colour = NA),
     plot.background = element_rect(fill = "transparent", colour = NA),

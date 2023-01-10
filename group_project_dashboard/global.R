@@ -29,7 +29,7 @@ avg_2018_2019 <- waiting_times %>%
 
 # DISCHARGE DELAYS
 
-  delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv")) %>% 
+delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv")) %>% 
   janitor::clean_names()
 
 
@@ -48,4 +48,3 @@ health_boards <- c("Ayrshire and Arran", "Borders", "Dumfries and Galloway",
 
 scottish_hb <- hb %>% 
   filter(name %in% health_boards)
-

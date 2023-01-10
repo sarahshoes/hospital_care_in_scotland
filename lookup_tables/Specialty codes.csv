@@ -1,0 +1,163 @@
+﻿_id,Specialty,SpecialtyName
+1,A1,General Medicine
+2,A11,Acute Medicine
+3,A2,Cardiology
+4,A21,Paediatric Cardiology
+5,A3,Clinical Genetics
+6,A4,Tropical Medicine
+7,A5,Clinical Pharmacology & Therapeutics
+8,A6,Infectious Diseases
+9,A7,Dermatology
+10,A8,Endocrinology & Diabetes
+11,A81,Endocrinology
+12,A82,Diabetes
+13,A9,Gastroenterology
+14,AA,Genito-Urinary Medicine
+15,AB,Geriatric Medicine
+16,AC,Homeopathy
+17,AD,Medical Oncology
+18,AF,Paediatrics
+19,AFA,Community Child Health
+20,AG,Renal Medicine
+21,AH,Neurology
+22,AJ,Integrative Care
+23,AK,Occupational Medicine
+24,AM,Palliative Medicine
+25,AN,Public Health Medicine
+26,AP,Rehabilitation Medicine
+27,AQ,Respiratory Medicine
+28,AR,Rheumatology
+29,AS,Sport & Exercise Medicine
+30,AT,Medical Ophthalmology
+31,AV,Clinical Neurophysiology
+32,AW,Allergy
+33,C1,General Surgery
+34,C11,General Surgery (excl Vascular)
+35,C12,Vascular Surgery
+36,C13,Oral and Maxillofacial Surgery
+37,C2,Accident & Emergency
+38,C3,Anaesthetics
+39,C31,Pain Management
+40,C4,Cardiothoracic Surgery
+41,C41,Cardiac Surgery
+42,C42,Thoracic Surgery
+43,C5,"Ear, Nose & Throat (ENT)"
+44,C51,Audiological Medicine
+45,C6,Neurosurgery
+46,C7,Ophthalmology
+47,C8,Trauma and Orthopaedic Surgery
+48,C9,Plastic Surgery
+49,C91,Cleft Lip and Palate Surgery
+50,CA,Paediatric Surgery
+51,CB,Urology
+52,CC,Intensive Care Medicine
+53,D1,Community Dental Practice
+54,D2,General Dental Practice
+55,D3,Oral Surgery
+56,D4,Oral Medicine
+57,D5,Orthodontics
+58,D6,Restorative Dentistry
+59,D61,Restorative Dentistry - Endodontics
+60,D62,Restorative Dentistry - Periodontics
+61,D63,Restorative Dentistry - Prosthodontics
+62,D7,Dental Public Health
+63,D8,Paediatric Dentistry
+64,D9,Oral Pathology
+65,DA,Oral Microbiology
+66,DB,Dental & Maxillofacial Radiology
+67,DC,Surgical Dentistry
+68,DD,Fixed & Removable Prosthodontics
+69,DE,Special Care Dentistry
+70,E1,General Practice
+71,E11,GP Obstetrics
+72,E12,GP Other than Obstetrics
+73,F1,Obstetrics & Gynaecology
+74,F1A,Well Woman Service
+75,F1B,Family Planning Service
+76,F2,Gynaecology
+77,F3,Obstetrics
+78,F31,Obstetrics Ante-Natal
+79,F32,Obstetrics Post-Natal
+80,F4,Community Sexual & Reproductive Health
+81,G1,General Psychiatry (Mental Illness)
+82,G1A,Community Psychiatry
+83,G2,Child & Adolescent Psychiatry
+84,G21,Child Psychiatry
+85,G22,Adolescent Psychiatry
+86,G3,Forensic Psychiatry
+87,G4,Psychiatry of Old Age
+88,G5,Learning Disability
+89,G6,Psychotherapy
+90,G61,Behavioural Psychotherapy
+91,G62,Child & Adolescent Psychotherapy
+92,G63,Adult Psychotherapy
+93,H1,Clinical Radiology
+94,H1A,Breast Screening Service
+95,H2,Clinical Oncology
+96,J1,Histopathology
+97,J2,Blood Transfusion
+98,J3,Chemical Pathology
+99,J4,Haematology
+100,J5,Immunology
+101,J6,Medical Microbiology & Virology
+102,J61,Microbiology
+103,J62,Virology
+104,J7,Diagnostic Neuropathology
+105,J8,Forensic Histopathology
+106,J9,Paediatric and Perinatal Pathology
+107,R1,Chiropody/Podiatry
+108,R11,Surgical Podiatry
+109,R2,Clinical psychology
+110,R3,Dietetics
+111,R4,Occupational Therapy
+112,R41,Industrial therapists
+113,R5,Physiotherapy
+114,R6,Speech and Language Therapy
+115,R7,Ambulancemen/women - Accident & Emergency
+116,R8,Audiological science
+117,R81,Hearing aids
+118,R82,Audiometry
+119,R9,Medical physics
+120,RA,Pharmacy
+121,RB,Physiology
+122,RC,Dental Hygiene
+123,RD,Dental Surgery Assistance
+124,RE,Physiological Measurement
+125,RF,Prosthetics/orthotics
+126,RF1,Prosthetics
+127,RF2,Orthotics
+128,RG,Dispensing optometry
+129,RH,Optometry
+130,RJ,Orthoptics
+131,RK,Diagnostic radiography
+132,RK1,Electroencephalography
+133,RK2,Electrocardiography
+134,RK3,Ultrasonics
+135,RK4,Nuclear medicine
+136,RL,Therapeutic radiography
+137,RM,Medical photography
+138,RP,Paramedics
+139,RS,Dental therapy
+140,RT,Pharmaceutical Medicine
+141,RU,Arts Therapies
+142,RU1,Art Therapy
+143,RU2,Drama Therapy
+144,RU3,Music Therapy
+145,RU4,Dance Therapy
+146,RU5,Mistletoe Therapy
+147,RU6,Acupuncture
+148,RU7,Bowen Therapy
+149,RU8,Counselling
+150,T1,General nursing
+151,T11,School nursing
+152,T2,Midwifery
+153,T21,Community Midwifery
+154,T3,Mental health nursing
+155,T31,Community psychiatric nursing
+156,T4,Learning disability nursing
+157,T41,Community learning disability nursing
+158,T5,Community nursing (district nursing)
+159,T6,Health visiting
+160,T7,Sick children's nursing
+161,T8,Nursery nursing
+162,Z9,"All specialties, topic specific"
