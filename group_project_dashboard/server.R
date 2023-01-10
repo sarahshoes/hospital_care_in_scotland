@@ -17,9 +17,8 @@ server <- function(input, output) {
 # add names of health boards with addLabelOnlyMarkers but need to calculate
 # centroid data with lat and lon values and make new dataframe
   
-   
+# A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
-     
      waiting_times %>% 
        # Conduct this 2020 filtering step at an earlier stage
        filter(date >= "2020-01-01") %>% 
@@ -42,7 +41,39 @@ server <- function(input, output) {
        annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
                 label = "2018/2019 Average", colour = "blue")
    })
+
+# Treatment Waiting Times
    
+   output$treatment_waiting_times <- renderPlot({
+   avg_2018_2019 <- ongoing_waits %>% 
+     filter(month_ending >= "2018-01-01" & month_ending <= "2019-12-31") %>% 
+     filter(hb_name == input$treat_wait_health_board) %>% 
+     filter(patient_type == input$out_or_inpatient) %>% 
+     group_by(month_ending) %>% 
+     summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE),
+               num_waiting_over12weeks_2018_2019_by_month = 
+                 sum(number_waiting_over12weeks, na.rm = TRUE)) %>% 
+     summarise(avg_num_waiting = mean(num_waiting_2018_2019_by_month),
+               avg_num_waiting_over12weeks = mean(num_waiting_over12weeks_2018_2019_by_month))   
+   
+   ongoing_waits %>% 
+     filter(hb_name == input$treat_wait_health_board) %>% 
+     filter(patient_type == input$out_or_inpatient) %>% 
+     group_by(month_ending) %>% 
+     mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE),
+            total_waiting_over12weeks_by_month = sum(number_waiting_over12weeks, 
+                                                     na.rm = TRUE)) %>% 
+     mutate(percentage_var = (total_waiting_by_month - avg_2018_2019$avg_num_waiting)
+            / avg_2018_2019$avg_num_waiting * 100,
+            percentage_var_12w = (total_waiting_over12weeks_by_month - 
+                                    avg_2018_2019$avg_num_waiting_over12weeks) /
+              avg_2018_2019$avg_num_waiting_over12weeks * 100) %>% 
+     
+     timeseriesplot(aes(month_ending, percentage_var), "Treatment Waiting Times", 
+                    "% change relative to 2018/19") 
+   })
+   
+# Delayed Discharge      
       output$discharge_delays <- renderPlot({
       plotdata <- delayed_discharge %>% 
          filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 

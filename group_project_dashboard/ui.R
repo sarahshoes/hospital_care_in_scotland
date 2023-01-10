@@ -13,7 +13,8 @@ ui <- fluidPage(
               )
             ),
     tabPanel("Admissions",
-             fluidRow(
+# A&E Waiting Times 
+            fluidRow(
                column(width = 6,
                       checkboxGroupInput(inputId = "minor_or_emerg_dept",
                                          label = "Select Department Type",
@@ -28,8 +29,32 @@ ui <- fluidPage(
                       plotOutput("a_and_e_waiting_times")
                       ))
                ),
-    tabPanel("Hospital Activity"),
+    
+    
+    tabPanel("Hospital Activity",
+# Treatment Waiting Times
+            fluidRow(
+               column(width = 6, 
+                      checkboxGroupInput(inputId = "out_or_inpatient",
+                                         label = "Patient Type",
+                                         choices = unique(ongoing_waits$patient_type),
+                                         selected = c("New Outpatient",
+                                                      "Inpatient/Day case")
+                                         ),
+                      selectInput(inputId = "treat_wait_health_board",
+                                  label = "Select Health Board",
+                                  choices = unique(ongoing_waits$hb_name),
+                                  selected = "NHS Scotland"
+                                  ),
+                      plotOutput("treatment_waiting_times")
+                      )
+             )),
+    
+    
+    
+    
     tabPanel("Discharge",
+# Delayed Discharge             
              fluidRow(
                column(width = 6,
                       checkboxGroupInput(inputId = "dd_reason_for_delay",
