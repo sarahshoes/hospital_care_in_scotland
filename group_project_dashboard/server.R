@@ -82,7 +82,7 @@ server <- function(input, output) {
       plotmapping <- aes(x=mdate, y=percent_var) 
       plottitle <- ("Number of delayed bed days - by xxx")
       plotylabel <- ("% change relative to 2018/19") 
-      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
    })
    
 }

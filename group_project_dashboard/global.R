@@ -5,11 +5,13 @@ library(tidyverse)
 library(leaflet)
 library(shiny)
 library(lubridate)
+library(grid) #needed for custom annotation
 
 
 # Load plot theme and function to prepare plot
 source(here::here("palette_theme/define_theme.R"))
 source(here::here("palette_theme/plot_timeseries.R"))
+source(here::here("palette_theme/plot_timeseriesv2.R"))
 palette = read_csv(here::here("palette_theme/phs_palette.csv"))
 
 # A&E WAITING TIMES
@@ -35,8 +37,8 @@ ongoing_waits <- read_csv(here::here("clean_data/treatment_waiting_times_ongoing
 
 # DISCHARGE DELAYS
 
-delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv")) %>% 
-  janitor::clean_names()
+delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv"))  
+
 
 
 
