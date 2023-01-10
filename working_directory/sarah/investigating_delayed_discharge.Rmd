@@ -6,7 +6,7 @@ editor_options:
 ---
 
 Looking at weekly delayed discharge data
-what paraeters are available?
+what parameters are available?
 https://www.isdscotland.org/health-topics/health-and-social-community-care/delayed-discharges/guidelines/docs/Background-of-delayed-discharge-information-and-glossary-of-terms.pdf
 
 by age 
