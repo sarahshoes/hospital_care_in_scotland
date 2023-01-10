@@ -29,37 +29,6 @@ glimpse(qtrly_hosp_beds)
 ```
 
 ```{r}
-qtrly_hosp_beds_pivot <- qtrly_hosp_beds %>% 
-  pivot_longer(cols = c(specialty, 
-                        quarterly_available_staffed_bed_days, 
-                        quarterly_occupied_bed_days, 
-                        daily_average_available_staffed_beds, 
-                        daily_average_occupied_beds, 
-                        percentage_occupancy), 
-              names_to = "Metric",
-              values_to = time_period)
-
-qtrly_hosp_beds_pivot
-```
-
-```{r}
-qtrly_hosp_beds_pivot <- qtrly_hosp_beds %>% 
-  group_by(time_period, year)
-  
-  
-  pivot_wider(names_from = time_period, 
-              values_from = c(specialty, 
-                        quarterly_available_staffed_bed_days, 
-                        quarterly_occupied_bed_days, 
-                        daily_average_available_staffed_beds, 
-                        daily_average_occupied_beds, 
-                        percentage_occupancy))
-```
-
-
-
-
-```{r}
 qtrly_hosp_beds %>% 
   filter(geography_level == "Scotland") %>% 
   filter(specialty == "All Acute") %>% 
