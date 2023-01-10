@@ -380,6 +380,17 @@ weekly_admissions_spec %>%
 ```
 How is NA calculated - still need to check??
 
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality == "All") %>% 
+  filter(hb_name != "All Scotland") %>% 
+  group_by(hb_name) %>% 
+  summarise(mean = mean(number_admissions)) %>% 
+  arrange(desc(mean))
+```
+
 ```{r}
 weekly_admissions_spec %>% 
   filter(admission_type == "All") %>% 

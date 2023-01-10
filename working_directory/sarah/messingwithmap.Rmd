@@ -1,0 +1,26 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(sf)
+map_scot <- st_read("SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp")
+tx_ll <- st_transform(map_scot, "+proj=longlat +ellps=WGS84 +datum=WGS84")
+
+ggplot(map_scot) +
+ geom_sf() +
+ stat_sf_coordinates(geom = "point", color = "red") +
+ geom_sf_text(aes(label = HBName), size = 3, nudge_x = 600, colour = "black",check_overlap = TRUE) +
+ scale_fill_distiller(palette = "GnBu", type = "seq") +
+ theme_void()
+```
+
+
+reminder for myself of of how I plotted long lat onto map before...
+
+st_stations <- data.frame(lat = c(40.73,40.73,40.709,40.709,40.73),
+                               long = c(-74.052,-74.03,-74.03,-74.052,-74.052))
+stations_stf <- st_stations %>% 
+  st_as_sf(coords = c("long","lat"), crs = 4326) 
+
