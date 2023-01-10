@@ -59,7 +59,7 @@ server <- function(input, output) {
                 label = "2018/2019 Average", colour = "blue")
    })
    
-   
+
 }
 
 
