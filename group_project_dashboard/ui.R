@@ -29,8 +29,27 @@ ui <- fluidPage(
                       ))
                ),
     tabPanel("Hospital Activity"),
-    tabPanel("Discharge")
-  
-)
+    tabPanel("Discharge",
+             fluidRow(
+               column(width = 6,
+                      checkboxGroupInput(inputId = "reason_for_delay",
+                                         label = "Select Delay Reason",
+                                         choices = unique(delayed_discharge$reason_for_delay,
+                                                          selected = "All (18plus)")
+                      ),
+                      checkboxGroupInput(inputId = "age_group",
+                                  label = "Select Age Group",
+                                  choices = unique(delayed_discharge$age_group,
+                                                   selected = "All (18plus)")
+                      ),
+                      selectInput(inputId = "health_board",
+                                  label = "Select Health Board",
+                                  choices = unique(delayed_discharge$hb_name,
+                                  selected = "All Scotland")
+                      ),
+                      plotOutput("discharge_delays")
+               ))
+             )
+  ) 
 )
 

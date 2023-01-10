@@ -42,6 +42,11 @@ server <- function(input, output) {
        annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
                 label = "2018/2019 Average", colour = "blue")
    })
+   
+   output$discharge_delays <- renderPlot({
+      print("hello")
+   })
+   
 }
 
 

@@ -27,7 +27,10 @@ avg_2018_2019 <- waiting_times %>%
   filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
   summarise(average_percent_meeting_target = mean(percent_meeting_target))
 
+# DISCHARGE DELAYS
 
+  delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv")) %>% 
+  janitor::clean_names()
 
 
 
