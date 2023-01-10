@@ -1,0 +1,47 @@
+---
+title: "Project Summary"
+output: html_notebook
+---
+
+# Data
+
+We investigated PHS data...
+
+Methods
+
+We looked at key metrics, comparing the trends from 2020-2022 with pre-pandemic data.
+
+We referenced data to published targets/benchmarks where available
+
+We have defined two seasons 
+winter - Q1 and Q4 or Oct-Mar
+summer - Q2 and Q3 or Apr-Sep
+
+# Section 1 - Summary
+
+## Hospital Admissions
+
+Prior to the Covid 19 Pandemic in Hospital admissions varied with a seasonal pattern with admissions generally rising in winter months??? [this is assumption we need to find a way to test of its true]
+
+Prior to the Covid 19 pandemic hospital admissions over the whole hospital system were on average xxxx admissions per month. Hospital admissions dropped rapidly when lockdown happened in March 2020 and then slowly climbed, the rise in admissions over that period was mostly (insert %) driven by Covid cases. Overall, hospital admissions remain lower than pre-pandemic levels. On average in 2022, admissions are at 90-95% of pre=pandemic levels.
+
+include observations on variability we have seen that alters the above pattern for some groups.
+
+detail by speciality
+issues in A+E also cancer, paediatrics etc.
+
+detail by age/sex
+under5s and old people...
+
+detail by simd
+difference between simd 1 and simd 5
+
+## A+E Waiting times
+
+
+## Delayed Discharges
+
+Prior to the Covid 19 pandemic discharge delays over the whole hospital system were on average xxxx bed days per month. AT the start of the Covid 19 pandemic in March 2020. discharge delays reached zero. Our assumptions are that as many patients as possible were discharged and the hospital system was prepared to take in Covid patients. Since then disharge delays have been rising and during 2022 discharge delays have exceeded pre-pandemic levels. On average in 2022, discharge depays are at ?? % of pre-pandemic levels.
+
+
+# Section 2 - Health Boards/Geographic Patterns
