@@ -44,6 +44,8 @@ and service provision towards increased use of non-consultant led clinics, a ful
 return to pre-pandemic levels is unlikely, particularly for the number of patients seen
 and additions to the list.
 
+The total Scotland data was created by summing the health boards. This gave the same results as the original Scotland data except it filled in the zero values and increased the low values for 2017 and 2018. This means that the Jubilee data is separate and not included in NHS Glasgow. It is a special separate health board. 
+
 ```{r}
 library(tidyverse)
 library(lubridate)
@@ -59,53 +61,79 @@ Ongoing waits may be a more representative dataset. It could be looked at as a w
 ongoing_waits <- read_csv(here::here("clean_data/treatment_waiting_times_ongoing.csv"))
 ```
 
+```{r}
+palette = read_csv(here::here("palette_theme/phs_palette.csv"))
+# load theme
+source(here::here("palette_theme/define_theme.R"))
+#load plotting function
+source(here::here("palette_theme/plot_timeseries.R"))
+```
 
 
 ## Number of Patients On Waiting list
 
-The ongoing wait data suffers the same issues as the completed waits. The scotland and Tayside data are low or zero for a period across 2017 and 2018. 
+The ongoing wait data suffers the same issues as the completed waits. The Scotland and Tayside data are low or zero for a period across 2017 and 2018. 
+
+Graph for reference
+```{r}
+ongoing_waits %>% 
+  filter(!hb == "S92000003") %>% 
+  filter(specialty == "Z9") %>% 
+  group_by(month_ending) %>% 
+  summarise(total = sum(number_waiting, na.rm = TRUE),
+            total_12w = sum(number_waiting_over12weeks, na.rm = TRUE)) %>% 
+  ggplot(aes(month_ending, total)) + 
+  geom_line() +
+  geom_line(aes(month_ending, total_12w), colour = "red") +
+  scale_y_continuous(labels = scales::comma)
+
+
+```
+
+
+
+
+Calculating 2018 and 2019 average, ensuring it can be filtered and therefore calculated at health board level.
+```{r}
+avg_2018_2019 <- ongoing_waits %>% 
+  filter(month_ending >= "2018-01-01" & month_ending <= "2019-12-31") %>% 
+  filter(!hb == "S92000003") %>% 
+# Have to filter by Z9 which is all specialties otherwise each patient counted twice
+    filter(specialty == "Z9") %>% 
+#  filter(hb == "S08000030") %>% 
+  group_by(month_ending) %>% 
+  summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE),
+            num_waiting_over12weeks_2018_2019_by_month = 
+              sum(number_waiting_over12weeks, na.rm = TRUE)) %>% 
+  summarise(avg_num_waiting = mean(num_waiting_2018_2019_by_month),
+            avg_num_waiting_over12weeks = mean(num_waiting_over12weeks_2018_2019_by_month))
+```
+
 
 ```{r}
 ongoing_waits %>% 
-  filter(!hbt == "S92000003") %>% 
-#  filter(hbt == "S08000025") %>% 
+  filter(!hb == "S92000003") %>% 
+# Have to filter by Z9 which is all specialties otherwise each patient counted twice
+    filter(specialty == "Z9") %>% 
+#  filter(hb == "S08000025") %>% 
   group_by(month_ending) %>% 
-  mutate(total_waiting_by_date = sum(number_waiting, na.rm = TRUE),
-         total_waiting_over12weeks_by_date = sum(number_waiting_over12weeks, 
+  mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE),
+         total_waiting_over12weeks_by_month = sum(number_waiting_over12weeks, 
                                                     na.rm = TRUE)) %>% 
-  ggplot(aes(month_ending, total_waiting_by_date)) + 
-  geom_line() +
-  geom_line(aes(month_ending, total_waiting_over12weeks_by_date))
+ mutate(percentage_var = (total_waiting_by_month - avg_2018_2019$avg_num_waiting)
+            / avg_2018_2019$avg_num_waiting * 100,
+        percentage_var_12w = (total_waiting_over12weeks_by_month - 
+                                avg_2018_2019$avg_num_waiting_over12weeks) /
+          avg_2018_2019$avg_num_waiting_over12weeks * 100) %>% 
+  
+  timeseriesplot(aes(month_ending, percentage_var), "Treatment Waiting Times", 
+                 "% Variation Compared to 2018/2019") 
+#   geom_line(aes(month_ending, percentage_var_12w), colour = "red")
+
+
+
 ```
 
 Chose this metric to display as it is simple and gives a strong simple message. The number of patients waiting for treatment is increasing. Shows a bottleneck.
 
-
-Numbers waiting > 12 weeks
-
-```{r}
-ongoing_waits %>% 
-  filter(!hbt == "S92000003") %>% 
-#  filter(hbt == "S08000025") %>% 
-  group_by(month_ending) %>% 
-  summarise(total_waiting_over12weeks_by_date = sum(number_waiting_over12weeks, na.rm = TRUE)) %>% 
-  ggplot(aes(month_ending, total_waiting_over12weeks_by_date)) + 
-  geom_line()
-
-```
-
-This could be a good metric to chose as it shows a relatively static period over 2018 - 2019. 
-
-
-Percentage waiting > 12 weeks
-
-```{r}
-ongoing_waits %>% 
-  mutate(percent_over12weeks = number_waiting_over12weeks / number_waiting * 100) %>% 
-  group_by(month_ending) %>% 
-  summarise(pc_waiting_over12weeks_by_date = mean(percent_over12weeks, na.rm = TRUE)) %>% 
-  ggplot(aes(month_ending, pc_waiting_over12weeks_by_date)) + 
-  geom_line()
-
-```
 
