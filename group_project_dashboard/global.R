@@ -7,10 +7,10 @@ library(shiny)
 library(lubridate)
 
 
-# Plot theme and function to prepare plot
+# Load plot theme and function to prepare plot
 source(here::here("palette_theme/define_theme.R"))
 source(here::here("palette_theme/plot_timeseries.R"))
-
+palette = read_csv(here::here("palette_theme/phs_palette.csv"))
 
 # A&E WAITING TIMES
 
