@@ -28,4 +28,13 @@ a_and_e_data <- a_and_e_data %>%
   left_join(health_board_names, by = "hbt") %>% 
   relocate(hb_name, .after = hbt)
 
+# Adding percent meeting target column to dataframe
+a_and_e_data <- a_and_e_data %>% 
+  mutate(percent_meeting_target = number_meeting_target_aggregate / 
+           number_of_attendances_aggregate * 100) 
+
+
+
+
+
 write_csv(a_and_e_data, "clean_data/a_and_e_data_clean.csv")
