@@ -15,7 +15,10 @@ source(here::here("palette_theme/plot_timeseriesv2.R"))
 palette = read_csv(here::here("palette_theme/phs_palette.csv"))
 
 # HEALTH BOARD NAMES
-health_boards <- read_csv(here::here("lookup_tables/health_board_codes.csv")) 
+health_board_list <- read_csv(here::here("lookup_tables/health_board_codes.csv")) %>% 
+  janitor::clean_names() %>% 
+  distinct(hb_name) %>% 
+  pull()
 
 # A&E WAITING TIMES
 

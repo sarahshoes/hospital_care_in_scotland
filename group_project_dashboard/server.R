@@ -81,7 +81,6 @@ server <- function(input, output) {
       timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
    })
    
-}
 
 # Bed occupancy
       output$beds <- renderPlot({
@@ -92,3 +91,5 @@ server <- function(input, output) {
       plotylabel <- ("% occupancy")
       timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
       })
+
+}
