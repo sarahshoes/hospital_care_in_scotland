@@ -13,7 +13,8 @@ timeseriesplot <- function(plotdata,plotmapping,plottitle,plotylabel){
     geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
     geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) +
     scale_x_date(limits=plotlim, date_breaks="3 month", labels = scales::label_date_short(), expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
+    # SH removed this as think we need a little space 
+    #scale_y_continuous(expand = c(0,0)) +
     scale_colour_manual(values = palette$mycolours) + 
     xlab("Date") +   
     ylab(plotylabel) +

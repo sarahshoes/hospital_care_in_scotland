@@ -78,6 +78,7 @@ Graph for reference
 ```{r}
 ongoing_waits %>% 
   filter(!hb == "S92000003") %>% 
+  filter(hb_name == "NHS Fife") %>% 
   group_by(month_ending) %>% 
   summarise(total = sum(number_waiting, na.rm = TRUE),
             total_12w = sum(number_waiting_over12weeks, na.rm = TRUE)) %>% 
@@ -97,7 +98,7 @@ Calculating 2018 and 2019 average, ensuring it can be filtered and therefore cal
 avg_2018_2019 <- ongoing_waits %>% 
   filter(month_ending >= "2018-01-01" & month_ending <= "2019-12-31") %>% 
   filter(!hb == "S92000003") %>% 
-#  filter(hb == "S08000030") %>% 
+ filter(hb == "S08000030") %>% 
   group_by(month_ending) %>% 
   summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE),
             num_waiting_over12weeks_2018_2019_by_month = 
@@ -110,7 +111,7 @@ avg_2018_2019 <- ongoing_waits %>%
 ```{r}
 ongoing_waits %>% 
   filter(!hb == "S92000003") %>% 
-#  filter(hb == "S08000025") %>% 
+ filter(hb == "S08000030") %>% 
   group_by(month_ending) %>% 
   mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE),
          total_waiting_over12weeks_by_month = sum(number_waiting_over12weeks, 
@@ -123,7 +124,7 @@ ongoing_waits %>%
   
   timeseriesplot(aes(month_ending, percentage_var), "Treatment Waiting Times", 
                  "% Variation Compared to 2018/2019") 
-#   geom_line(aes(month_ending, percentage_var_12w), colour = "red")
+#   geom_line(aes(month_ending, percentage_var, colour = "hb_name"))
 
 
 
