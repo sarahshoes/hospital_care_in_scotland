@@ -5,17 +5,22 @@ server <- function(input, output) {
 
    output$map <- renderLeaflet({
      
-     leaflet(scottish_hb) %>% 
+     leaflet(scot_hb_shapefile) %>% 
 # addTiles adds scotland map from OpenStreetMap  
        addTiles() %>% 
 # addPolygons adds health board shape from shapefile
        addPolygons(color = "black", weight = 1) %>% 
 # fit scotland onto map using fitBounds once we know the dimensions of the map
-      fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2)
+      fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2) %>% 
+       addCircleMarkers(lng = health_board_lat_lon$Longitude, 
+                        lat = health_board_lat_lon$Latitude,
+                        radius = fake_data$Situation,
+                        color = "purple",
+                        weight = 3,
+                        opacity = 0.8,
+                        label = health_board_lat_lon$HBName)
    }) 
 
-# add names of health boards with addLabelOnlyMarkers but need to calculate
-# centroid data with lat and lon values and make new dataframe
   
 # A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
