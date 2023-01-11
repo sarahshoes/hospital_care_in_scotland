@@ -71,8 +71,8 @@ ui <- fluidPage(
                       ),
                       selectInput(inputId = "treat_wait_health_board",
                                   label = "Select Health Board",
-                                  choices = unique(ongoing_waits$hb_name),
-                                  selected = "NHS Scotland"
+                                  choices = health_board_list,
+                                  selected = "All Scotland"
                       ),
                       plotOutput("treatment_waiting_times"),
                       tags$a("Note: There are issues with NHS Tayside results caused by

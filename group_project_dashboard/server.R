@@ -89,8 +89,9 @@ server <- function(input, output) {
             / avg_2018_2019$avg_num_waiting * 100) %>% 
      
      timeseriesplot(aes(month_ending, percentage_var, colour = patient_type), 
-                    "Treatment Waiting Times", 
-                    "% change relative to 2018/19") 
+                    "Treatment Waiting Times for Ongoing Waits", 
+                    "% change relative to 2018/19") +
+     labs(subtitle = "Number of People on Waiting Lists")
    })
    
 # Delayed Discharge  by age    
