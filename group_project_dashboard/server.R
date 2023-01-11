@@ -120,7 +120,8 @@ server <- function(input, output) {
       output$beds <- renderPlot({
       plotdata <- bed_occupancy %>%
          filter(specialty_name == "All Acute") %>%
-         filter(hb_name == input$occ_health_board)
+         filter(hb_name == input$occ_health_board) %>% 
+         filter(location_qf == "d")
       plotmapping <- aes(x = made_date, y = percentage_occupancy)
       plottitle <- ("Hospital bed occupancy")
       plotylabel <- ("% occupancy")
