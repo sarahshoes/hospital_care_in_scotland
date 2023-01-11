@@ -1,0 +1,94 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# LOAD LIBRARIES
+
+
+```{r}
+library(sf)
+library(tidyverse)
+library(leaflet)
+library(shiny)
+library(lubridate)
+library(grid) #needed for custom annotation
+```
+
+
+# Load plot theme and function to prepare plot
+
+```{r}
+source(here::here("palette_theme/define_theme.R"))
+source(here::here("palette_theme/plot_timeseries.R"))
+source(here::here("palette_theme/plot_timeseriesv2.R"))
+palette = read_csv(here::here("palette_theme/phs_palette.csv"))
+```
+
+
+# A&E WAITING TIMES
+
+```{r}
+waiting_times <- read_csv(here::here("clean_data/a_and_e_data_clean.csv")) %>% 
+  janitor::clean_names()
+
+```
+
+
+
+
+
+
+```{r}
+# A&E Waiting Times    
+ #  output$a_and_e_waiting_times <- renderPlot({
+     
+avg_2018_2019 <- waiting_times %>% 
+     filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
+#       filter(department_type %in% input$minor_or_emerg_dept) %>% 
+#       filter(hb_name == input$health_board) %>% 
+     filter(hb_name == "All Scotland") %>% 
+     filter(department_type %in% c("Minor Injury Unit or Other", 
+                                   "Emergency Department")) %>%      
+#     group_by(date) %>% 
+#     summarise(num_waiting_2018_2019 = 
+#                 sum(number_of_attendances_aggregate, na.rm = TRUE)) %>% 
+     summarise(avg_percent_meeting_target = mean(percent_meeting_target)) 
+
+
+
+
+    waiting_times %>% 
+       # Conduct this 2020 filtering step at an earlier stage
+       filter(date >= "2020-01-01") %>% 
+#       filter(department_type %in% input$minor_or_emerg_dept) %>% 
+#       filter(hb_name == input$health_board) %>% 
+       filter(hb_name == "NHS Highland") %>% 
+     filter(department_type %in% c("Minor Injury Unit or Other", 
+                                   "Emergency Department")) %>%    
+       group_by(date) %>% 
+       summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
+       
+       timeseriesplot(aes(date, percent_meeting_target_by_month),
+                      "Percentage of Attendances Meeting 4 Hour Target", 
+                      "% Meeting 4 Hour Target") +
+       labs(subtitle = "Data Averaged By Month") +
+#       theme(axis.text = element_text(size = 12)) +
+       # Make sure only whole percent number shows on y-axis (not e.g. 92.5%)
+#       scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
+       geom_hline(yintercept = 95, colour = "#964091", linetype = "dashed") + 
+       geom_hline(yintercept = avg_2018_2019$avg_percent_meeting_target, colour = "#86BC25", linetype = "dashed") +
+       annotate(geom = "label", x = as.Date("2022-08-01"), 
+                y = 95, 
+                label = "NHS 95% Target", colour = "#964091", fill = "white", alpha = 0.5) +
+       annotate(geom = "text", x = as.Date("2022-08-01"), 
+                y = avg_2018_2019$avg_percent_meeting_target + 0.5, 
+                label = "2018/2019 Average", colour = "#86BC25")
+
+
+
+#})
+
+```
+
+

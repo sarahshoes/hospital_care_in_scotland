@@ -24,8 +24,14 @@ server <- function(input, output) {
   
 # A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
+     
+     avg_2018_2019 <- waiting_times %>% 
+       filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
+       filter(department_type %in% input$minor_or_emerg_dept) %>% 
+       filter(hb_name == input$health_board) %>% 
+       summarise(avg_percent_meeting_target = mean(percent_meeting_target))  
+     
      waiting_times %>% 
-       # Conduct this 2020 filtering step at an earlier stage
        filter(date >= "2020-01-01") %>% 
        filter(department_type %in% input$minor_or_emerg_dept) %>% 
        filter(hb_name == input$health_board) %>% 
@@ -36,15 +42,16 @@ server <- function(input, output) {
                       "Percentage of Attendances Meeting 4 Hour Target", 
                       "% Meeting 4 Hour Target") +
        labs(subtitle = "Data Averaged By Month") +
-       theme(axis.text = element_text(size = 12)) +
-       # Make sure only whole percent number shows on y-axis (not e.g. 92.5%)
-       scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
-       geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
-       geom_hline(yintercept = 97, colour = "blue", linetype = "dashed") +
-       annotate(geom = "text", x = as.Date("2022-08-01"), y = 94.5, 
-                label = "NHS 95% Target", colour = "red") +
-       annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
-                label = "2018/2019 Average", colour = "blue")
+       geom_hline(yintercept = 95, colour = "#964091", linetype = "dashed") + 
+       geom_hline(yintercept = avg_2018_2019$avg_percent_meeting_target, 
+                  colour = "#86BC25", linetype = "dashed") +
+       annotate(geom = "label", x = as.Date("2022-08-01"), y = 95, 
+                label = "NHS 95% Target", colour = "#964091", fill = "white",
+                alpha = 0.8) +
+       annotate(geom = "label", x = as.Date("2022-08-01"), 
+                y = avg_2018_2019$avg_percent_meeting_target, 
+                label = "2018/2019 Average", colour = "#86BC25", fill = "white",
+                alpha = 0.8)
    })
    
    # Covid Cases
@@ -111,12 +118,44 @@ server <- function(input, output) {
 
 # Bed occupancy
       output$beds <- renderPlot({
-      plotdata <- bed_occupancy %>% 
-        filter(specialty_name == "All Acute")
+      plotdata <- bed_occupancy %>%
+         filter(specialty_name == "All Acute") %>%
+         filter(hb_name == input$occ_health_board)
       plotmapping <- aes(x = made_date, y = percentage_occupancy)
       plottitle <- ("Hospital bed occupancy")
       plotylabel <- ("% occupancy")
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
       })
 
+# Length of stay (relative to 2018/19 avg)
+      output$stay_change <- renderPlot({
+      plotdata <- stay_length %>% 
+         filter(hb_name == input$stay_change_health_board) %>% 
+         filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+         group_by(year, month_num, made_date, admission_type) %>% 
+         summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE), 
+                   pre_pan_avg = sum(average20182019, na.rm = TRUE)) %>% 
+         mutate(pcent_change_to_pre_pan_avg = (avg_stay - pre_pan_avg) / pre_pan_avg * 100)
+      plotmapping <- aes(x = made_date, y = pcent_change_to_pre_pan_avg, 
+                         group = admission_type, colour = admission_type)
+      plottitle <- ("Change in length of hospital stay (compared to 2018/19)")
+      plotylabel <- ("% change relative to 2018/19")
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      })
+      
+# Length of stay (admission type)
+      output$stay_admission <- renderPlot({
+      plotdata <- stay_length %>% 
+         filter(hb_name == input$stay_admission_health_board) %>% 
+         filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+         group_by(year, month_num, made_date, admission_type) %>% 
+         summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
+      plotmapping <- aes(x = made_date, y = avg_stay, group = admission_type, colour = admission_type)
+      plottitle <- ("Average length of hospital stay")
+      plotylabel <- ("days")
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      })
+      
+      
+      
 }

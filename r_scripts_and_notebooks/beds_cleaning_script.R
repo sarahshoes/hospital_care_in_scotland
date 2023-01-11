@@ -22,7 +22,7 @@ bed_occupancy <- bed_occupancy %>%
     str_sub(quarter, start = 5, end = 6) == "Q4" ~ 12, 
   ), .after = year
   ) %>% 
-  mutate(made_date = make_datetime(year, month_num), .after = month_num)
+  mutate(made_date = make_date(as.numeric(year), month_num), .after = month_num)
 
 # write clean data to file
 write_csv(bed_occupancy, "clean_data/bed_occupancy_clean.csv")
