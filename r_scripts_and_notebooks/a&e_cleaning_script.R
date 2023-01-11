@@ -28,13 +28,35 @@ a_and_e_data <- a_and_e_data %>%
   left_join(health_board_names, by = "hbt") %>% 
   relocate(hb_name, .after = hbt)
 
+# Remove columns we aren't using
+a_and_e_data <- a_and_e_data %>% 
+  select(date, hbt, hb_name, treatment_location, department_type, 
+         number_of_attendances_aggregate, number_meeting_target_aggregate)
+
+
+# Create data called All Scotland which sums values from all health boards
+
+all_scot_data <- a_and_e_data %>% 
+  group_by(date) %>% 
+  summarise(number_of_attendances_aggregate = 
+              sum(number_of_attendances_aggregate, na.rm = TRUE),
+            number_meeting_target_aggregate = 
+              sum(number_meeting_target_aggregate, na.rm = TRUE))
+
+hbt <- rep("S92000003", 58)
+hb_name <- rep("All Scotland", 58)
+treatment_location <- rep("All", 58)
+department_type <- rep("NA", 58)
+
+all_scot_data <- cbind(all_scot_data, hbt, hb_name, treatment_location, department_type) 
+  
+a_and_e_data <- rbind(a_and_e_data, all_scot_data)
+
+
 # Adding percent meeting target column to dataframe
 a_and_e_data <- a_and_e_data %>% 
   mutate(percent_meeting_target = number_meeting_target_aggregate / 
            number_of_attendances_aggregate * 100) 
-
-
-
 
 
 write_csv(a_and_e_data, "clean_data/a_and_e_data_clean.csv")
