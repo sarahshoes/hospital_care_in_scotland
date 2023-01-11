@@ -37,18 +37,20 @@ a_and_e_data <- a_and_e_data %>%
 # Create data called All Scotland which sums values from all health boards
 
 all_scot_data <- a_and_e_data %>% 
-  group_by(date) %>% 
+  group_by(date, department_type) %>% 
   summarise(number_of_attendances_aggregate = 
               sum(number_of_attendances_aggregate, na.rm = TRUE),
             number_meeting_target_aggregate = 
               sum(number_meeting_target_aggregate, na.rm = TRUE))
 
-hbt <- rep("S92000003", 58)
-hb_name <- rep("All Scotland", 58)
-treatment_location <- rep("All", 58)
-department_type <- rep("NA", 58)
+hbt <- rep("S92000003", 116)
+hb_name <- rep("All Scotland", 116)
+treatment_location <- rep("All", 116)
 
-all_scot_data <- cbind(all_scot_data, hbt, hb_name, treatment_location, department_type) 
+all_scot_data <- cbind(all_scot_data, hbt, hb_name, treatment_location) %>% 
+  rename(hbt = "...5") %>% 
+  rename(hb_name = "...6") %>% 
+  rename(treatment_location = "...7")
   
 a_and_e_data <- rbind(a_and_e_data, all_scot_data)
 
