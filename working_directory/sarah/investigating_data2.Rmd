@@ -79,9 +79,50 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
 ```{r}
 monthly_admissions_spec <- weekly_admissions_spec
 
+<<<<<<< Updated upstream
 monthly_admissions_spec
 
 ```
+=======
+monthly_admissions_spec <- monthly_admissions_spec %>% 
+  group_by(hb, admission_type, speciality, year, month) %>% 
+  mutate(monthly_admissions = mean(number_admissions, na.rm = TRUE)) %>% 
+  mutate(mdate = as.Date(make_datetime(year, month, 15))) 
+```
+
+```{r}
+weekly_admissions_spec %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=wdate, y = number_admissions) +
+geom_line(colour='red') 
+```
+check results
+
+```{r}
+monthly_admissions_spec%>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>% 
+ggplot() +
+aes(x=mdate, y = monthly_admissions) +
+geom_line(colour='red') 
+```
+```{r}
+monthly_admissions_spec %>% 
+filter(year == 2021) %>% 
+filter(month==8) %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") 
+```
+
+
+
+
+>>>>>>> Stashed changes
 
 
 ```{r}

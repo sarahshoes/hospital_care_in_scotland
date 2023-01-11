@@ -1,9 +1,11 @@
 library(shiny)
 
-
-
 ui <- fluidPage(
-  titlePanel("Dashboard Title"),
+  titlePanel("Dashboard Title",
+             selectInput(inputId = "dd_health_board",
+                         label = "Select Health Board",
+                         choices = health_board_list,
+                         selected = "All Scotland")),
   tabsetPanel(
     tabPanel("Summary",
               fluidRow(
