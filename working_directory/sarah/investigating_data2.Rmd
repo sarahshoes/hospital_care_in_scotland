@@ -14,10 +14,12 @@ revised version - now extracting all Scotland more easily.
 library("tidyverse")
 library("janitor")
 library("lubridate")
+library("skimr")
 ```
 
+#read in healthboard codes
 ```{r}
-hb_codes <- read_csv("health_board_codes.csv")
+hb_codes <- read_csv(here::here("lookup_tables/health_board_codes.csv"))
 hb_codes <- clean_names(hb_codes)
 ```
 
@@ -51,7 +53,15 @@ weekly_admissions_demog <- left_join(weekly_admissions_demog,hb_codes)
 weekly_admissions_dep <- left_join(weekly_admissions_dep,hb_codes) 
 ```
 
-do the analysis needed for identifying qinter and 'crisis'
+do the analysis needed for identifying winter and 'crisis'
+```{r}
+weekly_admissions_spec %>% 
+  distinct(hb_name)
+```
+```{r}
+skim(weekly_admissions_spec)
+```
+
 
 ```{r}
 weekly_admissions_spec <- weekly_admissions_spec %>% 
@@ -65,6 +75,31 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
   mutate(above_thresh = ifelse(percent_variation>0,7,0))
 ```
+
+```{r}
+monthly_admissions_spec <- weekly_admissions_spec
+
+monthly_admissions_spec
+
+```
+
+
+```{r}
+elec_rolling <- vic_elec %>% 
+  mutate(
+    temp_moving_avg = slide_dbl(
+      .x = Temperature, 
+      .f = ~ mean(., na.rm = TRUE),
+      .before = 1000,
+      .after = 1000
+    )
+  )
+
+elec_rolling
+```
+
+
+
 
 ```{r}
 weekly_admissions_demog <- weekly_admissions_demog %>% 
