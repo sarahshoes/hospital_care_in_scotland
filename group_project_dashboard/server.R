@@ -125,7 +125,11 @@ server <- function(input, output) {
       plotmapping <- aes(x = made_date, y = percentage_occupancy)
       plottitle <- ("Hospital bed occupancy")
       plotylabel <- ("% occupancy")
-      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel) +
+      geom_hline(yintercept = 85, colour = "#651C32", linetype = "dashed") + 
+      annotate(geom = "label", x = as.Date("2022-08-01"), y = 85, 
+                  label = "85% Risk Threshold", colour = "#651C32", fill = "white",
+                  alpha = 0.8)
       })
 
 # Length of stay (relative to 2018/19 avg)
