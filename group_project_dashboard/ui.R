@@ -24,12 +24,18 @@ ui <- fluidPage(
                                          ),
                       selectInput(inputId = "health_board",
                                   label = "Select Health Board",
-                                  choices = unique(waiting_times$hb_name)
+                                  choices = health_board_list,
                                   ),
                       plotOutput("a_and_e_waiting_times")
-                      
-
-                      ))
+                      ),
+               column(width = 6,
+                      checkboxGroupInput(inputId = "cc_age_group",
+                                         label = "Select Age Group",
+                                         choices = unique(covid_cases$age_band),
+                                         selected = "All ages (0plus)"),
+                     plotOutput("covid_cases")
+                      )
+               )
                ),
     
     
@@ -55,9 +61,9 @@ ui <- fluidPage(
                column(width = 6, 
                       selectInput(inputId = "hb_health_board", 
                                   label = "Select Health Board", 
-                                  choices = unique(health_boards$hb_names), 
-                                  selected = "NHS Scotland")
-                      plotOutput("beds"), 
+                                  choices = health_board_list, 
+                                  selected = "NHS Scotland"),
+                      plotOutput("beds") 
                       )
              )),
     
@@ -68,24 +74,38 @@ ui <- fluidPage(
 # Delayed Discharge             
              fluidRow(
                column(width = 6,
-                      checkboxGroupInput(inputId = "dd_reason_for_delay",
-                                         label = "Select Delay Reason",
-                                         choices = unique(delayed_discharge$reason_for_delay,
-                                                          selected = "All Delay Reasons")
-                      ),
                       checkboxGroupInput(inputId = "dd_age_group",
                                   label = "Select Age Group",
-                                  choices = unique(delayed_discharge$age_group,
+                                  choices = unique(delayed_discharge$age_group),
                                                    selected = "All (18plus)")
-                      ),
+                      ,
                       selectInput(inputId = "dd_health_board",
                                   label = "Select Health Board",
-                                  choices = unique(delayed_discharge$hb_name,
+                                  choices = health_board_list,
                                   selected = "All Scotland")
-                      ),
-                      plotOutput("discharge_delays")
-               ))
+                      ,
+
+                      plotOutput("discharge_delays_byage")
+               )
+               ,
+               column(width=6,
+                
+                checkboxGroupInput(inputId = "dd_reason_for_delay",
+                                   label = "Select Delay Reason",
+                                   choices = unique(delayed_discharge$reason_for_delay),
+                                   selected = "All Delay Reasons")
+                ,
+                selectInput(inputId = "dd_health_board",
+                            label = "Select Health Board",
+                            choices = health_board_list,
+                            selected = "All Scotland")
+                ,
+                plotOutput("discharge_delays_byreason")
+                )
+               )
              )
-  ) 
-)
+
+#end brackets for fluipage and tabsetpanel
+  )) 
+
 

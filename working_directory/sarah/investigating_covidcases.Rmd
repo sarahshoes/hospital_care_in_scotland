@@ -26,10 +26,11 @@ covid_cases <- clean_names(covid_cases)
 data cleaning
 ```{r}
 covid_cases <- covid_cases %>% 
- mutate(year = as.integer(str_sub(week_ending,1,4)), .after = week_ending) %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4)), .after = week_ending) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6)), .after  =year) %>% 
   mutate(day = as.integer(str_sub(week_ending,7,8)), .after = month) %>% 
   mutate(wdate = ymd(week_ending), .after = week_ending) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE), .after=month) %>%
   select(-week_ending) 
 ```
 
@@ -69,40 +70,51 @@ covid_cases <- covid_cases %>%
   mutate(age_band = ifelse(age_band == "Total", "All ages (0plus)", age_band)) %>% 
   mutate(admissions_qf = coalesce(" ")) %>% # so the next line works better
   mutate(admissions = ifelse(admissions_qf =="c",1,admissions)) %>% 
-  select(-ends_with("qf")) 
+  select(-ends_with("qf")) %>% 
+  #merge age_bands
+    mutate(age_band_new = case_when(
+    age_band == "All ages (0plus)" ~ "All ages (0plus)",  
+    age_band == "Under 18" ~ "Under 18",
+    age_band == "80+" ~ "75+",
+    age_band == "75-79" ~ "75+",
+    TRUE ~ "18-74",))
+```
+
+```{r}
+covid_cases <- covid_cases %>% 
+  group_by(wdate,age_band_new) %>% 
+  mutate(admissions_new = sum(admissions, na.rm = TRUE))
 ```
 
 ```{r}
 covid_cases %>% 
-  distinct(age_band)
-```
-
-
-```{r}
-covid_cases %>% 
-  filter(age_band != "All ages (0plus)") %>% 
+  #filter(age_band != "All ages (0plus)") %>% 
   ggplot() +
-  aes(x=wdate, y=admissions, colour = age_band)+
+  aes(x=wdate, y=admissions_new, colour = age_band_new)+
   geom_line()
 ```
 
 
-```{r}
-# setup data as a tsibble
-#covid_cases <- rowid_to_column(covid_cases, "id") 
-#covid_cases<- as_tsibble(covid_cases, index = wdate, key = id)  
-```
 
 
 can see that covid cases don't have a simple winter/summer pattern - much more complex particularly coming into 2021.
 
 ```{r}
 monthly_covid_cases <- covid_cases %>% 
-  filter(age_band != "All ages (0plus)") %>% 
-  group_by(age_band, year, month) %>% 
-  mutate(monthly_admissions = sum(admissions, na.rm = TRUE)) %>% 
+  filter(age_band_new != "All ages (0plus)") %>% 
+  group_by(age_band_new, year, month) %>% 
+  mutate(monthly_admissions = sum(admissions_new, na.rm = TRUE)) %>% 
   mutate(mdate = as.Date(make_datetime(year, month, 15))) 
 ```
+
+```{r}
+monthly_covid_cases %>% 
+  group_by(age_band_new) %>% 
+ggplot() +
+aes(x=mdate, y = monthly_admissions, colour = age_band_new) +
+geom_line() 
+```
+
 
 ```{r}
 monthly_covid_cases %>% 
@@ -115,14 +127,15 @@ geom_col()
 ```{r}
 covid_cases %>% 
   group_by(age_band) %>% 
- summarise(total = sum(admissions, na.rm = TRUE)) %>% 
- arrange(desc(total))
+  filter(age_band != "All ages (0plus)") %>% 
+  summarise(total = sum(admissions, na.rm = TRUE), sum(admissions, na.rm = TRUE)) %>% 
+  adorn_percentages(denominator = "all")
 ```
 
 boxplot for winter/summer
 ```{r}
 covid_cases %>%
- filter(age_band != "Total") %>%   
+filter(age_band != "All ages (0plus)") %>% 
  group_by(year, iswinter) %>% 
  ggplot()+
  aes(x=iswinter, y=admissions, fill = hb_name) +  

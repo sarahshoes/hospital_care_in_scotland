@@ -15,7 +15,10 @@ source(here::here("palette_theme/plot_timeseriesv2.R"))
 palette = read_csv(here::here("palette_theme/phs_palette.csv"))
 
 # HEALTH BOARD NAMES
-health_boards <- read_csv(here::here("lookup_tables/health_board_codes.csv")) 
+health_board_list <- read_csv(here::here("lookup_tables/health_board_codes.csv")) %>% 
+  janitor::clean_names() %>% 
+  distinct(hb_name) %>% 
+  pull()
 
 # A&E WAITING TIMES
 
@@ -31,6 +34,9 @@ waiting_times <- waiting_times %>%
 avg_2018_2019 <- waiting_times %>%  
   filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
   summarise(average_percent_meeting_target = mean(percent_meeting_target))
+
+# ADMISSION - COVID CASES 
+covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv")) 
 
 
 # TREATMENT WAITING TIMES
@@ -50,15 +56,10 @@ bed_occupancy <- read_csv(here::here("clean_data/bed_occupancy_clean.csv"))
 
 # HEALTH BOARD MAP
 
-# shapefile sourced from 
-# https://github.com/tomwhite/covid-19-uk-data/issues/18
+scot_hb_shapefile <- st_read(here::here("map_files/scotland_hb_shapefile_simplified/
+         scot_hb_shapefile_simplified.shp"))
 
-hb <- st_read(here::here("map_files/UK_covid_reporting_regions/UK_covid_reporting_regions.shp"))
+health_board_lat_lon <- read_csv(here::here("map_files/health_board_lat_lon.csv"))  
 
-health_boards <- c("Ayrshire and Arran", "Borders", "Dumfries and Galloway",
-                   "Fife", "Forth Valley", "Grampian", "Greater Glasgow and Clyde", 
-                   "Highland", "Lanarkshire", "Lothian", "Orkney", "Shetland",
-                   "Tayside", "Western Isles")
+fake_data <- read_csv(here::here("map_files/fake_health_board_data.csv")) 
 
-scottish_hb <- hb %>% 
-  filter(name %in% health_boards)
