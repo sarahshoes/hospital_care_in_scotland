@@ -74,18 +74,29 @@ server <- function(input, output) {
                     "% change relative to 2018/19") 
    })
    
-# Delayed Discharge      
-      output$discharge_delays <- renderPlot({
+# Delayed Discharge  by age    
+      output$discharge_delays_byage <- renderPlot({
       plotdata <- delayed_discharge %>% 
          filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
          filter(hb_name %in% input$dd_health_board) %>% 
          filter(age_group %in% input$dd_age_group)
-      plotmapping <- aes(x=mdate, y=percent_var) 
-      plottitle <- ("Number of delayed bed days - by xxx")
+      plotmapping <- aes(x=mdate, y=percent_var, colour = age_group) 
+      plottitle <- ("Number of delayed bed days - by age")
       plotylabel <- ("% change relative to 2018/19") 
-      timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })
-   
+      
+      # Delayed Discharge  by reason for delay   
+      output$discharge_delays_byreason <- renderPlot({
+        plotdata <- delayed_discharge %>% 
+          filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
+          filter(hb_name %in% input$dd_health_board) %>% 
+          filter(age_group == "All (18plus)")
+        plotmapping <- aes(x=mdate, y=percent_var, colour = reason_for_delay) 
+        plottitle <- ("Number of delayed bed days - by reason for delay")
+        plotylabel <- ("% change relative to 2018/19") 
+        timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      })
 
 # Bed occupancy
       output$beds <- renderPlot({
