@@ -51,6 +51,13 @@ ui <- fluidPage(
                       plotOutput("treatment_waiting_times"),
                       tags$a("Note: There are issues with NHS Tayside results caused by
                              missing data from 2017 and 2018.")
+                      ), 
+               column(width = 6, 
+                      selectInput(inputId = "hb_health_board", 
+                                  label = "Select Health Board", 
+                                  choices = unique(health_boards$hb_names), 
+                                  selected = "NHS Scotland")
+                      plotOutput("beds"), 
                       )
              )),
     

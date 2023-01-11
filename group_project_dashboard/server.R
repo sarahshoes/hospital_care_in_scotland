@@ -83,4 +83,12 @@ server <- function(input, output) {
    
 }
 
-
+# Bed occupancy
+      output$beds <- renderPlot({
+      plotdata <- bed_occupancy %>% 
+        filter(specialty_name == "All Acute")
+      plotmapping <- aes(x = made_date, y = percentage_occupancy)
+      plottitle <- ("Hospital bed occupancy")
+      plotylabel <- ("% occupancy")
+      timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
+      })
