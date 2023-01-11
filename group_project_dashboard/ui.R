@@ -24,12 +24,14 @@ ui <- fluidPage(
                                          ),
                       selectInput(inputId = "health_board",
                                   label = "Select Health Board",
-                                  choices = unique(waiting_times$hb_name)
+                                  choices = health_board_list,
                                   ),
                       plotOutput("a_and_e_waiting_times")
-                      
-
-                      ))
+                      ),
+               column(width = 6,
+                     plotOutput("covid_cases")
+                      )
+               )
                ),
     
     
@@ -55,11 +57,11 @@ ui <- fluidPage(
                column(width = 6, 
                       selectInput(inputId = "hb_health_board", 
                                   label = "Select Health Board", 
-                                  choices = health_board_list), 
+                                  choices = health_board_list, 
                                   selected = "NHS Scotland"),
                       plotOutput("beds") 
                       )
-             ),
+             )),
     
     
     
@@ -80,7 +82,7 @@ ui <- fluidPage(
                       ,
                       selectInput(inputId = "dd_health_board",
                                   label = "Select Health Board",
-                                  choices = unique(delayed_discharge$hb_name),
+                                  choices = health_board_list,
                                   selected = "All Scotland")
                       ,
                       plotOutput("discharge_delays")
