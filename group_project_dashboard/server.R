@@ -49,25 +49,21 @@ server <- function(input, output) {
      filter(month_ending >= "2018-01-01" & month_ending <= "2019-12-31") %>% 
      filter(hb_name == input$treat_wait_health_board) %>% 
      filter(patient_type == input$out_or_inpatient) %>% 
+#     filter(hb_name == "NHS Highland") %>% 
+#     filter(patient_type %in% c("New Outpatient, "Inpatient/Day case") %>%      
      group_by(month_ending) %>% 
-     summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE),
-               num_waiting_over12weeks_2018_2019_by_month = 
-                 sum(number_waiting_over12weeks, na.rm = TRUE)) %>% 
-     summarise(avg_num_waiting = mean(num_waiting_2018_2019_by_month),
-               avg_num_waiting_over12weeks = mean(num_waiting_over12weeks_2018_2019_by_month))   
+     summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE)) %>% 
+     summarise(avg_num_waiting = mean(num_waiting_2018_2019_by_month))   
    
    ongoing_waits %>% 
      filter(hb_name == input$treat_wait_health_board) %>% 
      filter(patient_type == input$out_or_inpatient) %>% 
+#     filter(hb_name == "NHS Highland") %>% 
+#     filter(patient_type == "Inpatient/Day case") %>%      
      group_by(month_ending) %>% 
-     mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE),
-            total_waiting_over12weeks_by_month = sum(number_waiting_over12weeks, 
-                                                     na.rm = TRUE)) %>% 
+     mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE)) %>% 
      mutate(percentage_var = (total_waiting_by_month - avg_2018_2019$avg_num_waiting)
-            / avg_2018_2019$avg_num_waiting * 100,
-            percentage_var_12w = (total_waiting_over12weeks_by_month - 
-                                    avg_2018_2019$avg_num_waiting_over12weeks) /
-              avg_2018_2019$avg_num_waiting_over12weeks * 100) %>% 
+            / avg_2018_2019$avg_num_waiting * 100) %>% 
      
      timeseriesplot(aes(month_ending, percentage_var), "Treatment Waiting Times", 
                     "% change relative to 2018/19") 

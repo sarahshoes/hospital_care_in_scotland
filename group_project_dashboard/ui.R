@@ -27,6 +27,8 @@ ui <- fluidPage(
                                   choices = unique(waiting_times$hb_name)
                                   ),
                       plotOutput("a_and_e_waiting_times")
+                      
+
                       ))
                ),
     
@@ -46,7 +48,9 @@ ui <- fluidPage(
                                   choices = unique(ongoing_waits$hb_name),
                                   selected = "NHS Scotland"
                                   ),
-                      plotOutput("treatment_waiting_times")
+                      plotOutput("treatment_waiting_times"),
+                      tags$a("Note: There are issues with NHS Tayside results caused by
+                             missing data from 2017 and 2018.")
                       )
              )),
     
