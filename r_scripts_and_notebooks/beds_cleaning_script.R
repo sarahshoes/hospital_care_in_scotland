@@ -6,7 +6,7 @@ library(lubridate)
 bed_occupancy <- read_csv("raw_data/Beds by board of treatment and specialty.csv") %>% 
   janitor::clean_names()
 
-health_boards <- read_csv("health_board_codes.csv") %>% 
+health_boards <- read_csv("lookup_tables/health_board_codes.csv") %>% 
   janitor::clean_names()
 
 # join to health board data
