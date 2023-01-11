@@ -95,11 +95,6 @@ ui <- fluidPage(
                                    choices = unique(delayed_discharge$reason_for_delay),
                                    selected = "All Delay Reasons")
                 ,
-                selectInput(inputId = "dd_health_board",
-                            label = "Select Health Board",
-                            choices = health_board_list,
-                            selected = "All Scotland")
-                ,
                 plotOutput("discharge_delays_byreason")
                 )
                )
