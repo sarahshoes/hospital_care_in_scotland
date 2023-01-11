@@ -90,7 +90,9 @@ ui <- fluidPage(
                                   selected = "All Scotland")
                       ,
                       plotOutput("discharge_delays")
-               ))
+               ),
+               (column_width=6)
+               )
              )
   )) 
 
