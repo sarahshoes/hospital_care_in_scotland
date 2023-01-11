@@ -12,7 +12,7 @@ library(lubridate)
 ### BEDS
 
 ```{r, include=FALSE}
-beds_qtrly <- read_csv("Beds by board of treatment and specialty.csv") %>% 
+bed_occupancy <- read_csv("Beds by board of treatment and specialty.csv") %>% 
   janitor::clean_names()
 ```
 
@@ -20,11 +20,11 @@ beds_qtrly <- read_csv("Beds by board of treatment and specialty.csv") %>%
 health_boards <- read_csv("health_board_codes.csv") %>% 
   janitor::clean_names()
 
-beds_qtrly <- left_join(beds_qtrly, health_boards, by = "hb")
+bed_occupancy <- left_join(bed_occupancy, health_boards, by = "hb")
 ```
 
 ```{r}
-beds_qtrly <- beds_qtrly %>% 
+bed_occupancy <- bed_occupancy %>% 
   mutate(year = str_sub(quarter, start = 1, end = 4), .after = quarter) %>% 
   mutate(month_num = case_when(
     str_sub(quarter, start = 5, end = 6) == "Q1" ~ 3, 
@@ -38,14 +38,14 @@ beds_qtrly <- beds_qtrly %>%
 
 ```{r}
 # bed occupancy plot
-beds_qtrly %>% 
+bed_occupancy %>% 
   filter(hb == "S92000003") %>% # Scotland HB
   filter(specialty_name == "All Acute") %>% 
   ggplot() +
   aes(x = made_date, y = percentage_occupancy) +
   geom_line() +
   geom_hline(yintercept = 85, colour = "red") +
-  annotate("text", min(beds_qtrly$made_date), 85, vjust = + 2, hjust = 0, 
+  annotate("text", min(bed_occupancy$made_date), 85, vjust = + 2, hjust = 0, 
            label = "85% risk threshold", colour = "red") +
   labs(
     x = "", 
@@ -114,7 +114,7 @@ stay_length_summ %>%
   aes(x = made_date, y = pcent_change_to_pre_pan_avg, 
       group = admission_type, colour = admission_type) +
   geom_line() +
-  scale_y_continuous(limits = c(NA, 15)) +
+  scale_y_continuous(limits = c(NA, 20)) +
   labs(
     x = "", 
     y = "% change relative to 2018/19\n", 

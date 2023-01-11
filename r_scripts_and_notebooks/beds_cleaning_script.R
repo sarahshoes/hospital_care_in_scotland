@@ -6,7 +6,11 @@ library(lubridate)
 bed_occupancy <- read_csv("raw_data/Beds by board of treatment and specialty.csv") %>% 
   janitor::clean_names()
 
-# bed_occupancy <- left_join(bed_occupancy, scottish_hb, by = c("hb" = "code"))
+health_boards <- read_csv("health_board_codes.csv") %>% 
+  janitor::clean_names()
+
+# join to health board data
+bed_occupancy <- left_join(bed_occupancy, health_boards, by = "hb")
 
 # create date
 bed_occupancy <- bed_occupancy %>% 
