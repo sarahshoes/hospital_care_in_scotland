@@ -4,9 +4,10 @@ output: html_notebook
 ---
 
 ```{r}
+library(tidyverse)
 library(sf)
 map_scot <- st_read("SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp")
-tx_ll <- st_transform(map_scot, "+proj=longlat +ellps=WGS84 +datum=WGS84")
+#tx_ll <- st_transform(map_scot, "+proj=longlat +ellps=WGS84 +datum=WGS84")
 
 ggplot(map_scot) +
  geom_sf() +

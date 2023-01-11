@@ -1682,17 +1682,23 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+content: "";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "\e258";
-font-family: 'Glyphicons Halflings';
+content: "";
 border: none;
+}
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "";
+font-family: 'Glyphicons Halflings';
+display: inline-block;
+padding: 10px;
+border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -1754,18 +1760,24 @@ display: none;
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShzZilcbm1hcF9zY290IDwtIHN0X3JlYWQoXCJTR19OSFNfSGVhbHRoQm9hcmRzXzIwMTkvU0dfTkhTX0hlYWx0aEJvYXJkc18yMDE5LnNocFwiKVxudHhfbGwgPC0gc3RfdHJhbnNmb3JtKG1hcF9zY290LCBcIitwcm9qPWxvbmdsYXQgK2VsbHBzPVdHUzg0ICtkYXR1bT1XR1M4NFwiKVxuXG5nZ3Bsb3QobWFwX3Njb3QpICtcbiBnZW9tX3NmKCkgK1xuIHN0YXRfc2ZfY29vcmRpbmF0ZXMoZ2VvbSA9IFwicG9pbnRcIiwgY29sb3IgPSBcInJlZFwiKSArXG4gZ2VvbV9zZl90ZXh0KGFlcyhsYWJlbCA9IEhCTmFtZSksIHNpemUgPSAzLCBudWRnZV94ID0gNjAwLCBjb2xvdXIgPSBcImJsYWNrXCIsY2hlY2tfb3ZlcmxhcCA9IFRSVUUpICtcbiBzY2FsZV9maWxsX2Rpc3RpbGxlcihwYWxldHRlID0gXCJHbkJ1XCIsIHR5cGUgPSBcInNlcVwiKSArXG4gdGhlbWVfdm9pZCgpXG5gYGAifQ== -->
-<pre class="r"><code>library(sf)
-map_scot &lt;- st_read(&quot;SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp&quot;)
-tx_ll &lt;- st_transform(map_scot, &quot;+proj=longlat +ellps=WGS84 +datum=WGS84&quot;)
-
-ggplot(map_scot) +
- geom_sf() +
- stat_sf_coordinates(geom = &quot;point&quot;, color = &quot;red&quot;) +
- geom_sf_text(aes(label = HBName), size = 3, nudge_x = 600, colour = &quot;black&quot;,check_overlap = TRUE) +
- scale_fill_distiller(palette = &quot;GnBu&quot;, type = &quot;seq&quot;) +
- theme_void()</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5cbmBgYCJ9 -->
+<pre class="r"><code>library(tidyverse)
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2RzIG92ZXJ3cml0dGVuIGJ5ICdkYnBseXInOlxuICBtZXRob2QgICAgICAgICBmcm9tXG4gIHByaW50LnRibF9sYXp5ICAgICBcbiAgcHJpbnQudGJsX3NxbCAgICAgIFxu4pSA4pSAIEF0dGFjaGluZyBwYWNrYWdlcyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgdGlkeXZlcnNlIDEuMy4xIOKUgOKUgFxu4pyUIGdncGxvdDIgMy40LjAgICAgIOKclCBwdXJyciAgIDAuMy40XG7inJQgdGliYmxlICAzLjEuOCAgICAg4pyUIGRwbHlyICAgMS4wLjlcbuKclCB0aWR5ciAgIDEuMi4wICAgICDinJQgc3RyaW5nciAxLjQuMFxu4pyUIHJlYWRyICAgMi4xLjIgICAgIOKclCBmb3JjYXRzIDAuNS4xXG7ilIDilIAgQ29uZmxpY3RzIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgCB0aWR5dmVyc2VfY29uZmxpY3RzKCkg4pSA4pSAXG7inJYgZHBseXI6OmZpbHRlcigpIG1hc2tzIHN0YXRzOjpmaWx0ZXIoKVxu4pyWIGRwbHlyOjpsYWcoKSAgICBtYXNrcyBzdGF0czo6bGFnKClcbiJ9 -->
+<pre><code>Registered S3 methods overwritten by &#39;dbplyr&#39;:
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+── Attaching packages ──────────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.4.0     ✔ purrr   0.3.4
+✔ tibble  3.1.8     ✔ dplyr   1.0.9
+✔ tidyr   1.2.0     ✔ stringr 1.4.0
+✔ readr   2.1.2     ✔ forcats 0.5.1
+── Conflicts ─────────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>reminder for myself of of how I plotted long lat onto map before…</p>
@@ -1775,7 +1787,7 @@ c(-74.052,-74.03,-74.03,-74.052,-74.052)) stations_stf &lt;- st_stations
 %&gt;% st_as_sf(coords = c(“long”,“lat”), crs = 4326)</p>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkoc2YpCm1hcF9zY290IDwtIHN0X3JlYWQoIlNHX05IU19IZWFsdGhCb2FyZHNfMjAxOS9TR19OSFNfSGVhbHRoQm9hcmRzXzIwMTkuc2hwIikKdHhfbGwgPC0gc3RfdHJhbnNmb3JtKG1hcF9zY290LCAiK3Byb2o9bG9uZ2xhdCArZWxscHM9V0dTODQgK2RhdHVtPVdHUzg0IikKCmdncGxvdChtYXBfc2NvdCkgKwogZ2VvbV9zZigpICsKIHN0YXRfc2ZfY29vcmRpbmF0ZXMoZ2VvbSA9ICJwb2ludCIsIGNvbG9yID0gInJlZCIpICsKIGdlb21fc2ZfdGV4dChhZXMobGFiZWwgPSBIQk5hbWUpLCBzaXplID0gMywgbnVkZ2VfeCA9IDYwMCwgY29sb3VyID0gImJsYWNrIixjaGVja19vdmVybGFwID0gVFJVRSkgKwogc2NhbGVfZmlsbF9kaXN0aWxsZXIocGFsZXR0ZSA9ICJHbkJ1IiwgdHlwZSA9ICJzZXEiKSArCiB0aGVtZV92b2lkKCkKYGBgCgoKcmVtaW5kZXIgZm9yIG15c2VsZiBvZiBvZiBob3cgSSBwbG90dGVkIGxvbmcgbGF0IG9udG8gbWFwIGJlZm9yZS4uLgoKc3Rfc3RhdGlvbnMgPC0gZGF0YS5mcmFtZShsYXQgPSBjKDQwLjczLDQwLjczLDQwLjcwOSw0MC43MDksNDAuNzMpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbG9uZyA9IGMoLTc0LjA1MiwtNzQuMDMsLTc0LjAzLC03NC4wNTIsLTc0LjA1MikpCnN0YXRpb25zX3N0ZiA8LSBzdF9zdGF0aW9ucyAlPiUgCiAgc3RfYXNfc2YoY29vcmRzID0gYygibG9uZyIsImxhdCIpLCBjcnMgPSA0MzI2KSAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKYGBge3J9CmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHNmKQptYXBfc2NvdCA8LSBzdF9yZWFkKCJTR19OSFNfSGVhbHRoQm9hcmRzXzIwMTkvU0dfTkhTX0hlYWx0aEJvYXJkc18yMDE5LnNocCIpCiN0eF9sbCA8LSBzdF90cmFuc2Zvcm0obWFwX3Njb3QsICIrcHJvaj1sb25nbGF0ICtlbGxwcz1XR1M4NCArZGF0dW09V0dTODQiKQoKZ2dwbG90KG1hcF9zY290KSArCiBnZW9tX3NmKCkgKwogc3RhdF9zZl9jb29yZGluYXRlcyhnZW9tID0gInBvaW50IiwgY29sb3IgPSAicmVkIikgKwogZ2VvbV9zZl90ZXh0KGFlcyhsYWJlbCA9IEhCTmFtZSksIHNpemUgPSAzLCBudWRnZV94ID0gNjAwLCBjb2xvdXIgPSAiYmxhY2siLGNoZWNrX292ZXJsYXAgPSBUUlVFKSArCiBzY2FsZV9maWxsX2Rpc3RpbGxlcihwYWxldHRlID0gIkduQnUiLCB0eXBlID0gInNlcSIpICsKIHRoZW1lX3ZvaWQoKQpgYGAKCgpyZW1pbmRlciBmb3IgbXlzZWxmIG9mIG9mIGhvdyBJIHBsb3R0ZWQgbG9uZyBsYXQgb250byBtYXAgYmVmb3JlLi4uCgpzdF9zdGF0aW9ucyA8LSBkYXRhLmZyYW1lKGxhdCA9IGMoNDAuNzMsNDAuNzMsNDAuNzA5LDQwLjcwOSw0MC43MyksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBsb25nID0gYygtNzQuMDUyLC03NC4wMywtNzQuMDMsLTc0LjA1MiwtNzQuMDUyKSkKc3RhdGlvbnNfc3RmIDwtIHN0X3N0YXRpb25zICU+JSAKICBzdF9hc19zZihjb29yZHMgPSBjKCJsb25nIiwibGF0IiksIGNycyA9IDQzMjYpIAoK</div>
 
 
 
