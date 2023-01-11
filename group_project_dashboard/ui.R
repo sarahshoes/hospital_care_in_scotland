@@ -8,6 +8,14 @@ ui <- fluidPage(
                column(4,
                       leafletOutput("map")
                )
+               ),
+             fluidRow(
+               column(4, 
+                      selectInput(inputId = "map_data_to_display",
+                                  label = "Select Data to Display",
+                                  choices = unique(fake_data$fake_situation),
+                                  selected = "fake beds")
+                      )
              )
     ),
     tabPanel("Admissions",

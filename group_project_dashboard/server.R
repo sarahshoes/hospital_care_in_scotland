@@ -4,6 +4,9 @@ library(shiny)
 server <- function(input, output) {
 
    output$map <- renderLeaflet({
+
+fake_data_to_map <- fake_data %>% 
+       filter(fake_situation == input$map_data_to_display)
      
      leaflet(scot_hb_shapefile) %>% 
 # addTiles adds scotland map from OpenStreetMap  
@@ -14,7 +17,7 @@ server <- function(input, output) {
       fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2) %>% 
        addCircleMarkers(lng = health_board_lat_lon$Longitude, 
                         lat = health_board_lat_lon$Latitude,
-                        radius = fake_data$Situation,
+                        radius = fake_data_to_map$fake_number,
                         color = "purple",
                         weight = 3,
                         opacity = 0.8,
