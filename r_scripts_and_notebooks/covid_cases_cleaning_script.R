@@ -1,4 +1,4 @@
-#script for covid_cases
+#script for cleaning data on admssions with covid
 
 # data info https://www.isdscotland.org/health-topics/health-and-social-community-care/delayed-discharges/guidelines/docs/Background-of-delayed-discharge-information-and-glossary-of-terms.pdf
 # data source

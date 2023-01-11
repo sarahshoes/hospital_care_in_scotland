@@ -12,7 +12,7 @@ library("tsibble")
 library("tsibbledata")
 
 #read in healthboard codes
-hb_codes <- read_csv(here::here("downloaded_data/health_board_codes.csv"))
+hb_codes <- read_csv(here::here("lookup_tables/health_board_codes.csv"))
 hb_codes <- clean_names(hb_codes)
 
 #load in datafiles
