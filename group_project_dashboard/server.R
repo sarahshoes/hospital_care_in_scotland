@@ -39,9 +39,9 @@ server <- function(input, output) {
        summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
        
        timeseriesplot(aes(date, percent_meeting_target_by_month),
-                      "Percentage of Attendances Meeting 4 Hour Target", 
+                      "A&E - Percentage of Attendances Meeting 
+                      4 Hour Target", 
                       "% Meeting 4 Hour Target") +
-       labs(subtitle = "Data Averaged By Month") +
        geom_hline(yintercept = 95, colour = "#964091", linetype = "dashed") + 
        geom_hline(yintercept = avg_2018_2019$avg_percent_meeting_target, 
                   colour = "#86BC25", linetype = "dashed") +
@@ -71,24 +71,25 @@ server <- function(input, output) {
    avg_2018_2019 <- ongoing_waits %>% 
      filter(month_ending >= "2018-01-01" & month_ending <= "2019-12-31") %>% 
      filter(hb_name == input$treat_wait_health_board) %>% 
-     filter(patient_type == input$out_or_inpatient) %>% 
+     filter(patient_type %in% input$out_or_inpatient) %>% 
 #     filter(hb_name == "NHS Highland") %>% 
-#     filter(patient_type %in% c("New Outpatient, "Inpatient/Day case") %>%      
+#    filter(patient_type %in% c("New Outpatient", "Inpatient/Day case")) %>%      
      group_by(month_ending) %>% 
      summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE)) %>% 
      summarise(avg_num_waiting = mean(num_waiting_2018_2019_by_month))   
    
    ongoing_waits %>% 
      filter(hb_name == input$treat_wait_health_board) %>% 
-     filter(patient_type == input$out_or_inpatient) %>% 
+     filter(patient_type %in% input$out_or_inpatient) %>% 
 #     filter(hb_name == "NHS Highland") %>% 
-#     filter(patient_type %in% c("New Outpatient, "Inpatient/Day case") %>%    
+#     filter(patient_type %in% c("New Outpatient", "Inpatient/Day case")) %>%    
      group_by(month_ending) %>% 
      mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE)) %>% 
      mutate(percentage_var = (total_waiting_by_month - avg_2018_2019$avg_num_waiting)
             / avg_2018_2019$avg_num_waiting * 100) %>% 
      
-     timeseriesplot(aes(month_ending, percentage_var), "Treatment Waiting Times", 
+     timeseriesplot(aes(month_ending, percentage_var, colour = patient_type), 
+                    "Treatment Waiting Times", 
                     "% change relative to 2018/19") 
    })
    
