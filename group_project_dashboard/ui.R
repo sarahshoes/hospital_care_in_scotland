@@ -25,6 +25,7 @@ ui <- fluidPage(
                       selectInput(inputId = "health_board",
                                   label = "Select Health Board",
                                   choices = health_board_list,
+                                  selected = "All Scotland"
                                   ),
                       plotOutput("a_and_e_waiting_times")
                       ),
