@@ -68,18 +68,21 @@ ui <- fluidPage(
              ), 
              fluidRow(
                column(width = 6,
+                      selectInput(inputId = "stay_admission_health_board", 
+                                  label = "Select Health Board", 
+                                  choices = health_board_list, 
+                                  selected = "All Scotland"), 
+                      plotOutput("stay_admission")
+               ), 
+               column(width = 6, 
                       selectInput(inputId = "stay_change_health_board", 
                                   label = "Select Health Board", 
                                   choices = health_board_list, 
                                   selected = "All Scotland"), 
                       plotOutput("stay_change")
-               ), 
-               column(width = 6, 
-                      selectInput(inputId = "stay_admission_health_board", 
-                                  label = "Select Health Board", 
-                                  choices = health_board_list, 
-                                  selected = "All Scotland"), 
-                      plotOutput("stay_admission"))
+               )
+               
+               
              )
     ),
     
@@ -119,7 +122,7 @@ ui <- fluidPage(
              )
     )
     
-    #end brackets for fluipage and tabsetpanel
+    #end brackets for fluidpage and tabsetpanel
   )) 
 
 

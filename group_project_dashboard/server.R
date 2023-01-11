@@ -131,7 +131,7 @@ server <- function(input, output) {
          mutate(pcent_change_to_pre_pan_avg = (avg_stay - pre_pan_avg) / pre_pan_avg * 100)
       plotmapping <- aes(x = made_date, y = pcent_change_to_pre_pan_avg, 
                          group = admission_type, colour = admission_type)
-      plottitle <- ("Length of hospital stay (admission type)")
+      plottitle <- ("Change in length of hospital stay (compared to 2018/19)")
       plotylabel <- ("% change relative to 2018/19")
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
       })
@@ -144,7 +144,7 @@ server <- function(input, output) {
          group_by(year, month_num, made_date, admission_type) %>% 
          summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
       plotmapping <- aes(x = made_date, y = avg_stay, group = admission_type, colour = admission_type)
-      plottitle <- ("Average length of hospital stay (admission type)")
+      plottitle <- ("Average length of hospital stay")
       plotylabel <- ("days")
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
       })
