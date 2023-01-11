@@ -79,11 +79,6 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
 ```{r}
 monthly_admissions_spec <- weekly_admissions_spec
 
-<<<<<<< Updated upstream
-monthly_admissions_spec
-
-```
-=======
 monthly_admissions_spec <- monthly_admissions_spec %>% 
   group_by(hb, admission_type, speciality, year, month) %>% 
   mutate(monthly_admissions = mean(number_admissions, na.rm = TRUE)) %>% 
