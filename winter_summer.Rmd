@@ -1,0 +1,37 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(infer)
+```
+
+## define functions
+source(here::here("r_scripts_and_notebooks/fun_smoother.R"))
+source(here::here("r_scripts_and_notebooks/ws_null_hypothesis.R"))
+
+## note that data must just be one timeries
+## date must be date format either weekly or monthly
+
+## load data here
+delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv"))  
+
+## start here ##
+seldata -> delayed_discharge %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") 
+
+data -> seldata%admissions 
+date -> seldata$wdate
+indicator -> "weekly"
+
+## call function to smooth data
+smoothed_data <- function(date,data,indicator)
+
+## plot data
+smoothed_data %>% 
+  ggplot() +
+    aes(x=date, y = data) +
+    geom_line(colour='red') 

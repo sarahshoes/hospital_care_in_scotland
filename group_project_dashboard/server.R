@@ -54,7 +54,7 @@ server <- function(input, output) {
                 alpha = 0.8)
    })
    
-   # Covid Cases
+# Covid Cases
    output$covid_cases <- renderPlot({
       plotdata <- covid_cases %>% 
          filter(age_band %in% input$cc_age_group)
@@ -63,7 +63,6 @@ server <- function(input, output) {
       plotylabel <- ("Number of admissions") 
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })
-   
    
 # Treatment Waiting Times
    
