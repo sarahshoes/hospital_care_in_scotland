@@ -1,11 +1,7 @@
 library(shiny)
 
 ui <- fluidPage(
-  titlePanel("Dashboard Title",
-             selectInput(inputId = "dd_health_board",
-                         label = "Select Health Board",
-                         choices = health_board_list,
-                         selected = "All Scotland")),
+  titlePanel("Dashboard Title"),
   tabsetPanel(
     tabPanel("Summary",
              fluidRow(
@@ -89,38 +85,41 @@ ui <- fluidPage(
              )
     ),
     
-    
     tabPanel("Discharge",
              # Delayed Discharge             
              fluidRow(
+                 column(width = 4,
+                        checkboxGroupInput(inputId = "dd_age_group",
+                                           label = "Select Age Group",
+                                           choices = unique(delayed_discharge$age_group),
+                                           selected = "All (18plus)")
+                        )
+                 ,
+                 column(width = 4,                      
+                        selectInput(inputId = "dd_health_board",
+                                    label = "Select Health Board",
+                                    choices = health_board_list,
+                                    selected = "All Scotland"))
+                 ,
+                 column(width = 4,
+                        checkboxGroupInput(inputId = "dd_reason_for_delay",
+                                           label = "Select Delay Reason",
+                                           choices = unique(delayed_discharge$reason_for_delay),
+                                           selected = "All Delay Reasons")        
+                )
+                ),
+             fluidRow(
                column(width = 6,
-                      checkboxGroupInput(inputId = "dd_age_group",
-                                         label = "Select Age Group",
-                                         choices = unique(delayed_discharge$age_group),
-                                         selected = "All (18plus)")
-                      ,
-                      selectInput(inputId = "dd_health_board",
-                                  label = "Select Health Board",
-                                  choices = health_board_list,
-                                  selected = "All Scotland")
-                      ,
-                      
                       plotOutput("discharge_delays_byage")
-               )
-               ,
+               ),
                column(width=6,
-
-                checkboxGroupInput(inputId = "dd_reason_for_delay",
-                                   label = "Select Delay Reason",
-                                   choices = unique(delayed_discharge$reason_for_delay),
-                                   selected = "All Delay Reasons")
-                ,
-                plotOutput("discharge_delays_byreason")
+                      plotOutput("discharge_delays_byreason")
                )
              )
     )
     
     #end brackets for fluidpage and tabsetpanel
-  )) 
+  )
+  ) 
 
 
