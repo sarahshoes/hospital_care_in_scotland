@@ -12,7 +12,6 @@ library("lubridate")
 covid_cases <- read_csv(here::here("raw_data/admissions_ageband_week.csv"))
 covid_cases <- clean_names(covid_cases)
 
-
 # data cleaning
 covid_cases <- covid_cases %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4)), .after = week_ending) %>% 
@@ -20,7 +19,7 @@ covid_cases <- covid_cases %>%
   mutate(day = as.integer(str_sub(week_ending,7,8)), .after = month) %>% 
   mutate(wdate = ymd(week_ending), .after = week_ending) %>% 
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE), .after=day) %>%
-  select(-week_ending) 
+  select(-week_ending) %>% 
 
   #tidying paramenter names  
   rename(hb = country) %>% 
@@ -36,33 +35,31 @@ covid_cases <- covid_cases %>%
     age_band == "Under 18" ~ "Under 18",
     age_band == "80+" ~ "75+",
     age_band == "75-79" ~ "75+",
-    TRUE ~ "18-74",))
+    TRUE ~ "18-74",)) %>% 
 
   #drop data we dont need
   select(-starts_with("admissions")) %>% 
   select(-starts_with("age_band")) %>% 
     
  
-  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
-  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>%
-  mutate(age_group = ifelse(age_group=="18plus","All (18plus)",age_group)) %>%   
-  relocate(hb_name, .after = hb)
-
-#calculate 2018-2019 levels
-pre_pandemic_avg <- delayed_discharge %>% 
+  #calculate 2018-2019 levels
+  pre_pandemic_avg <- covid_cases %>% 
   filter(between(year,2018,2019)) %>% 
-  group_by(hb,age_group,reason_for_delay) %>% 
-  summarise(avg_20182019 =  mean(number_of_delayed_bed_days)) 
+  group_by(hb,age_band,reason_for_delay) %>% 
+  summarise(avg_20182019 =  mean(admissions)) 
 
-#merge this column back into all data
-delayed_discharge <- left_join(delayed_discharge,pre_pandemic_avg) 
+  #merge this column back into all data
+  covid_cases <- left_join(covid_cases,pre_pandemic_avg) 
 
-#calculate percent variation
-delayed_discharge <- delayed_discharge %>% 
+  #calculate percent variation
+  delayed_discharge <- delayed_discharge %>% 
   mutate(percent_var = 100*(number_of_delayed_bed_days-avg_20182019)/avg_20182019)
 
-# setup data as a tsibble
-delayed_discharge <- as_tsibble(delayed_discharge, key = id, index = mdate) 
+  # setup data as a tsibble
+  #covid_cases <- rowid_to_column(covid_cases, "id") 
+  #covid_cases<- as_tsibble(covid_cases, index = wdate, key = id)  
 
-#write out data file
-write_csv(delayed_discharge, "clean_data/delayed_discharge_clean.csv")
+  #write out data file
+  write_csv(covid_cases, "clean_data/covid_cases_clean.csv")
+
+  
