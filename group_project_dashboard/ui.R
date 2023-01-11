@@ -29,6 +29,10 @@ ui <- fluidPage(
                       plotOutput("a_and_e_waiting_times")
                       ),
                column(width = 6,
+                      checkboxGroupInput(inputId = "cc_age_group",
+                                         label = "Select Age Group",
+                                         choices = unique(covid_cases$age_band),
+                                         selected = "All ages (0plus)"),
                      plotOutput("covid_cases")
                       )
                )

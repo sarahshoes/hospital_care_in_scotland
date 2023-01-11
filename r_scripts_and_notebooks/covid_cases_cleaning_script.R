@@ -37,29 +37,33 @@ covid_cases <- covid_cases %>%
     age_band == "75-79" ~ "75+",
     TRUE ~ "18-74",)) %>% 
 
+  group_by(wdate,age_band_new) %>% 
+  mutate(admissions_new = sum(admissions, na.rm = TRUE)) %>% 
+
   #drop data we dont need
-  select(-starts_with("admissions")) %>% 
-  select(-starts_with("age_band")) %>% 
-    
+  select(-admissions) %>% 
+  select(-age_band) %>% 
+  rename(admissions = admissions_new) %>%   
+  rename(age_band = age_band_new)    
  
   #calculate 2018-2019 levels
   pre_pandemic_avg <- covid_cases %>% 
   filter(between(year,2018,2019)) %>% 
-  group_by(hb,age_band,reason_for_delay) %>% 
+  group_by(hb,age_band) %>% 
   summarise(avg_20182019 =  mean(admissions)) 
 
   #merge this column back into all data
   covid_cases <- left_join(covid_cases,pre_pandemic_avg) 
 
   #calculate percent variation
-  delayed_discharge <- delayed_discharge %>% 
-  mutate(percent_var = 100*(number_of_delayed_bed_days-avg_20182019)/avg_20182019)
+  covid_cases <-covid_cases %>% 
+  mutate(percent_var = 100*(admissions-avg_20182019)/avg_20182019)
 
   # setup data as a tsibble
   #covid_cases <- rowid_to_column(covid_cases, "id") 
   #covid_cases<- as_tsibble(covid_cases, index = wdate, key = id)  
 
   #write out data file
-  write_csv(covid_cases, "clean_data/covid_cases_clean.csv")
+  write_csv(covid_cases,here::here("clean_data/covid_cases_clean.csv"))
 
   

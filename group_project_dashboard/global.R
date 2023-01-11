@@ -35,6 +35,9 @@ avg_2018_2019 <- waiting_times %>%
   filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
   summarise(average_percent_meeting_target = mean(percent_meeting_target))
 
+# ADMISSION - COVID CASES 
+covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv")) 
+
 
 # TREATMENT WAITING TIMES
 

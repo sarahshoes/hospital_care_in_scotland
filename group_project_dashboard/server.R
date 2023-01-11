@@ -41,7 +41,18 @@ server <- function(input, output) {
        annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
                 label = "2018/2019 Average", colour = "blue")
    })
-
+   
+   # Covid Cases
+   output$covid_cases <- renderPlot({
+      plotdata <- covid_cases %>% 
+         filter(age_band %in% input$cc_age_group)
+      plotmapping <- aes(x=wdate, y=admissions, colour =age_band) 
+      plottitle <- ("Number of Covid Cases Admitted to Hospital - by age")
+      plotylabel <- ("% change relative to 2018/19") 
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+   })
+   
+   
 # Treatment Waiting Times
    
    output$treatment_waiting_times <- renderPlot({
