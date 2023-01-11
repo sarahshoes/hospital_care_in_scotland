@@ -3,9 +3,9 @@ library(tidyverse)
 library(leaflet)
 
 
-scot_hb_shapfile <- st_read(here::here("map_files/SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp"))
+scot_hb_shapefile <- st_read(here::here("map_files/SG_NHS_HealthBoards_2019/SG_NHS_HealthBoards_2019.shp"))
 
-scot_hb_shapfile <- st_transform(scot_hb_shapfile, "+proj=longlat +ellps=WGS84 +datum=WGS84")
+scot_hb_shapefile <- st_transform(scot_hb_shapfile, "+proj=longlat +ellps=WGS84 +datum=WGS84")
 
 simple_scot_hb_shapefile <- rmapshaper::ms_simplify(input = scot_hb_shapfile,
                                            keep = 0.001,
