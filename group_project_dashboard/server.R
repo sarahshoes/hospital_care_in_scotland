@@ -5,17 +5,22 @@ server <- function(input, output) {
 
    output$map <- renderLeaflet({
      
-     leaflet(scottish_hb) %>% 
+     leaflet(scot_hb_shapefile) %>% 
 # addTiles adds scotland map from OpenStreetMap  
        addTiles() %>% 
 # addPolygons adds health board shape from shapefile
        addPolygons(color = "black", weight = 1) %>% 
 # fit scotland onto map using fitBounds once we know the dimensions of the map
-      fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2)
+      fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2) %>% 
+       addCircleMarkers(lng = health_board_lat_lon$Longitude, 
+                        lat = health_board_lat_lon$Latitude,
+                        radius = fake_data$Situation,
+                        color = "purple",
+                        weight = 3,
+                        opacity = 0.8,
+                        label = health_board_lat_lon$HBName)
    }) 
 
-# add names of health boards with addLabelOnlyMarkers but need to calculate
-# centroid data with lat and lon values and make new dataframe
   
 # A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
@@ -81,17 +86,28 @@ server <- function(input, output) {
    })
    
 # Delayed Discharge  by age    
-      output$discharge_delays <- renderPlot({
+      output$discharge_delays_byage <- renderPlot({
       plotdata <- delayed_discharge %>% 
          filter(reason_for_delay == "All Delay Reasons") %>% 
          filter(hb_name %in% input$dd_health_board) %>% 
          filter(age_group %in% input$dd_age_group)
-      plotmapping <- aes(x=mdate, y=percent_var) 
-      plottitle <- ("Number of delayed bed days - by delay reason")
+      plotmapping <- aes(x=mdate, y=percent_var, colour = age_group) 
+      plottitle <- ("Number of delayed bed days - by age")
       plotylabel <- ("% change relative to 2018/19") 
-      timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })
-   
+      
+      # Delayed Discharge  by reason for delay   
+      output$discharge_delays_byreason <- renderPlot({
+        plotdata <- delayed_discharge %>% 
+          filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
+          filter(hb_name %in% input$dd_health_board) %>% 
+          filter(age_group == "All (18plus)")
+        plotmapping <- aes(x=mdate, y=percent_var, colour = reason_for_delay) 
+        plottitle <- ("Number of delayed bed days - by reason for delay")
+        plotylabel <- ("% change relative to 2018/19") 
+        timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      })
 
 # Bed occupancy
       output$beds <- renderPlot({

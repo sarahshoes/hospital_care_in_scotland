@@ -56,15 +56,10 @@ bed_occupancy <- read_csv(here::here("clean_data/bed_occupancy_clean.csv"))
 
 # HEALTH BOARD MAP
 
-# shapefile sourced from 
-# https://github.com/tomwhite/covid-19-uk-data/issues/18
+scot_hb_shapefile <- st_read(here::here("map_files/scotland_hb_shapefile_simplified/
+         scot_hb_shapefile_simplified.shp"))
 
-hb <- st_read(here::here("map_files/UK_covid_reporting_regions/UK_covid_reporting_regions.shp"))
+health_board_lat_lon <- read_csv(here::here("map_files/health_board_lat_lon.csv"))  
 
-health_boards <- c("Ayrshire and Arran", "Borders", "Dumfries and Galloway",
-                   "Fife", "Forth Valley", "Grampian", "Greater Glasgow and Clyde", 
-                   "Highland", "Lanarkshire", "Lothian", "Orkney", "Shetland",
-                   "Tayside", "Western Isles")
+fake_data <- read_csv(here::here("map_files/fake_health_board_data.csv")) 
 
-scottish_hb <- hb %>% 
-  filter(name %in% health_boards)
