@@ -48,7 +48,7 @@ server <- function(input, output) {
          filter(age_band %in% input$cc_age_group)
       plotmapping <- aes(x=wdate, y=admissions, colour =age_band) 
       plottitle <- ("Number of Covid Cases Admitted to Hospital - by age")
-      plotylabel <- ("% change relative to 2018/19") 
+      plotylabel <- ("Number of admissions") 
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })
    
