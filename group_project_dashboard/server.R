@@ -24,8 +24,14 @@ server <- function(input, output) {
   
 # A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
+     
+     avg_2018_2019 <- waiting_times %>% 
+       filter(date >= "2018-01-01" & date <= "2019-12-31") %>% 
+       filter(department_type %in% input$minor_or_emerg_dept) %>% 
+       filter(hb_name == input$health_board) %>% 
+       summarise(avg_percent_meeting_target = mean(percent_meeting_target))  
+     
      waiting_times %>% 
-       # Conduct this 2020 filtering step at an earlier stage
        filter(date >= "2020-01-01") %>% 
        filter(department_type %in% input$minor_or_emerg_dept) %>% 
        filter(hb_name == input$health_board) %>% 
@@ -36,15 +42,16 @@ server <- function(input, output) {
                       "Percentage of Attendances Meeting 4 Hour Target", 
                       "% Meeting 4 Hour Target") +
        labs(subtitle = "Data Averaged By Month") +
-       theme(axis.text = element_text(size = 12)) +
-       # Make sure only whole percent number shows on y-axis (not e.g. 92.5%)
-       scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
-       geom_hline(yintercept = 95, colour = "red", linetype = "dashed") + 
-       geom_hline(yintercept = 97, colour = "blue", linetype = "dashed") +
-       annotate(geom = "text", x = as.Date("2022-08-01"), y = 94.5, 
-                label = "NHS 95% Target", colour = "red") +
-       annotate(geom = "text", x = as.Date("2022-08-01"), y = 96.5, 
-                label = "2018/2019 Average", colour = "blue")
+       geom_hline(yintercept = 95, colour = "#964091", linetype = "dashed") + 
+       geom_hline(yintercept = avg_2018_2019$avg_percent_meeting_target, 
+                  colour = "#86BC25", linetype = "dashed") +
+       annotate(geom = "label", x = as.Date("2022-08-01"), y = 95, 
+                label = "NHS 95% Target", colour = "#964091", fill = "white",
+                alpha = 0.8) +
+       annotate(geom = "label", x = as.Date("2022-08-01"), 
+                y = avg_2018_2019$avg_percent_meeting_target, 
+                label = "2018/2019 Average", colour = "#86BC25", fill = "white",
+                alpha = 0.8)
    })
    
    # Covid Cases
