@@ -111,12 +111,44 @@ server <- function(input, output) {
 
 # Bed occupancy
       output$beds <- renderPlot({
-      plotdata <- bed_occupancy %>% 
-        filter(specialty_name == "All Acute")
+      plotdata <- bed_occupancy %>%
+         filter(specialty_name == "All Acute") %>%
+         filter(hb_name == input$occ_health_board)
       plotmapping <- aes(x = made_date, y = percentage_occupancy)
       plottitle <- ("Hospital bed occupancy")
       plotylabel <- ("% occupancy")
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
       })
 
+# Length of stay (relative to 2018/19 avg)
+      output$stay_change <- renderPlot({
+      plotdata <- stay_length %>% 
+         filter(hb_name == input$stay_change_health_board) %>% 
+         filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+         group_by(year, month_num, made_date, admission_type) %>% 
+         summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE), 
+                   pre_pan_avg = sum(average20182019, na.rm = TRUE)) %>% 
+         mutate(pcent_change_to_pre_pan_avg = (avg_stay - pre_pan_avg) / pre_pan_avg * 100)
+      plotmapping <- aes(x = made_date, y = pcent_change_to_pre_pan_avg, 
+                         group = admission_type, colour = admission_type)
+      plottitle <- ("Length of hospital stay (admission type)")
+      plotylabel <- ("% change relative to 2018/19")
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      })
+      
+# Length of stay (admission type)
+      output$stay_admission <- renderPlot({
+      plotdata <- stay_length %>% 
+         filter(hb_name == input$stay_admission_health_board) %>% 
+         filter(admission_type %in% c("Elective Inpatients", "Emergency Inpatients")) %>% 
+         group_by(year, month_num, made_date, admission_type) %>% 
+         summarise(avg_stay = sum(average_length_of_stay, na.rm = TRUE))
+      plotmapping <- aes(x = made_date, y = avg_stay, group = admission_type, colour = admission_type)
+      plottitle <- ("Average length of hospital stay (admission type)")
+      plotylabel <- ("days")
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      })
+      
+      
+      
 }

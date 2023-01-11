@@ -6,6 +6,12 @@ library(lubridate)
 stay_length <- read_csv("raw_data/Inpatient and day case activity by board of treatment, age and sex.csv") %>% 
   janitor::clean_names()
 
+health_boards <- read_csv("lookup_tables/health_board_codes.csv") %>% 
+  janitor::clean_names()
+
+# join to health board data
+stay_length <- left_join(stay_length, health_boards, by = "hb")
+
 # create date field
 stay_length <- stay_length %>% 
   mutate(year = str_sub(quarter, start = 1, end = 4), .after = quarter) %>% 
@@ -16,7 +22,7 @@ stay_length <- stay_length %>%
     str_sub(quarter, start = 5, end = 6) == "Q4" ~ 12, 
   ), .after = year
   ) %>% 
-  mutate(made_date = make_datetime(year, month_num), .after = month_num)
+  mutate(made_date = make_date(as.numeric(year), month_num), .after = month_num)
 
 # calculate average pre-pandemic stay length by hb, month, admission and age
 stay_length_pre_pandemic_avg <- stay_length %>% 

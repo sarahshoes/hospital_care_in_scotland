@@ -54,6 +54,11 @@ delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv
 bed_occupancy <- read_csv(here::here("clean_data/bed_occupancy_clean.csv"))
 
 
+# STAY LENGTH
+
+stay_length <- read_csv(here::here("clean_data/stay_length_clean.csv"))
+
+
 # HEALTH BOARD MAP
 
 scot_hb_shapefile <- st_read(here::here("map_files/scotland_hb_shapefile_simplified/
