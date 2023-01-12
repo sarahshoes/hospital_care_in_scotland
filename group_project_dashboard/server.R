@@ -5,8 +5,8 @@ server <- function(input, output) {
 
    output$map <- renderLeaflet({
 
-fake_data_to_map <- fake_data %>% 
-       filter(fake_situation == input$map_data_to_display)
+  data_to_map <- summary_tab_map_data %>% 
+       filter(metric == input$map_data_to_display)
      
      leaflet(scot_hb_shapefile) %>% 
 # addTiles adds scotland map from OpenStreetMap  
@@ -17,14 +17,17 @@ fake_data_to_map <- fake_data %>%
       fitBounds(lat1 = 55, lng1 = -7, lat2 = 61, lng2 = 0) %>% 
        addCircleMarkers(lng = health_board_lat_lon$Longitude, 
                         lat = health_board_lat_lon$Latitude,
-                        radius = fake_data_to_map$fake_number,
+                        radius = data_to_map$scaled_value,
                         color = "purple",
                         weight = 3,
                         opacity = 0.8,
                         label = health_board_lat_lon$HBName)
    }) 
 
-  
+  output$summary_table <- renderTable(summary_tab_table_data)
+   
+   
+   
 # A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
      
@@ -42,8 +45,7 @@ fake_data_to_map <- fake_data %>%
        summarise(percent_meeting_target_by_month = mean(percent_meeting_target)) %>% 
        
        timeseriesplot(aes(date, percent_meeting_target_by_month),
-                      "A&E - Percentage of Attendances Meeting 
-                      4 Hour Target", 
+                      "A&E Attendances Meeting 4 Hour Target", 
                       "% Meeting 4 Hour Target") +
        geom_hline(yintercept = 95, colour = "#964091", linetype = "dashed") + 
        geom_hline(yintercept = avg_2018_2019$avg_percent_meeting_target, 
@@ -122,8 +124,6 @@ fake_data_to_map <- fake_data %>%
      filter(month_ending >= "2018-01-01" & month_ending <= "2019-12-31") %>% 
      filter(hb_name == input$treat_wait_health_board) %>% 
      filter(patient_type %in% input$out_or_inpatient) %>% 
-#     filter(hb_name == "NHS Highland") %>% 
-#    filter(patient_type %in% c("New Outpatient", "Inpatient/Day case")) %>%      
      group_by(month_ending) %>% 
      summarise(num_waiting_2018_2019_by_month = sum(number_waiting, na.rm = TRUE)) %>% 
      summarise(avg_num_waiting = mean(num_waiting_2018_2019_by_month))   
@@ -131,17 +131,14 @@ fake_data_to_map <- fake_data %>%
    ongoing_waits %>% 
      filter(hb_name == input$treat_wait_health_board) %>% 
      filter(patient_type %in% input$out_or_inpatient) %>% 
-#     filter(hb_name == "NHS Highland") %>% 
-#     filter(patient_type %in% c("New Outpatient", "Inpatient/Day case")) %>%    
      group_by(month_ending) %>% 
      mutate(total_waiting_by_month = sum(number_waiting, na.rm = TRUE)) %>% 
      mutate(percentage_var = (total_waiting_by_month - avg_2018_2019$avg_num_waiting)
             / avg_2018_2019$avg_num_waiting * 100) %>% 
      
      timeseriesplot(aes(month_ending, percentage_var, colour = patient_type), 
-                    "Treatment Waiting Times for Ongoing Waits", 
-                    "% change relative to 2018/19") +
-     labs(subtitle = "Number of People on Waiting Lists")
+                    "Number of People on Waiting Lists for Treatment", 
+                    "% change relative to 2018/19") 
    })
    
 # Delayed Discharge  by age    
