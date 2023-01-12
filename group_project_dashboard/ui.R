@@ -93,7 +93,7 @@ ui <- fluidPage(
              # fluid row 1 - admissions
              fluidRow(
                column(width = 6, 
-                      tags$h2("A&E Attendances")
+                      tags$h2("A&E Waiting Times")
                       ),
                column(width = 6, 
                       tags$h2("Covid Admissions")
@@ -137,7 +137,7 @@ ui <- fluidPage(
             # fluid row 4 - admissions
             fluidRow(
               column(width = 6, 
-                     tags$h2("Treatment Waiting Times")
+                     tags$h2("Treatment Waiting Lists")
                      )
               ),
             
