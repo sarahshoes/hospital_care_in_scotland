@@ -25,11 +25,13 @@ health_board_list <- read_csv(here::here("lookup_tables/health_board_codes.csv")
 waiting_times <- read_csv(here::here("clean_data/a_and_e_data_clean.csv")) %>% 
   janitor::clean_names()
 
- 
-
 # ADMISSION - COVID CASES 
 covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv")) 
 
+# ADMISSIONS - BY SPECIALITY, DEMOG and DEPRIVATION 
+admissions_spec <- read_csv(here::here("clean_data/weekly_admissions_spec_clean.csv")) 
+admissions_demog <- read_csv(here::here("clean_data/weekly_admissions_dep_clean.csv")) 
+admissions_dep <- read_csv(here::here("clean_data/weekly_admissions_dep_clean.csv")) 
 
 # TREATMENT WAITING TIMES
 
