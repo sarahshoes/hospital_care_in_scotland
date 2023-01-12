@@ -51,12 +51,15 @@ bed_occupancy <- read_csv(here::here("clean_data/bed_occupancy_clean.csv"))
 stay_length <- read_csv(here::here("clean_data/stay_length_clean.csv"))
 
 
-# HEALTH BOARD MAP
+# HEALTH BOARD MAP 
 
 scot_hb_shapefile <- st_read(here::here("map_files/scotland_hb_shapefile_simplified/
          scot_hb_shapefile_simplified.shp"))
 
 health_board_lat_lon <- read_csv(here::here("map_files/health_board_lat_lon.csv"))  
 
-fake_data <- read_csv(here::here("map_files/fake_health_board_data.csv")) 
+summary_tab_map_data <- read_csv(here::here("clean_data/summary_tab_map_data.csv")) 
 
+# SUMMARY TAB DATA
+
+summary_tab_table_data <- read_csv(here::here("clean_data/summary_tab_table_data.csv"))
