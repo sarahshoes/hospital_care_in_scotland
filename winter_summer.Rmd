@@ -4,6 +4,7 @@ output: html_notebook
 ---
 
 ```{r}
+library(tidyverse)
 library(infer)
 ```
 
@@ -20,6 +21,7 @@ source(here::here("r_scripts_and_notebooks/fun_smoother.R"))
 ```{r}
 covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv"))  
 ```
+
 ```{r}
 #define filters
 input <- list(dd_health_board = "NHS Ayrshire and Arran",dd_age_group = "All (18plus)")
@@ -30,10 +32,7 @@ input <- list(cc_age_group = "75plus")
 ## start here ##
 ```{r}
 covid_cases %>% 
-         filter(age_band %in% input$cc_age_group)
-ggplot() +
-aes(x=wdate, y=admissions) +
-geom_line()
+         filter(age_band == input$cc_age_group)
 ```
 
 ```{r}

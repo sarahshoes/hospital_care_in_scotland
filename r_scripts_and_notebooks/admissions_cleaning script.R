@@ -41,14 +41,14 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   rename("speciality"= "specialty") %>% 
   rename("speciality_qf"= "specialty_qf") 
 
-
 weekly_admissions_spec <- weekly_admissions_spec %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
   mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
   mutate(wdate = ymd(week_ending)) %>% 
   # identify "All Scotland" data
-  #mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
-  #mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
   mutate(above_thresh = ifelse(percent_variation>0,7,0))
+
