@@ -17,7 +17,7 @@ server <- function(input, output) {
       fitBounds(lat1 = 55, lng1 = -7, lat2 = 61, lng2 = 0) %>% 
        addCircleMarkers(lng = health_board_lat_lon$Longitude, 
                         lat = health_board_lat_lon$Latitude,
-                        radius = data_to_map$value,
+                        radius = data_to_map$scaled_value,
                         color = "purple",
                         weight = 3,
                         opacity = 0.8,
