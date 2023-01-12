@@ -65,25 +65,28 @@ ui <- fluidPage(
                     ),
     tabPanel("Admissions - demographics",
              fluidRow(
-               column(width = 4,
+               column(width = 3,
                       checkboxGroupInput(inputId = "ha_age_group",
                                          label = "Select Age Group",
                                          choices = unique(delayed_discharge$age_group),
                                          selected = "All (18plus)")
                )
                ,
-               column(width = 4,                      
+               column(width = 3,                      
                       selectInput(inputId = "ha_health_board",
                                   label = "Select Health Board",
                                   choices = health_board_list,
                                   selected = "All Scotland"),
+               )
+               ,
+               column(width = 3,
                checkboxGroupInput(inputId = "ha_admission_type",
                            label = "Select Admission Type",
                            choices = unique(admissions_spec$admission_type),
                            selected = "All")
                )
                ,
-               column(width = 4,
+               column(width = 3,
                       checkboxGroupInput(inputId = "ha_speciality",
                                          label = "Select Delay Reason",
                                          choices = unique(delayed_discharge$reason_for_delay),
