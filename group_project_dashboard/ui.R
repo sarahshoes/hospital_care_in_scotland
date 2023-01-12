@@ -87,10 +87,11 @@ ui <- fluidPage(
                )
                ,
                column(width = 3,
-                      checkboxGroupInput(inputId = "ha_age_group",
-                                         label = "Select Age Group",
-                                         choices = unique(admissions_demog$age_group),
-                                         selected = "All ages")
+                      checkboxGroupInput(inputId = "ha_dep_index",
+                                         label = "Select SIMD Index",
+                                         choices = unique(admissions_dep$simd_quintile),
+                                         selected=c(1:5),
+                                         inline = TRUE)
                )
              ),
              fluidRow(

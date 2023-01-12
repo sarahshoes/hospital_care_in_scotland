@@ -77,7 +77,18 @@ fake_data_to_map <- fake_data %>%
          plottitle <- ("Weekly number of hospital admissions - by speciality")
          plotylabel <- ("% change relative to 2018/19") 
          timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
-   })    
+   }) 
+   
+# Hospital admissions  by speciality - barplot
+   output$admissions_byspec_bar <- renderPlot({
+      plotdata <- admissions_spec %>% 
+         filter(admission_type %in% input$ha_admission_type) %>% 
+         filter(hb_name %in% input$ha_health_board) %>% 
+         filter(speciality == "All") %>% 
+         ggplot() +
+         aes(x=wdate, y=number_admissions, fill = year) +
+         geom_col(position = "dodge") 
+   })  
    
       
 # Hospital admissions  by age    
@@ -92,6 +103,18 @@ fake_data_to_map <- fake_data %>%
       plotylabel <- ("% change relative to 2018/19") 
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })   
+   
+# Hospital admissions  by dep   
+   output$admissions_bydep <- renderPlot({
+      plotdata <- admissions_dep %>% 
+         filter(admission_type %in% input$ha_admission_type) %>% 
+         filter(hb_name %in% input$ha_health_board) %>% 
+         filter(simd_quintile %in% input$dep_index) 
+      plotmapping <- aes(x=wdate, y=percent_var, colour = simd_quintile) 
+      plottitle <- ("Weekly number of hospital admissions - by SIMD")
+      plotylabel <- ("% change relative to 2018/19") 
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+   })      
    
 # Treatment Waiting Times
    
