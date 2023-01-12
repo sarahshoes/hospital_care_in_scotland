@@ -7,14 +7,18 @@ ui <- fluidPage(
              fluidRow(
                column(4,
                       leafletOutput("map")
-               )
+                      ),
+               column(8, 
+                   #   tags$h2("Covid Admissions")
+                     tableOutput("summary_table")
+                      )
                ),
              fluidRow(
                column(4, 
                       selectInput(inputId = "map_data_to_display",
                                   label = "Select Data to Display",
-                                  choices = unique(fake_data$fake_situation),
-                                  selected = "fake beds")
+                                  choices = unique(summary_tab_map_data$metric),
+                                  selected = "A&E % Treated in 4 h")
                       )
              )
     ),

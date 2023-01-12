@@ -5,8 +5,8 @@ server <- function(input, output) {
 
    output$map <- renderLeaflet({
 
-fake_data_to_map <- fake_data %>% 
-       filter(fake_situation == input$map_data_to_display)
+  data_to_map <- summary_tab_map_data %>% 
+       filter(metric == input$map_data_to_display)
      
      leaflet(scot_hb_shapefile) %>% 
 # addTiles adds scotland map from OpenStreetMap  
@@ -17,14 +17,17 @@ fake_data_to_map <- fake_data %>%
       fitBounds(lat1 = 55, lng1 = -7, lat2 = 61, lng2 = 0) %>% 
        addCircleMarkers(lng = health_board_lat_lon$Longitude, 
                         lat = health_board_lat_lon$Latitude,
-                        radius = fake_data_to_map$fake_number,
+                        radius = data_to_map$scaled_value,
                         color = "purple",
                         weight = 3,
                         opacity = 0.8,
                         label = health_board_lat_lon$HBName)
    }) 
 
-  
+  output$summary_table <- renderTable(summary_tab_table_data)
+   
+   
+   
 # A&E Waiting Times    
    output$a_and_e_waiting_times <- renderPlot({
      
