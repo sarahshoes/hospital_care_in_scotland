@@ -1,0 +1,40 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+Example of creating health board indicators
+
+```{r}
+admissions_spec <- read_csv(here::here("clean_data/weekly_admissions_spec_clean.csv")) 
+```
+
+#this will already be available in the app
+
+```{r}
+selected <- admissions_spec %>% 
+  filter(admission_type == "All") %>% 
+  filter(speciality=="All") %>% 
+  filter(admission_type =="All") %>% 
+  #filter(year == 2020) %>% 
+  filter(iswinter) %>%
+  group_by(hb_name) %>% 
+  summarise(count_bad_days = sum(above_thresh), 
+            count_days = n()*7, # if data is monthly this will be 30
+            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
+            mean_percentvar =mean(percent_var)) 
+```
+the value to add to summary tab is pcnt_bad_days
+
+```{r}
+selected %>% 
+  ggplot() +
+  aes(x=hb_name, y=pcnt_bad_days) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
