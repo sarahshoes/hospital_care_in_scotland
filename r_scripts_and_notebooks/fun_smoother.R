@@ -1,7 +1,10 @@
 data_smoother <- function(date,data){
   
   #define smoothing period - test date interval
-  if ((mean(diff(unique(date)), na.rm = TRUE)) > 29){
+  date <- date %>% 
+    mutate(diff = as.numeric((mdate - lag(mdate)), 'days'))
+  
+  if (mean(date$diff, na.rm = TRUE) > 29){
   timeinterval = "monthly"
   } else {
   timeinterval = "weekly"

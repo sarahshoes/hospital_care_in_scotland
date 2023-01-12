@@ -80,15 +80,6 @@ ui <- fluidPage(
              )
     ), 
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     tabPanel("Admissions",
              # fluid row 1 - admissions
              fluidRow(
@@ -245,7 +236,25 @@ ui <- fluidPage(
                       plotOutput("discharge_delays_byreason")
                )
              )
-    )
+    ),
+    tabPanel("Seasonal Statistics",
+             fluidRow(
+               column(width = 3,
+                     checkboxGroupInput(inputId = "stat_reason_for_delay",
+                                        label = "Select Delay Reason",
+                                        choices = unique(delayed_discharge$reason_for_delay),
+                                         selected = "All Delay Reasons"),
+                     selectInput(inputId = "stat_health_board",
+                                 label = "Select Health Board",
+                                 choices = health_board_list,
+                                 selected = "All Scotland"),
+                     ),
+               column(width = 9,
+                      plotOutput("discharge_delays_byreason2") 
+                      )
+                     ),
+             fluidRow(),
+             )
     
     #end brackets for fluidpage and tabsetpanel
   )

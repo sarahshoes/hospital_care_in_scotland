@@ -11,7 +11,7 @@ library(infer)
 ## define functions
 ```{r}
 source(here::here("r_scripts_and_notebooks/fun_smoother.R"))
-#source(here::here("r_scripts_and_notebooks/ws_null_hypothesis.R"))
+source(here::here("r_scripts_and_notebooks/stats_test.R"))
 ```
 
 ## note that data must just be one timeries
@@ -56,10 +56,10 @@ eval(str2expression(str_c("choice1=unique(seldata$",lookup_param[1],")")))
 seldata <- delayed_discharge %>% 
   filter(hb_name == "All Scotland") %>% 
   filter(age_group == "All (18plus)") %>% 
-  filter(reason_for_delay == "All Delay Reasons") %>% 
-  filter(mdate > as.Date("2020-04-01")) %>% 
-  select(mdate, number_of_delayed_bed_days) %>% 
-  rename(param = number_of_delayed_bed_days)
+  filter(reason_for_delay == "Code 9 Non-AWI") %>% 
+  #filter(mdate > as.Date("2020-04-01")) %>% 
+  rename(param = number_of_delayed_bed_days) %>% 
+  select(mdate, param, iswinter) 
 
 data <- seldata[2]
 date <- seldata[1]
@@ -69,13 +69,18 @@ date <- seldata[1]
 ```{r}
 smoothed_data <- data_smoother(date,seldata)
 ```
+## call function to run test and calc p-value
+```{r}
+p_value <- stats_test(smoothed_data)
+```
+
+
 
 ```{r}
 ## plot data
 #calculate difference to create mvar
 smoothed_data <- smoothed_data %>% 
-  mutate(mvar = param - moving_avg) %>% 
-  mutate(iswinter = ifelse(month(mdate) %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+  mutate(mvar = param - moving_avg) 
 ```
 
 # plot - check the smoother makes sense and tweak values if they dont
@@ -124,7 +129,6 @@ alpha_test=0.05
 
 ```{r}
 smoothed_data %>% 
-  filter(iswinter) %>% 
   ggplot() +
   aes(x = mvar) +
   geom_histogram(col = "white")
@@ -134,27 +138,29 @@ smoothed_data %>%
 seasonal_avg <- smoothed_data  %>%
   group_by(iswinter) %>% 
   summarise(mean= mean(mvar, na.rm=TRUE))
+
 seasonal_avg
+observed_stat = seasonal_avg$mean[seasonal_avg$iswinter ==TRUE]
+            -seasonal_avg$mean[seasonal_avg$iswinter ==FALSE]
 ```
 
 ```{r}
 null_distribution <- smoothed_data  %>%
-  filter(iswinter) %>%  
-  specify(response = mvar) %>%
-  hypothesize(null = "point", mu = 6.04) %>%
-  generate(reps = 1000, type = "bootstrap") %>%
-  calculate(stat = "mean")
+  specify(response = mvar, explanatory = iswinter) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c(TRUE,FALSE)) #winter - summer
 ```
 
 ```{r}
 null_distribution %>%
   visualise(bins = 30) + 
-shade_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
-            , direction = "less")
+shade_p_value(obs_stat = observed_stat
+            , direction = "greater")
  
 p_value <- null_distribution %>% 
-get_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
-            , direction = "less")
+get_p_value(obs_stat = observed_stat
+            , direction = "greater")
 pull()
 ```
 
