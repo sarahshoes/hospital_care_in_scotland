@@ -69,8 +69,8 @@ ui <- fluidPage(
                       checkboxGroupInput(inputId = "ha_age_group",
                                          label = "Select Age Group",
                                          choices = unique(admissions_demog$age_group),
-                                         selected = "All")
-               )
+                                         selected = "All ages")
+                )
                ,
                column(width = 3,                      
                       selectInput(inputId = "ha_health_board",
@@ -87,10 +87,10 @@ ui <- fluidPage(
                )
                ,
                column(width = 3,
-                      selectInput(inputId = "ha_speciality",
-                                         label = "Speciality",
-                                         choices = unique(admissions_spec$speciality),
-                                         selected = "All")        
+                      checkboxGroupInput(inputId = "ha_age_group",
+                                         label = "Select Age Group",
+                                         choices = unique(admissions_demog$age_group),
+                                         selected = "All ages")
                )
              ),
              fluidRow(
@@ -98,11 +98,25 @@ ui <- fluidPage(
                       plotOutput("admissions_byage") 
                       ),
                column(width=6,
-                      plotOutput("admissions_byspec") 
+                      plotOutput("admissions_bydep") 
                       )
              ),
-             fluidRow()
-             ),
+             fluidRow(),
+             fluidRow(
+               column(width=6,
+                             plotOutput("admissions_byspec") 
+                      ),
+             column(width=2,
+                    checkboxGroupInput(inputId = "ha_speciality",
+                                label = "Speciality",
+                                choices = unique(admissions_spec$speciality),
+                                selected = "All")    
+                    ),
+             column(width=4,
+                    plotOutput("admissions_byspec_bar") 
+                    )
+             )
+            ),
     tabPanel("Hospital Activity",
              # Treatment Waiting Times
              fluidRow(
