@@ -97,3 +97,28 @@ ha1_tot
 ha2_tot
 dd_tot
 ```
+
+Converting bed days to percentage occupied by delayed patients
+
+```{r}
+num_beds <- read_csv(here::here("clean_data/num_beds_by_hb.csv"))
+
+# multiple by 30 so we have number of beds days available by month for each   
+# health board
+
+num_beds %>% 
+  mutate(num_bed_days_each_month = num_beds * 30) %>% 
+  cbind(dd_byhb$number_of_delayed_bed_days) %>% 
+  rename(number_of_delayed_bed_days = "dd_byhb$number_of_delayed_bed_days") %>% 
+  mutate(percent_bed_days_taken_by_delayed_discharge = 
+           number_of_delayed_bed_days / num_bed_days_each_month * 100)
+
+
+```
+```{r}
+
+
+
+
+```
+
