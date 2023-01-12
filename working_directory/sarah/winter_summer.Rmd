@@ -87,9 +87,8 @@ smoothed_data <- smoothed_data %>%
 ```{r}
 plotlim <- as.Date(c("2018-01-01","2022-12-31")) 
 ggplot(smoothed_data) +
-  geom_line(aes(x = mdate, y = param), colour = "gray") +
-  geom_line(aes(x = mdate, y = moving_avg), colour = "red") +
-  geom_line(aes(x = mdate, y = mvar), colour = "green") +
+  geom_line(aes(x = mdate, y = c(param, moving_avg, mvar)) 
+
   scale_x_date(limits=plotlim, date_breaks="3 month", 
                labels = scales::label_date_short(), expand = c(0,0)) +
     # add dashed lines to show the boundaries 

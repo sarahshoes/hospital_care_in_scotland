@@ -14,6 +14,10 @@ source(here::here("palette_theme/plot_timeseries.R"))
 source(here::here("palette_theme/plot_timeseriesv2.R"))
 palette = read_csv(here::here("palette_theme/phs_palette.csv"))
 
+#source functions for stats test
+source(here::here("r_scripts_and_notebooks/fun_smoother.R"))
+source(here::here("r_scripts_and_notebooks/fun_stats_test.R"))
+
 # HEALTH BOARD NAMES
 health_board_list <- read_csv(here::here("lookup_tables/health_board_codes.csv")) %>% 
   janitor::clean_names() %>% 

@@ -222,5 +222,31 @@ server <- function(input, output) {
          timeseriesplot2(plotdata,plotmapping,plottitle,plotylabel)
       })
          
+ # Delayed Discharge  for statistical analysis  
+      output$smooth_prepandemic <- renderPlot({
+         seldata <- delayed_discharge %>% 
+            filter(hb_name %in% input$stat_health_board) %>% 
+            filter(age_group == "All (18plus)") %>% 
+            filter(reason_for_delay %in% input$stat_reason_for_delay) %>% 
+            #filter(mdate > as.Date("2020-04-01")) %>% 
+            rename(param = number_of_delayed_bed_days) %>% 
+            select(mdate, param, iswinter) 
+         smoothed_data <- data_smoother(seldata[1],seldata)
+         # now for plot - could create function?
+         plotlim <- as.Date(c("2018-01-01","2019-12-31")) 
+         ggplot(smoothed_data) +
+            geom_line(aes(x = mdate, y = param), colour = "gray") +
+            geom_line(aes(x = mdate, y = moving_avg), colour = "red") +
+            geom_line(aes(x = mdate, y = mvar), colour = "green") +
+            scale_x_date(limits=plotlim, date_breaks="3 month", 
+                         labels = scales::label_date_short(), expand = c(0,0)) +
+            # add dashed lines to show the boundaries 
+            geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", linewidth = 0.5) +
+            geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) 
+      })   
       
 }

@@ -253,9 +253,21 @@ ui <- fluidPage(
                       plotOutput("discharge_delays_byreason2") 
                       )
                      ),
-             fluidRow(),
+             fluidRow(
+               column(width=3,
+                      plotOutput("smooth_prepandemic")
+             ),
+             column(width=3,
+                      plotOutput("boxplot_prepandemic")
+                    ),
+             column(width=3,
+                    plotOutput("smooth_postpandemic")
+                    ),
+             column(width=3,
+                    plotOutput("boxplot_prepandemic")
+                    )
              )
-    
+    )
     #end brackets for fluidpage and tabsetpanel
   )
   ) 
