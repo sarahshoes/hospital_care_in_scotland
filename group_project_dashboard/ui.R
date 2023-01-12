@@ -69,7 +69,7 @@ ui <- fluidPage(
                       checkboxGroupInput(inputId = "ha_age_group",
                                          label = "Select Age Group",
                                          choices = unique(admissions_demog$age_group),
-                                         selected = "All ages")
+                                         selected = "All")
                )
                ,
                column(width = 3,                      
@@ -80,7 +80,7 @@ ui <- fluidPage(
                )
                ,
                column(width = 3,
-               checkboxGroupInput(inputId = "ha_admission_type",
+               radioButtons(inputId = "ha_admission_type",
                            label = "Select Admission Type",
                            choices = unique(admissions_spec$admission_type),
                            selected = "All")
