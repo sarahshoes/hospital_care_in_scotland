@@ -90,7 +90,7 @@ ui <- fluidPage(
                       checkboxGroupInput(inputId = "ha_dep_index",
                                          label = "Select SIMD Index",
                                          choices = unique(admissions_dep$simd_quintile),
-                                         selected=c(1:5),
+                                         selected=c(1,5),
                                          inline = TRUE)
                )
              ),
