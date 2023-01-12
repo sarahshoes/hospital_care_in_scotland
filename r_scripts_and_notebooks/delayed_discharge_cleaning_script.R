@@ -61,3 +61,4 @@ delayed_discharge <- as_tsibble(delayed_discharge, key = id, index = mdate)
 
 #write out data file
 write_csv(delayed_discharge, "clean_data/delayed_discharge_clean.csv")
+
