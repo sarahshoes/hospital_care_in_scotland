@@ -47,7 +47,12 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   rename("speciality_qf"= "specialty_qf") 
 ```
 
-
+# merge hbnames into datafiles
+```{r}
+weekly_admissions_spec <- left_join(weekly_admissions_spec,hb_codes)
+weekly_admissions_demog <- left_join(weekly_admissions_demog,hb_codes)
+weekly_admissions_dep <- left_join(weekly_admissions_dep,hb_codes) 
+``
 
 do the analysis needed for identifying winter and 'crisis'
 ```{r}
@@ -90,7 +95,7 @@ monthly_admissions_spec <- left_join(monthly_admissions_spec,hb_codes)
 ```{r}
 monthly_admissions_spec <- monthly_admissions_spec %>% 
   mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
-  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
 ```
 
 ```{r}

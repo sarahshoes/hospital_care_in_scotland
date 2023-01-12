@@ -1,7 +1,7 @@
 library(shiny)
 
 ui <- fluidPage(
-  titlePanel("Dashboard Title"),
+  titlePanel("Hospital Care in Scotland"),
   tabsetPanel(
     tabPanel("Summary",
              fluidRow(
@@ -68,8 +68,8 @@ ui <- fluidPage(
                column(width = 3,
                       checkboxGroupInput(inputId = "ha_age_group",
                                          label = "Select Age Group",
-                                         choices = unique(delayed_discharge$age_group),
-                                         selected = "All (18plus)")
+                                         choices = unique(admissions_demog$age_group),
+                                         selected = "All")
                )
                ,
                column(width = 3,                      
@@ -87,13 +87,20 @@ ui <- fluidPage(
                )
                ,
                column(width = 3,
-                      checkboxGroupInput(inputId = "ha_speciality",
-                                         label = "Select Delay Reason",
-                                         choices = unique(delayed_discharge$reason_for_delay),
-                                         selected = "All Delay Reasons")        
+                      selectInput(inputId = "ha_speciality",
+                                         label = "Speciality",
+                                         choices = unique(admissions_spec$speciality),
+                                         selected = "All")        
                )
              ),
-             fluidRow(),
+             fluidRow(
+               column(width=6,
+                      plotOutput("admissions_byspec") 
+                      ),
+               column(width=6,
+                      plotOutput("admissions_byage") 
+                      )
+             ),
              fluidRow()
              ),
     tabPanel("Hospital Activity",

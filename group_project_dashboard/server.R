@@ -72,7 +72,7 @@ fake_data_to_map <- fake_data %>%
       plotdata <- admissions_spec %>% 
          filter(admission_type %in% input$ha_admission_type) %>% 
          filter(hb_name %in% input$ha_health_board) %>% 
-         filter(speciality %in% input$ha_speciality) %>% 
+         filter(speciality %in% input$ha_speciality) 
          plotmapping <- aes(x=mdate, y=percent_var, colour = speciality) 
          plottitle <- ("Weekly number of hospital admissions - by speciality")
          plotylabel <- ("% change relative to 2018/19") 
@@ -83,10 +83,10 @@ fake_data_to_map <- fake_data %>%
 # Hospital admissions  by age    
    output$admissions_byage <- renderPlot({
       plotdata <- admissions_demog %>% 
-         filter(admission_type == "All") %>% 
+         filter(admission_type %in% input$ha_admission_type) %>% 
          filter(hb_name %in% input$ha_health_board) %>% 
          filter(age_group %in% input$ha_age_group) %>% 
-         filter(sex =="All") %>% 
+         filter(sex =="All")  
       plotmapping <- aes(x=mdate, y=percent_var, colour = age_group) 
       plottitle <- ("Weekly number of hospital admissions - by age")
       plotylabel <- ("% change relative to 2018/19") 

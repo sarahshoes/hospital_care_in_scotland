@@ -50,8 +50,9 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
   mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
-  mutate(above_thresh = ifelse(percent_variation>0,7,0))
-
+  mutate(above_thresh = ifelse(percent_variation>0,7,0)) %>% 
+  rename(percent_var = percent_variation)
+  
 weekly_admissions_demog <- weekly_admissions_demog %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
@@ -61,8 +62,9 @@ weekly_admissions_demog <- weekly_admissions_demog %>%
   mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
   mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
-  mutate(above_thresh = ifelse(percent_variation>0,7,0))
-
+  mutate(above_thresh = ifelse(percent_variation>0,7,0)) %>% 
+  rename(percent_var = percent_variation)
+ 
 weekly_admissions_dep <- weekly_admissions_dep %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
@@ -72,8 +74,8 @@ weekly_admissions_dep <- weekly_admissions_dep %>%
   mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
   mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
-  mutate(above_thresh = ifelse(percent_variation>0,7,0))
-
+  mutate(above_thresh = ifelse(percent_variation>0,7,0)) %>% 
+  rename(percent_var = percent_variation)
 
 # for this dataset pre-pandemic levels are already calculated
 
