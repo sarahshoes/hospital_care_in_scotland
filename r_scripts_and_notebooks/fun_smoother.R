@@ -1,27 +1,30 @@
-data_smoother <- function(date,data,indicator){
+data_smoother <- function(date,data){
   
-  #define smoothing period
-  if (indicator == "weekly"){
+  #define smoothing period - test date interval
+  if ((mean(diff(unique(date)), na.rm = TRUE)) > 29){
+  timeinterval = "monthly"
+  } else {
+  timeinterval = "weekly"
+  }
+  
+  #set smooth period
+  if (timeinterval == "weekly"){
       sm=12
   }else{
-      sm=3
+      sm=1
   }
 
 library(slider)
   
-data_rolling <- weekly_admissions_spec %>% 
-    filter(wdate > as.Date("2020-05-01")) %>% 
-    filter(speciality == "All") %>% 
-    filter(admission_type == "All") %>% 
-    filter(hb_name =="All Scotland") %>%  
-    mutate(
-      moving_avg = slide_dbl(
-        .x = number_admissions, 
-        .f = ~ mean(., na.rm = TRUE),
-        .before = 12,
-        .after = 12,
-        .complete = FALSE
-      )
+smoothed_data <- data %>% 
+  mutate(
+    moving_avg = slide_dbl(
+      .x = param, 
+      .f = ~ mean(., na.rm = TRUE),
+      .before = 12,
+      .after = 12,
+      .complete = FALSE
     )
+  )
 
 }

@@ -19,36 +19,155 @@ source(here::here("r_scripts_and_notebooks/fun_smoother.R"))
 
 ## load data here
 ```{r}
-covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv"))  
+admissions_spec <- read_csv(here::here("clean_data/weekly_admissions_spec_clean.csv")) 
+delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv"))  
 ```
+
 
 ```{r}
 #define filters
-input <- list(dd_health_board = "NHS Ayrshire and Arran",dd_age_group = "All (18plus)")
-input <- list(cc_age_group = "75plus")
+input <- list(dataset = "delayed_discharge", age_group = "All (18plus)", healthboard = "All Scotland")
 ```
 
+
+```{r}
+selection <- 1
+lookup_dataset <- list("delayed_discharge","admissions_spec")
+lookup_param <- list("number_of_delayed_bed_days","number_admissions")
+lookup_date <- list("wdate","mdate")
+lookup_indicator <- list("weekly","monthly")
+```
+
+
+```{r}
+#apply filters
+eval(str2expression(str_c("seldata <- ",input$datase))) 
+
+```
+
+```{r}
+eval(str2expression(str_c("seldata <- ",input$datase))) 
+eval(str2expression(str_c("choice1=unique(seldata$",lookup_param[1],")")))
+```
 
 ## start here ##
-```{r}
-covid_cases %>% 
-         filter(age_band == input$cc_age_group)
-```
 
 ```{r}
-data <- seldata$number_of_delayed_bed_days 
-date <- seldata$wdate
-indicator <- "weekly"
+seldata <- delayed_discharge %>% 
+  filter(hb_name == "All Scotland") %>% 
+  filter(age_group == "All (18plus)") %>% 
+  filter(reason_for_delay == "All Delay Reasons") %>% 
+  filter(mdate > as.Date("2020-04-01")) %>% 
+  select(mdate, number_of_delayed_bed_days) %>% 
+  rename(param = number_of_delayed_bed_days)
+
+data <- seldata[2]
+date <- seldata[1]
 ```
 
 ## call function to smooth data
 ```{r}
-smoothed_data <- function(date,data,indicator)
+smoothed_data <- data_smoother(date,seldata)
 ```
 
-
+```{r}
 ## plot data
+#calculate difference to create mvar
+smoothed_data <- smoothed_data %>% 
+  mutate(mvar = param - moving_avg) %>% 
+  mutate(iswinter = ifelse(month(mdate) %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+```
+
+# plot - check the smoother makes sense and tweak values if they dont
+```{r}
+plotlim <- as.Date(c("2018-01-01","2022-12-31")) 
+ggplot(smoothed_data) +
+  geom_line(aes(x = mdate, y = param), colour = "gray") +
+  geom_line(aes(x = mdate, y = moving_avg), colour = "red") +
+  geom_line(aes(x = mdate, y = mvar), colour = "green") +
+  scale_x_date(limits=plotlim, date_breaks="3 month", 
+               labels = scales::label_date_short(), expand = c(0,0)) +
+    # add dashed lines to show the boundaries 
+    geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", linewidth = 0.5) +          
+    geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
+    geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) 
+```
+#now create a boxplot
+```{r}
 smoothed_data %>% 
   ggplot() +
-    aes(x=date, y = data) +
-    geom_line(colour='red') 
+  aes(x=iswinter, y=mvar) +
+  geom_boxplot() +
+  ylab("residual values (data - long term trend)") +
+  xlab("Season") +
+  scale_x_discrete(
+    labels=c("FALSE" = "Summer (Apr-Sep)", "TRUE" = "Winter (Oct-Mar)"), 
+    limits = c("FALSE","TRUE"))
+```
+
+### Hypothesis Test
+
+Is summer is significantly different to winter?
+
+The null hypothesis is that the average value for summer is the same or lower than the average value for winter.
+
+H0 : mean winter - mean summer <= 0
+HA : mean winter - mean summer >0 
+
+we are setting alpha for this test to be 0.05
+```{r}
+alpha_test=0.05
+```
+
+```{r}
+smoothed_data %>% 
+  filter(iswinter) %>% 
+  ggplot() +
+  aes(x = mvar) +
+  geom_histogram(col = "white")
+```
+
+```{r}
+seasonal_avg <- smoothed_data  %>%
+  group_by(iswinter) %>% 
+  summarise(mean= mean(mvar, na.rm=TRUE))
+seasonal_avg
+```
+
+```{r}
+null_distribution <- smoothed_data  %>%
+  filter(iswinter) %>%  
+  specify(response = mvar) %>%
+  hypothesize(null = "point", mu = 6.04) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+```
+
+```{r}
+null_distribution %>%
+  visualise(bins = 30) + 
+shade_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
+            , direction = "less")
+ 
+p_value <- null_distribution %>% 
+get_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
+            , direction = "less")
+pull()
+```
+
+```{r}
+p_value 
+```
+If pvalue is less than alpha we can reject null hypothesis
+
+```{r}
+if(p_value > alpha_test){
+ print("We cannot reject the null hypothesis. The average winter values in this data are the same as the average summer values")
+}else{
+    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter values in this data are significantly different to the average winter values")}
+```
+```
+
