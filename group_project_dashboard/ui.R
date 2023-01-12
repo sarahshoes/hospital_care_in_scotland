@@ -1,7 +1,7 @@
 library(shiny)
 
 ui <- fluidPage(
-  titlePanel("Dashboard Title"),
+  titlePanel("Hospital Care in Scotland"),
   tabsetPanel(
     tabPanel("Summary",
              fluidRow(
@@ -63,10 +63,61 @@ ui <- fluidPage(
                       )
                )
                     ),
-
-   
-    
-    
+    tabPanel("Admissions - demographics",
+             fluidRow(
+               column(width = 3,
+                      checkboxGroupInput(inputId = "ha_age_group",
+                                         label = "Select Age Group",
+                                         choices = unique(admissions_demog$age_group),
+                                         selected = "All ages")
+                )
+               ,
+               column(width = 3,                      
+                      selectInput(inputId = "ha_health_board",
+                                  label = "Select Health Board",
+                                  choices = health_board_list,
+                                  selected = "All Scotland"),
+               )
+               ,
+               column(width = 3,
+               radioButtons(inputId = "ha_admission_type",
+                           label = "Select Admission Type",
+                           choices = unique(admissions_spec$admission_type),
+                           selected = "All")
+               )
+               ,
+               column(width = 3,
+                      checkboxGroupInput(inputId = "ha_dep_index",
+                                         label = "Select SIMD Index",
+                                         choices = unique(admissions_dep$simd_quintile),
+                                         selected=c(1:5),
+                                         inline = TRUE)
+               )
+             ),
+             fluidRow(
+               column(width=6,
+                      plotOutput("admissions_byage") 
+                      ),
+               column(width=6,
+                      plotOutput("admissions_bydep") 
+                      )
+             ),
+             fluidRow(),
+             fluidRow(
+               column(width=6,
+                             plotOutput("admissions_byspec") 
+                      ),
+             column(width=2,
+                    checkboxGroupInput(inputId = "ha_speciality",
+                                label = "Speciality",
+                                choices = unique(admissions_spec$speciality),
+                                selected = "All")    
+                    ),
+             column(width=4,
+                    plotOutput("admissions_byspec_bar") 
+                    )
+             )
+            ),
     tabPanel("Hospital Activity",
              # Treatment Waiting Times
              fluidRow(

@@ -66,6 +66,54 @@ fake_data_to_map <- fake_data %>%
       plotylabel <- ("Number of admissions") 
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })
+
+# Hospital admissions  by speciality
+   output$admissions_byspec <- renderPlot({
+      plotdata <- admissions_spec %>% 
+         filter(admission_type %in% input$ha_admission_type) %>% 
+         filter(hb_name %in% input$ha_health_board) %>% 
+         filter(speciality %in% input$ha_speciality) 
+         plotmapping <- aes(x=wdate, y=percent_var, colour = speciality) 
+         plottitle <- ("Weekly number of hospital admissions - by speciality")
+         plotylabel <- ("% change relative to 2018/19") 
+         timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+   }) 
+   
+# Hospital admissions  by speciality - barplot
+   output$admissions_byspec_bar <- renderPlot({
+      plotdata <- admissions_spec %>% 
+         filter(speciality != "All") %>%
+         ggplot() +
+         aes(x=speciality, y=number_admissions, fill = as.factor(year)) +
+         geom_col(position = "dodge") #+
+         #scale_fill_manual(palette=palette$mycolours)
+   })  
+   
+      
+# Hospital admissions  by age    
+   output$admissions_byage <- renderPlot({
+      plotdata <- admissions_demog %>% 
+         filter(admission_type %in% input$ha_admission_type) %>% 
+         filter(hb_name %in% input$ha_health_board) %>% 
+         filter(age_group %in% input$ha_age_group) %>% 
+         filter(sex =="All")  
+      plotmapping <- aes(x=wdate, y=percent_var, colour = age_group) 
+      plottitle <- ("Weekly number of hospital admissions - by age")
+      plotylabel <- ("% change relative to 2018/19") 
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+   })   
+   
+# Hospital admissions  by dep   
+   output$admissions_bydep <- renderPlot({
+      plotdata <- admissions_dep %>% 
+         filter(admission_type %in% input$ha_admission_type) %>% 
+         filter(hb_name %in% input$ha_health_board) %>% 
+         filter(simd_quintile %in% input$ha_dep_index) 
+      plotmapping <- aes(x=wdate, y=percent_var, colour = as.factor(simd_quintile)) 
+      plottitle <- ("Weekly number of hospital admissions - by SIMD")
+      plotylabel <- ("% change relative to 2018/19") 
+      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+   })      
    
 # Treatment Waiting Times
    
@@ -108,16 +156,16 @@ fake_data_to_map <- fake_data %>%
       timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
    })
       
-      # Delayed Discharge  by reason for delay   
-      output$discharge_delays_byreason <- renderPlot({
-        plotdata <- delayed_discharge %>% 
-          filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
-          filter(hb_name %in% input$dd_health_board) %>% 
-          filter(age_group == "All (18plus)")
-        plotmapping <- aes(x=mdate, y=percent_var, colour = reason_for_delay) 
-        plottitle <- ("Number of delayed bed days - by reason for delay")
-        plotylabel <- ("% change relative to 2018/19") 
-        timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+# Delayed Discharge  by reason for delay   
+   output$discharge_delays_byreason <- renderPlot({
+  plotdata <- delayed_discharge %>% 
+       filter(reason_for_delay %in% input$dd_reason_for_delay) %>% 
+       filter(hb_name %in% input$dd_health_board) %>% 
+       filter(age_group == "All (18plus)")
+     plotmapping <- aes(x=mdate, y=percent_var, colour = reason_for_delay) 
+     plottitle <- ("Number of delayed bed days - by reason for delay")
+     plotylabel <- ("% change relative to 2018/19") 
+     timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
       })
 
 # Bed occupancy
