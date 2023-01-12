@@ -52,3 +52,12 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
   mutate(above_thresh = ifelse(percent_variation>0,7,0))
 
+
+monthly_admissions_spec <- weekly_admissions_spec
+
+monthly_admissions_spec <- monthly_admissions_spec %>% 
+  group_by(hb, admission_type, speciality, year, month) %>% 
+  summarise(monthly_admissions = 4*mean(number_admissions, na.rm = TRUE)) %>% 
+  mutate(mdate = as.Date(make_datetime(year, month, 15))) %>% 
+  ungroup()
+
