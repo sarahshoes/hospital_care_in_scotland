@@ -69,7 +69,7 @@ ui <- fluidPage(
                       checkboxGroupInput(inputId = "ha_age_group",
                                          label = "Select Age Group",
                                          choices = unique(admissions_demog$age_group),
-                                         selected = "All")
+                                         selected = "All ages")
                )
                ,
                column(width = 3,                      
@@ -95,10 +95,10 @@ ui <- fluidPage(
              ),
              fluidRow(
                column(width=6,
-                      plotOutput("admissions_byspec") 
+                      plotOutput("admissions_byage") 
                       ),
                column(width=6,
-                      plotOutput("admissions_byage") 
+                      plotOutput("admissions_byspec") 
                       )
              ),
              fluidRow()
