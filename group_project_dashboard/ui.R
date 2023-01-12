@@ -8,34 +8,63 @@ ui <- fluidPage(
                column(4,
                       leafletOutput("map")
                )
+               ),
+             fluidRow(
+               column(4, 
+                      selectInput(inputId = "map_data_to_display",
+                                  label = "Select Data to Display",
+                                  choices = unique(fake_data$fake_situation),
+                                  selected = "fake beds")
+                      )
              )
     ),
     tabPanel("Admissions",
              # A&E Waiting Times 
              fluidRow(
-               column(width = 6,
+               column(width = 6, 
+                      tags$h2("A&E Attendances")
+                      ),
+               column(width = 6, 
+                      tags$h2("Covid Admissions")
+                     )
+             ),
+             
+             fluidRow(
+               column(width = 3,
                       checkboxGroupInput(inputId = "minor_or_emerg_dept",
                                          label = "Select Department Type",
                                          choices = unique(waiting_times$department_type),
                                          selected = c("Minor Injury Unit or Other",
                                                       "Emergency Department")
+                                          )
                       ),
+               column(width = 3,
                       selectInput(inputId = "health_board",
                                   label = "Select Health Board",
                                   choices = health_board_list,
                                   selected = "All Scotland"
-                                  ),
-                      plotOutput("a_and_e_waiting_times")
+                                  )
                       ),
                column(width = 6,
                       checkboxGroupInput(inputId = "cc_age_group",
                                          label = "Select Age Group",
                                          choices = unique(covid_cases$age_band),
-                                         selected = "All ages (0plus)"),
+                                         selected = "All ages (0plus)"
+                                         )
+                      )
+             ),
+             
+            fluidRow(
+               column(width = 6,
+                      plotOutput("a_and_e_waiting_times")
+                      ),
+               column(width = 6,
                       plotOutput("covid_cases")
+                      )
                )
-             )
-    ),
+                    ),
+
+   
     
     
     tabPanel("Hospital Activity",
@@ -50,8 +79,8 @@ ui <- fluidPage(
                       ),
                       selectInput(inputId = "treat_wait_health_board",
                                   label = "Select Health Board",
-                                  choices = unique(ongoing_waits$hb_name),
-                                  selected = "NHS Scotland"
+                                  choices = health_board_list,
+                                  selected = "All Scotland"
                       ),
                       plotOutput("treatment_waiting_times"),
                       tags$a("Note: There are issues with NHS Tayside results caused by

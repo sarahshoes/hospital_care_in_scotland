@@ -23,7 +23,7 @@ ongoing_waits <- ongoing_waits %>%
 
 # Scotland and Jubilee hospital codes aren't in file so this code adds them to dataframe  
 ongoing_waits <- ongoing_waits %>%   
-  mutate(hb_name = case_when(hb == "S92000003" ~ "NHS Scotland",
+  mutate(hb_name = case_when(hb == "S92000003" ~ "All Scotland",
                              hb == "SB0801" ~ "NHS Golden Jubilee National Hospital",
                              TRUE ~ hb_name))
            
@@ -45,11 +45,11 @@ ongoing_waits <- ongoing_waits %>%
 
 # Code used to ensure calculations were correct
 original_scotland_values <- ongoing_waits %>% 
-   filter(hb_name == "NHS Scotland")
+   filter(hb_name == "All Scotland")
 
 # Calculate Scotland totals by summing each health board
 calculated_scotland_totals <- ongoing_waits %>% 
-  filter(!hb_name == "NHS Scotland") %>% 
+  filter(!hb_name == "All Scotland") %>% 
   group_by(month_ending, patient_type) %>% 
   summarise(total_scot_by_month = sum(number_waiting, na.rm = TRUE),
             total_scot_by_month_over12weeks = sum(number_waiting_over12weeks,
@@ -65,7 +65,7 @@ calculated_scotland_totals <- left_join(original_scotland_values, calculated_sco
 # Remove original Scotland data from ongoing_waits and replace with calculated 
 # values
 ongoing_waits <- ongoing_waits %>% 
-  filter(!hb_name == "NHS Scotland") %>% 
+  filter(!hb_name == "All Scotland") %>% 
   rbind(calculated_scotland_totals)
 
 
