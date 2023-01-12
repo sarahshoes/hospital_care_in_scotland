@@ -72,9 +72,8 @@ fake_data_to_map <- fake_data %>%
       plotdata <- admissions_spec %>% 
          filter(admission_type %in% input$ha_admission_type) %>% 
          filter(hb_name %in% input$ha_health_board) %>% 
-         filter(age_group == "All ages") %>% 
-         filter(speciality %in% input$ha_health_board) %>% 
-         plotmapping <- aes(x=mdate, y=percent_var, colour = age_group) 
+         filter(speciality %in% input$ha_speciality) %>% 
+         plotmapping <- aes(x=mdate, y=percent_var, colour = speciality) 
          plottitle <- ("Weekly number of hospital admissions - by speciality")
          plotylabel <- ("% change relative to 2018/19") 
          timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)

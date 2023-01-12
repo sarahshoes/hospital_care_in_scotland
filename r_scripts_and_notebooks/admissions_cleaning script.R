@@ -52,7 +52,7 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
   mutate(above_thresh = ifelse(percent_variation>0,7,0))
 
-weekly_admissions_demog <- weekly_admissions_spec %>% 
+weekly_admissions_demog <- weekly_admissions_demog %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
   mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
@@ -63,7 +63,7 @@ weekly_admissions_demog <- weekly_admissions_spec %>%
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
   mutate(above_thresh = ifelse(percent_variation>0,7,0))
 
-weekly_admissions_dep <- weekly_admissions_spec %>% 
+weekly_admissions_dep <- weekly_admissions_dep %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
   mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
   mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
