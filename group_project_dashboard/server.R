@@ -14,7 +14,7 @@ fake_data_to_map <- fake_data %>%
 # addPolygons adds health board shape from shapefile
        addPolygons(color = "black", weight = 1) %>% 
 # fit scotland onto map using fitBounds once we know the dimensions of the map
-      fitBounds(lat1 = 55, lng1 = -4, lat2 = 60, lng2 = -2) %>% 
+      fitBounds(lat1 = 55, lng1 = -7, lat2 = 61, lng2 = 0) %>% 
        addCircleMarkers(lng = health_board_lat_lon$Longitude, 
                         lat = health_board_lat_lon$Latitude,
                         radius = fake_data_to_map$fake_number,
