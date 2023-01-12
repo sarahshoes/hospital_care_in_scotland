@@ -1,4 +1,6 @@
 Metric,2018 / 2019 Average,Current Status
-A&E Attendances Waiting < 4 h (Target > 85%),92.80%,77.20%
-Bed Occupany (85% Risk Threshold),87.20%,87.20%
-C,yy,yyyy
+A&E Attendances Waiting < 4 h (Target > 85%),92.8%,77.2%
+Number of Weekly Admissions (Emergency),12192,11223
+Number of Weekly Admissions (Planned),3840,3073
+Bed Occupany (85% Risk Threshold),87.2%,87.2%
+Delayed Discharge Bed Days by Month,43572,58826
