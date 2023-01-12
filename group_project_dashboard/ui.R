@@ -22,17 +22,84 @@ ui <- fluidPage(
                       )
              )
     ),
+    
+    
+    tabPanel("Admissions - demographics",
+             fluidRow(
+               column(width = 3,
+                      checkboxGroupInput(inputId = "ha_age_group",
+                                         label = "Select Age Group",
+                                         choices = unique(admissions_demog$age_group),
+                                         selected = "All ages")
+               )
+               ,
+               column(width = 3,                      
+                      selectInput(inputId = "ha_health_board",
+                                  label = "Select Health Board",
+                                  choices = health_board_list,
+                                  selected = "All Scotland"),
+               )
+               ,
+               column(width = 3,
+                      radioButtons(inputId = "ha_admission_type",
+                                   label = "Select Admission Type",
+                                   choices = unique(admissions_spec$admission_type),
+                                   selected = "All")
+               )
+               ,
+               column(width = 3,
+                      checkboxGroupInput(inputId = "ha_dep_index",
+                                         label = "Select SIMD Index",
+                                         choices = unique(admissions_dep$simd_quintile),
+                                         selected=c(1,5),
+                                         inline = TRUE)
+               )
+             ),
+             fluidRow(
+               column(width=6,
+                      plotOutput("admissions_byage") 
+               ),
+               column(width=6,
+                      plotOutput("admissions_bydep") 
+               )
+             ),
+             fluidRow(),
+             fluidRow(
+               column(width=6,
+                      plotOutput("admissions_byspec") 
+               ),
+               column(width=2,
+                      checkboxGroupInput(inputId = "ha_speciality",
+                                         label = "Speciality",
+                                         choices = unique(admissions_spec$speciality),
+                                         selected = "All")    
+               ),
+               column(width=4,
+                      plotOutput("admissions_byspec_bar") 
+               )
+             )
+    ), 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     tabPanel("Admissions",
-             # A&E Waiting Times 
+             # fluid row 1 - admissions
              fluidRow(
                column(width = 6, 
-                      tags$h2("A&E Attendances")
+                      tags$h2("A&E Waiting Times")
                       ),
                column(width = 6, 
                       tags$h2("Covid Admissions")
                      )
              ),
-             
+             # fluid row 2 - admissions
              fluidRow(
                column(width = 3,
                       checkboxGroupInput(inputId = "minor_or_emerg_dept",
@@ -57,7 +124,7 @@ ui <- fluidPage(
                                          )
                       )
              ),
-             
+             # fluid row 3 - admissions
             fluidRow(
                column(width = 6,
                       plotOutput("a_and_e_waiting_times")
@@ -65,90 +132,51 @@ ui <- fluidPage(
                column(width = 6,
                       plotOutput("covid_cases")
                       )
-               )
-                    ),
-    tabPanel("Admissions - demographics",
-             fluidRow(
-               column(width = 3,
-                      checkboxGroupInput(inputId = "ha_age_group",
-                                         label = "Select Age Group",
-                                         choices = unique(admissions_demog$age_group),
-                                         selected = "All ages")
-                )
-               ,
-               column(width = 3,                      
-                      selectInput(inputId = "ha_health_board",
-                                  label = "Select Health Board",
-                                  choices = health_board_list,
-                                  selected = "All Scotland"),
-               )
-               ,
-               column(width = 3,
-               radioButtons(inputId = "ha_admission_type",
-                           label = "Select Admission Type",
-                           choices = unique(admissions_spec$admission_type),
-                           selected = "All")
-               )
-               ,
-               column(width = 3,
-                      checkboxGroupInput(inputId = "ha_dep_index",
-                                         label = "Select SIMD Index",
-                                         choices = unique(admissions_dep$simd_quintile),
-                                         selected=c(1,5),
-                                         inline = TRUE)
-               )
-             ),
-             fluidRow(
-               column(width=6,
-                      plotOutput("admissions_byage") 
-                      ),
-               column(width=6,
-                      plotOutput("admissions_bydep") 
-                      )
-             ),
-             fluidRow(),
-             fluidRow(
-               column(width=6,
-                             plotOutput("admissions_byspec") 
-                      ),
-             column(width=2,
-                    checkboxGroupInput(inputId = "ha_speciality",
-                                label = "Speciality",
-                                choices = unique(admissions_spec$speciality),
-                                selected = "All")    
-                    ),
-             column(width=4,
-                    plotOutput("admissions_byspec_bar") 
-                    )
-             )
-            ),
-    tabPanel("Hospital Activity",
-             # Treatment Waiting Times
-             fluidRow(
-               column(width = 6, 
+               ),
+            
+            # fluid row 4 - admissions
+            fluidRow(
+              column(width = 6, 
+                     tags$h2("Treatment Waiting Lists")
+                     )
+              ),
+            
+            # fluid row 5 - admissions
+            fluidRow(
+              column(width = 3, 
                       checkboxGroupInput(inputId = "out_or_inpatient",
                                          label = "Patient Type",
                                          choices = unique(ongoing_waits$patient_type),
                                          selected = c("New Outpatient",
                                                       "Inpatient/Day case")
-                      ),
+                      )
+                     ),
+              column(width = 3,
                       selectInput(inputId = "treat_wait_health_board",
                                   label = "Select Health Board",
                                   choices = health_board_list,
                                   selected = "All Scotland"
-                      ),
-                      plotOutput("treatment_waiting_times"),
+                      )
+                     )
+              ),
+            
+            # fluid row 5 - admissions
+            fluidRow(
+              column(width = 6,
+            plotOutput("treatment_waiting_times"),
                       tags$a("Note: There are issues with NHS Tayside results caused by
                              missing data from 2017 and 2018.")
-               ), 
-               column(width = 6, 
-                      selectInput(inputId = "occ_health_board", 
-                                  label = "Select Health Board", 
-                                  choices = health_board_list, 
-                                  selected = "All Scotland"),
-                      plotOutput("beds") 
+              ) 
+                     )
+                    ),
+
+    tabPanel("Hospital Activity",
+             fluidRow(
+               column(width = 12, 
+                      tags$h2("Length of Hospital Stay")
                )
-             ), 
+             ),
+             
              fluidRow(
                column(width = 6,
                       selectInput(inputId = "stay_admission_health_board", 
@@ -166,6 +194,23 @@ ui <- fluidPage(
                )
                
                
+             ),
+             
+             fluidRow(
+               column(width = 6, 
+                      tags$h2("Bed Occupancy")
+               )
+             ),
+             
+             fluidRow(
+               
+               column(width = 6, 
+                      selectInput(inputId = "occ_health_board", 
+                                  label = "Select Health Board", 
+                                  choices = health_board_list, 
+                                  selected = "All Scotland"),
+                      plotOutput("beds") 
+               )
              )
     ),
     
