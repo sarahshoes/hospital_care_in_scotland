@@ -5,36 +5,95 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(skimr)
 ```
 
 
-Example of creating health board indicators
+Example of creating summary indicators by health board
 
+# note you dont need this read script as its already read into the app.
 ```{r}
 admissions_spec <- read_csv(here::here("clean_data/weekly_admissions_spec_clean.csv")) 
+delayed_discharge <- read_csv(here::here("clean_data/delayed_discharge_clean.csv"))  
 ```
 
-#this will already be available in the app
 
+# extract admissions data (Emergency)
 ```{r}
-selected <- admissions_spec %>% 
-  filter(admission_type == "All") %>% 
+# extract 2018/19 average and current value
+seldata_admissions <- admissions_spec %>% 
+  filter(admission_type == "Emergency") %>% 
   filter(speciality=="All") %>% 
-  filter(admission_type =="All") %>% 
-  #filter(year == 2020) %>% 
-  filter(iswinter) %>%
-  group_by(hb_name) %>% 
-  summarise(count_bad_days = sum(above_thresh), 
-            count_days = n()*7, # if data is monthly this will be 30
-            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
-            mean_percentvar =mean(percent_var)) 
-```
-the value to add to summary tab is pcnt_bad_days
+  filter(wdate == max(wdate)) %>% 
+  #group_by(hb_name) %>% 
+  select(hb_name, average20182019, number_admissions, percent_var) 
+  
+# add this to summary table
+ha1_byhb <- seldata_admissions %>% 
+  filter(hb_name != "All Scotland") 
 
+# add this to plot
+ha1_tot <- seldata_admissions %>% 
+ filter(hb_name =="All Scotland")
+```
+
+
+# extract admissions data (Planned)
 ```{r}
-selected %>% 
-  ggplot() +
-  aes(x=hb_name, y=pcnt_bad_days) +
-  geom_col() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# extract 2018/19 average and current value
+seldata_admissions <- admissions_spec %>% 
+  filter(admission_type == "Planned") %>% 
+  filter(speciality=="All") %>% 
+  filter(wdate == max(wdate)) %>% 
+  #group_by(hb_name) %>% 
+  select(hb_name, average20182019, number_admissions, percent_var) 
+  
+# add this to summary table
+ha2_byhb <- seldata_admissions %>% 
+  filter(hb_name != "All Scotland") 
+
+# add this to plot
+ha2_tot <- seldata_admissions %>% 
+ filter(hb_name =="All Scotland")
+```
+
+#extract delayed discharge data
+# extract 2018/19 average and current value
+```{r}
+seldata <- delayed_discharge %>% 
+  filter(age_group == "All (18plus)") %>% 
+  filter(reason_for_delay=="All Delay Reasons") %>% 
+  filter(mdate == max(mdate)) %>% 
+  #group_by(hb_name) %>% 
+  select(hb_name, avg_20182019, number_of_delayed_bed_days, percent_var) 
+  
+# add this to summary table
+dd_byhb <- seldata %>% 
+  filter(hb_name != "All Scotland") 
+
+# add this to plot
+dd_tot <- seldata %>% 
+ filter(hb_name =="All Scotland")
+```
+
+
+# parameter names
+```{r}
+"Admissions to Hospital - Emergency"
+"Admissions to Hospital - Planned"
+"Delayed Discharge Bed Days"
+```
+
+
+# values you need for map are
+```{r}
+ha1_byhb
+ha2_byhb
+dd_byhb
+```
+#values you need for table are
+```{r}
+ha1_tot
+ha2_tot
+dd_tot
 ```
