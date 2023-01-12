@@ -46,18 +46,11 @@ covid_cases <- covid_cases %>%
   rename(admissions = admissions_new) %>%   
   rename(age_band = age_band_new)    
  
-  #calculate 2018-2019 levels
-  pre_pandemic_avg <- covid_cases %>% 
-  filter(between(year,2018,2019)) %>% 
-  group_by(hb,age_band) %>% 
-  summarise(avg_20182019 =  mean(admissions)) 
-
-  #merge this column back into all data
-  covid_cases <- left_join(covid_cases,pre_pandemic_avg) 
-
+ 
   #calculate percent variation
   covid_cases <-covid_cases %>% 
-  mutate(percent_var = 100*(admissions-avg_20182019)/avg_20182019)
+  mutate(avg_20182019 = 0)
+  mutate(percent_var = NA) #no covid cases prior to pandemic
 
   # setup data as a tsibble
   #covid_cases <- rowid_to_column(covid_cases, "id") 

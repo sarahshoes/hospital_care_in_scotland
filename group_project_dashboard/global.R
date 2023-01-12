@@ -25,11 +25,13 @@ health_board_list <- read_csv(here::here("lookup_tables/health_board_codes.csv")
 waiting_times <- read_csv(here::here("clean_data/a_and_e_data_clean.csv")) %>% 
   janitor::clean_names()
 
- 
-
 # ADMISSION - COVID CASES 
 covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv")) 
 
+# ADMISSIONS - BY SPECIALITY, DEMOG and DEPRIVATION 
+admissions_spec <- read_csv(here::here("clean_data/weekly_admissions_spec_clean.csv")) 
+admissions_demog <- read_csv(here::here("clean_data/weekly_admissions_demog_clean.csv")) 
+admissions_dep <- read_csv(here::here("clean_data/weekly_admissions_dep_clean.csv")) 
 
 # TREATMENT WAITING TIMES
 
@@ -51,12 +53,15 @@ bed_occupancy <- read_csv(here::here("clean_data/bed_occupancy_clean.csv"))
 stay_length <- read_csv(here::here("clean_data/stay_length_clean.csv"))
 
 
-# HEALTH BOARD MAP
+# HEALTH BOARD MAP 
 
 scot_hb_shapefile <- st_read(here::here("map_files/scotland_hb_shapefile_simplified/
          scot_hb_shapefile_simplified.shp"))
 
 health_board_lat_lon <- read_csv(here::here("map_files/health_board_lat_lon.csv"))  
 
-fake_data <- read_csv(here::here("map_files/fake_health_board_data.csv")) 
+summary_tab_map_data <- read_csv(here::here("clean_data/summary_tab_map_data.csv")) 
 
+# SUMMARY TAB DATA
+
+summary_tab_table_data <- read_csv(here::here("clean_data/summary_tab_table_data.csv"))

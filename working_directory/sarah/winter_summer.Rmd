@@ -1,0 +1,54 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(infer)
+```
+
+## define functions
+```{r}
+source(here::here("r_scripts_and_notebooks/fun_smoother.R"))
+#source(here::here("r_scripts_and_notebooks/ws_null_hypothesis.R"))
+```
+
+## note that data must just be one timeries
+## date must be date format either weekly or monthly
+
+## load data here
+```{r}
+covid_cases <- read_csv(here::here("clean_data/covid_cases_clean.csv"))  
+```
+
+```{r}
+#define filters
+input <- list(dd_health_board = "NHS Ayrshire and Arran",dd_age_group = "All (18plus)")
+input <- list(cc_age_group = "75plus")
+```
+
+
+## start here ##
+```{r}
+covid_cases %>% 
+         filter(age_band == input$cc_age_group)
+```
+
+```{r}
+data <- seldata$number_of_delayed_bed_days 
+date <- seldata$wdate
+indicator <- "weekly"
+```
+
+## call function to smooth data
+```{r}
+smoothed_data <- function(date,data,indicator)
+```
+
+
+## plot data
+smoothed_data %>% 
+  ggplot() +
+    aes(x=date, y = data) +
+    geom_line(colour='red') 

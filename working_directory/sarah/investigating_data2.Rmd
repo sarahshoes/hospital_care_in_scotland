@@ -15,6 +15,7 @@ library("tidyverse")
 library("janitor")
 library("lubridate")
 library("skimr")
+library("infer")
 ```
 
 #read in healthboard codes
@@ -46,12 +47,12 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   rename("speciality_qf"= "specialty_qf") 
 ```
 
-merge hbnames into datafiles
+# merge hbnames into datafiles
 ```{r}
 weekly_admissions_spec <- left_join(weekly_admissions_spec,hb_codes)
 weekly_admissions_demog <- left_join(weekly_admissions_demog,hb_codes)
 weekly_admissions_dep <- left_join(weekly_admissions_dep,hb_codes) 
-```
+``
 
 do the analysis needed for identifying winter and 'crisis'
 ```{r}
@@ -79,15 +80,26 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
 ```{r}
 monthly_admissions_spec <- weekly_admissions_spec
 
-<<<<<<< Updated upstream
-monthly_admissions_spec
-
-```
-=======
 monthly_admissions_spec <- monthly_admissions_spec %>% 
   group_by(hb, admission_type, speciality, year, month) %>% 
-  mutate(monthly_admissions = mean(number_admissions, na.rm = TRUE)) %>% 
-  mutate(mdate = as.Date(make_datetime(year, month, 15))) 
+  summarise(monthly_admissions = 4*mean(number_admissions, na.rm = TRUE)) %>% 
+  mutate(mdate = as.Date(make_datetime(year, month, 15))) %>% 
+  ungroup()
+```
+#merge hbnames into datafiles
+```{r}
+monthly_admissions_spec <- left_join(monthly_admissions_spec,hb_codes)
+#monthly_admissions_demog <- left_join(monthly_admissions_demog,hb_codes)
+#monthly_admissions_dep <- left_join(monthly_admissions_dep,hb_codes) 
+```
+```{r}
+monthly_admissions_spec <- monthly_admissions_spec %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
+```
+
+```{r}
+
 ```
 
 ```{r}
@@ -120,40 +132,119 @@ filter(month==8) %>%
 ```
 
 
-
-
->>>>>>> Stashed changes
-
-
 ```{r}
-elec_rolling <- vic_elec %>% 
+library(slider)
+
+data_rolling <- weekly_admissions_spec %>% 
+  filter(wdate > as.Date("2020-05-01")) %>% 
+  filter(speciality == "All") %>% 
+  filter(admission_type == "All") %>% 
+  filter(hb_name =="All Scotland") %>%  
   mutate(
-    temp_moving_avg = slide_dbl(
-      .x = Temperature, 
+    moving_avg = slide_dbl(
+      .x = number_admissions, 
       .f = ~ mean(., na.rm = TRUE),
-      .before = 1000,
-      .after = 1000
+      .before = 12,
+      .after = 12,
+      .complete = FALSE
     )
   )
-
-elec_rolling
+data_rolling
 ```
 
+#calculate difference to create mvar
+```{r}
+data_rolling <- data_rolling %>% 
+  mutate(mvar = number_admissions- moving_avg)
+```
 
+# plot - check the smoother makes sense and tweak values if they dont
+```{r}
+ggplot(data_rolling)+
+  geom_line(aes(x = wdate, y = number_admissions), colour = "gray") +
+  geom_line(aes(x = wdate, y = moving_avg), colour = "red") +
+  geom_line(aes(x = wdate, y = mvar), colour = "green") 
+```
 
+#calculate difference to create mvar
+```{r}
+data_rolling <- data_rolling %>% 
+  mutate(mvar = number_admissions- moving_avg)
+```
+
+#now create a boxplot
+```{r}
+data_rolling %>% 
+  ggplot() +
+  aes(x=iswinter, y=mvar) +
+  geom_boxplot()
+```
+
+### Hypothesis Test
+
+Is summer is significantly different to winter?
+
+The null hypothesis is that the average value for summer is the same or lower than the average value for winter.
+
+H0 : mean winter - mean summer <= 0
+HA : mean winter - mean summer >0 
+
+we are setting alpha for this test to be 0.05
+```{r}
+alpha=0.05
+```
 
 ```{r}
-weekly_admissions_demog <- weekly_admissions_demog %>% 
-  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
-  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
-  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
-  mutate(wdate = ymd(week_ending)) %>% 
-  # identify "All Scotland" data
-  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
-  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
-  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
-  mutate(above_thresh = ifelse(percent_variation>0,7,0))
+data_rolling %>% 
+  filter(iswinter) %>% 
+  ggplot() +
+  aes(x = mvar) +
+  geom_histogram(col = "white")
 ```
+```{r}
+seasonal_avg <- data_rolling %>%
+  group_by(iswinter) %>% 
+  summarise(mean= mean(mvar, na.rm=TRUE))
+seasonal_avg
+```
+
+```{r}
+null_distribution <- data_rolling %>%
+  filter(iswinter) %>%  
+  specify(response = mvar) %>%
+  hypothesize(null = "point", mu = 6.04) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+```
+
+```{r}
+null_distribution %>%
+  visualise(bins = 30) + 
+shade_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
+            , direction = "less")
+ 
+p_value <- null_distribution %>% 
+get_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
+            , direction = "less")
+pull()
+```
+```{r}
+p_value 
+```
+If pvalue is less than alpha we can reject null hypothesis
+
+```{r}
+if(p_value > alpha){
+ print("We cannot reject the null hypothesis. The average winter values are the same as the average summer values")
+}else{
+    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter values are significantly different to the average winter values")}
+```
+
+
+
+
+
+
 
 ```{r}
 weekly_admissions_dep <- weekly_admissions_dep %>% 
