@@ -15,13 +15,14 @@ output:
 Sarah Hughes, Malcolm Speight and Fiona Carson
 
 ## Roles & responsibilities of each member
-Sarah worked on …
+Sarah worked on the following datasets: Delayed Discharge Data, by health board, age and reason for delay. 
+Hospital Admissions, by speciality, by age and buy index of deprivation.
 
 Malcolm worked on …
 
 Fiona worked on …
 
-Everyone worked on …
+Everyone worked on the dashboard layout and the project plan.
 
 ## Brief description of dashboard topic
 Our dashboard is based on NHS Scotland data. Our brief was to investigate to what extent the 'winter crises' reported in the media are real and determine how Covid has affected acute care in Scotland. 
