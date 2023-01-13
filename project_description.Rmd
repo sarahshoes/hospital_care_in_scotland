@@ -39,7 +39,6 @@ The data links provided in the brief were investigated and other data was also s
 The git folder structure was set up and the repository shared. 
 
 Once the data was better understood we discussed the key datasets that would help answer the brief. These key datasets were divided among team members and then analysed in detail to determine trends in time and by geography, age and deprivation. 
-
 Planning the structure of the dashboard was conducted on pen and paper. Once this was agreed, a more detailed dashboard outline was created and shared through Miro. 
 
 Cleaning and wrangling the data was a time consuming task, which was followed by preparing suitable graphs. A graph theme, colour palette and graph plotting function were created to simply the visualisation step and ensure our plots were consistent.
@@ -71,7 +70,16 @@ We used the dataset on … to answer … and because it was …
 ## Data quality and potential bias, including a brief summary of data cleaning and transformations
 According to the About tab on the dataset page/dedicated page online, the data quality …
 The dataset may/may not be biased because …
+
+In general the data quality is very good with very little missing data. Some issues were encountered where the continuity of the data was affected by changes at hospital level e.g. changes in the definition of emergency departments due to Covid, the exclusion of certain diagnostic tests from outpatient activity from Oct 2019 onwards. 
+For the treatment times data, there were issues with numbers on the waiting lists from NHS Tayside Q2 2017 to Q2 2018 and low values for Q3-4 2018. The NHS Scotland data was also recorded as zero (or very low) for this these quarters. This meant the NHS Scotland data had be calculated manually by summing the totals from all the health boards. 
+
+There are two treatment waiting times datasets (completed treatment and patients still waiting) which will both be biased. The completed treatment dataset will be skewed towards shorter wait times, as the more urgent cases will be dealt with quicker. The opposite will be true for the list of patients still waiting - these will be the less urgent cases who will have to wait longer. This issue was highlighted in a recent incident where a government dashboard only used the competed treatment data to report waiting times (https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/).
+
 To clean the datasets we …
+
+
+
 
 ## How is the data stored and structured
 [Hint: This page offers a good starting point for understanding the data structure: https://guides.statistics.gov.scot/article/34-understanding-the-data-structure]
@@ -79,7 +87,12 @@ The data is in the form of …
 This means …
 Benefits of storing the data like this are …
 
+
+
 ## Ethical and legal considerations of the data
-[Hint: this page contains information on the Open Government License which covers most datasets on statistics.gov.scot: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/]
-There are no/There may be ethical considerations, because …
-The datasets are covered by the Open Government License, which means …
+
+There are some ethical considerations around publishing waiting time data. As described in the data bias section different waiting times will be calculated depending on whether you use the completed or patients still waiting datasets. This could lead to patients having unrealistic expectations for how quickly they will be seen for a particular condition. 
+
+
+The datasets are covered by the Open Government License: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+In summary this means the data can be copied, published, transmitted, adapted and even exploited commercially or non-commercially but the source of the information must be acknowledged. 
