@@ -78,17 +78,18 @@ server <- function(input, output) {
          plotmapping <- aes(x=wdate, y=percent_var, colour = speciality) 
          plottitle <- ("Weekly number of hospital admissions - by speciality")
          plotylabel <- ("% change relative to 2018/19") 
-         timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+         timeseriesplot_z(plotdata,plotmapping,plottitle,plotylabel)
    }) 
    
 # Hospital admissions  by speciality - barplot
    output$admissions_byspec_bar <- renderPlot({
-      plotdata <- admissions_spec %>% 
+      admissions_spec %>% 
          filter(speciality != "All") %>%
          ggplot() +
-         aes(x=speciality, y=number_admissions, fill = as.factor(year)) +
-         geom_col(position = "dodge") #+
-         #scale_fill_manual(palette=palette$mycolours)
+         aes(x=speciality, y=number_admissions, group = speciality) +
+         geom_col(position = "dodge") +
+         #scale_colour_manual(palette=palette$mycolours)
+         theme_phs
    })  
    
       
@@ -102,7 +103,7 @@ server <- function(input, output) {
       plotmapping <- aes(x=wdate, y=percent_var, colour = age_group) 
       plottitle <- ("Weekly number of hospital admissions - by age")
       plotylabel <- ("% change relative to 2018/19") 
-      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot_z(plotdata,plotmapping,plottitle,plotylabel)
    })   
    
 # Hospital admissions  by dep   
@@ -114,7 +115,7 @@ server <- function(input, output) {
       plotmapping <- aes(x=wdate, y=percent_var, colour = as.factor(simd_quintile)) 
       plottitle <- ("Weekly number of hospital admissions - by SIMD")
       plotylabel <- ("% change relative to 2018/19") 
-      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot_z(plotdata,plotmapping,plottitle,plotylabel)
    })      
    
 # Treatment Waiting Times
@@ -150,7 +151,7 @@ server <- function(input, output) {
       plotmapping <- aes(x=mdate, y=percent_var, colour = age_group) 
       plottitle <- ("Number of delayed bed days - by age")
       plotylabel <- ("% change relative to 2018/19") 
-      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot_z(plotdata,plotmapping,plottitle,plotylabel)
    })
       
 # Delayed Discharge  by reason for delay   
@@ -162,7 +163,7 @@ server <- function(input, output) {
      plotmapping <- aes(x=mdate, y=percent_var, colour = reason_for_delay) 
      plottitle <- ("Number of delayed bed days - by reason for delay")
      plotylabel <- ("% change relative to 2018/19") 
-     timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+     timeseriesplot_z(plotdata,plotmapping,plottitle,plotylabel)
       })
 
 # Bed occupancy

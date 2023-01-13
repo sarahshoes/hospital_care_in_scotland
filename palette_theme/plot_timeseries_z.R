@@ -2,12 +2,12 @@
 
 #this function defines the plot
 
-timeseriesplot <- function(plotdata,plotmapping,plottitle,plotylabel){
+timeseriesplot_z <- function(plotdata,plotmapping,plottitle,plotylabel){
   plotlim <- as.Date(c("2020-01-01","2022-12-31")) 
   ggplot(plotdata,plotmapping) +
     geom_line() + 
-    #add zero line - messes up some plots so made z version for now
-    #geom_hline(yintercept = 0, colour = palette$mycolours[8], linetype = "dashed") + 
+    #add zero line
+    geom_hline(yintercept = 0, colour = palette$mycolours[8], linetype = "dashed") + 
     # add dashed lines to show the boundaries 
     geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", linewidth = 0.5) +                                   geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", linewidth = 0.5) + 
     geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", linewidth = 0.5) + 
