@@ -1,43 +1,43 @@
 hb,hb_name,metric,value,scaled_value
-S08000015,NHS Ayrshire and Arran,A&E Attendances Waiting < 4h,85.3,14.57641921
-S08000016,NHS Borders,A&E Attendances Waiting < 4h,63.6,6.048034934
-S08000017,NHS Dumfries and Galloway,A&E Attendances Waiting < 4h,80,12.49344978
-S08000019,NHS Forth Valley,A&E Attendances Waiting < 4h,70,8.563318777
-S08000020,NHS Grampian,A&E Attendances Waiting < 4h,86.6,15.08733624
-S08000022,NHS Highland,A&E Attendances Waiting < 4h,95.2,18.46724891
-S08000024,NHS Lothian,A&E Attendances Waiting < 4h,64.9,6.558951965
-S08000025,NHS Orkney,A&E Attendances Waiting < 4h,90.6,16.65938865
-S08000026,NHS Shetland,A&E Attendances Waiting < 4h,92.1,17.2489083
-S08000028,NHS Western Isles,A&E Attendances Waiting < 4h,99.1,20
-S08000029,NHS Fife,A&E Attendances Waiting < 4h,89.9,16.38427948
-S08000030,NHS Tayside,A&E Attendances Waiting < 4h,94.5,18.19213974
-S08000031,NHS Greater Glasgow and Clyde,A&E Attendances Waiting < 4h,77.5,11.51091703
+S08000015,NHS Ayrshire and Arran,A&E Attendances Waiting < 4h,85.3,21.56331877729258
+S08000016,NHS Borders,A&E Attendances Waiting < 4h,63.6,8.296943231441052
+S08000017,NHS Dumfries and Galloway,A&E Attendances Waiting < 4h,80,18.323144104803497
+S08000019,NHS Forth Valley,A&E Attendances Waiting < 4h,70,12.209606986899566
+S08000020,NHS Grampian,A&E Attendances Waiting < 4h,86.6,22.358078602620086
+S08000022,NHS Highland,A&E Attendances Waiting < 4h,95.2,27.615720524017473
+S08000024,NHS Lothian,A&E Attendances Waiting < 4h,64.9,9.091703056768566
+S08000025,NHS Orkney,A&E Attendances Waiting < 4h,90.6,24.80349344978166
+S08000026,NHS Shetland,A&E Attendances Waiting < 4h,92.1,25.72052401746725
+S08000028,NHS Western Isles,A&E Attendances Waiting < 4h,99.1,30
+S08000029,NHS Fife,A&E Attendances Waiting < 4h,89.9,24.37554585152839
+S08000030,NHS Tayside,A&E Attendances Waiting < 4h,94.5,27.187772925764193
+S08000031,NHS Greater Glasgow and Clyde,A&E Attendances Waiting < 4h,77.5,16.794759825327514
 S08000032,NHS Lanarkshire,A&E Attendances Waiting < 4h,53.3,2
-S08000015,NHS Ayrshire and Arran,Bed Occupancy (%),93.16251,18.505968
-S08000016,NHS Borders,Bed Occupancy (%),94.95741,19.14823652
-S08000017,NHS Dumfries and Galloway,Bed Occupancy (%),89.06151,17.03850844
-S08000019,NHS Forth Valley,Bed Occupancy (%),77.51881,12.90818766
-S08000020,NHS Grampian,Bed Occupancy (%),88.45029,16.81979577
-S08000022,NHS Highland,Bed Occupancy (%),91.70032,17.98275301
-S08000024,NHS Lothian,Bed Occupancy (%),89.42097,17.1671339
-S08000025,NHS Orkney,Bed Occupancy (%),97.33777,20
+S08000015,NHS Ayrshire and Arran,Bed Occupancy (%),93.16251,27.675950226685103
+S08000016,NHS Borders,Bed Occupancy (%),94.95741,28.67503458026378
+S08000017,NHS Dumfries and Galloway,Bed Occupancy (%),89.06151,25.393235348961475
+S08000019,NHS Forth Valley,Bed Occupancy (%),77.51881,18.968291915871852
+S08000020,NHS Grampian,Bed Occupancy (%),88.45029,25.053015649482752
+S08000022,NHS Highland,Bed Occupancy (%),91.70032,26.86206023227918
+S08000024,NHS Lothian,Bed Occupancy (%),89.42097,25.59331939918009
+S08000025,NHS Orkney,Bed Occupancy (%),97.33777,30
 S08000026,NHS Shetland,Bed Occupancy (%),47.03451,2
-S08000028,NHS Western Isles,Bed Occupancy (%),72.67909,11.17639215
-S08000029,NHS Fife,Bed Occupancy (%),79.22564,13.51894211
-S08000030,NHS Tayside,Bed Occupancy (%),74.3504,11.77443649
-S08000031,NHS Greater Glasgow and Clyde,Bed Occupancy (%),90.56614,17.57690973
-S08000032,NHS Lanarkshire,Bed Occupancy (%),90.38126,17.51075417
-S08000015,NHS Ayrshire and Arran,,,
-S08000016,NHS Borders,,,
-S08000017,NHS Dumfries and Galloway,,,
-S08000019,NHS Forth Valley,,,
-S08000020,NHS Grampian,,,
-S08000022,NHS Highland,,,
-S08000024,NHS Lothian,,,
-S08000025,NHS Orkney,,,
-S08000026,NHS Shetland,,,
-S08000028,NHS Western Isles,,,
-S08000029,NHS Fife,,,
-S08000030,NHS Tayside,,,
-S08000031,NHS Greater Glasgow and Clyde,,,
-S08000032,NHS Lanarkshire,,,
+S08000028,NHS Western Isles,Bed Occupancy (%),72.67909,16.274387783217232
+S08000029,NHS Fife,Bed Occupancy (%),79.22564,19.918354396911848
+S08000030,NHS Tayside,Bed Occupancy (%),74.3504,17.204678981044168
+S08000031,NHS Greater Glasgow and Clyde,Bed Occupancy (%),90.56614,26.230748464413637
+S08000032,NHS Lanarkshire,Bed Occupancy (%),90.38126,26.127839825888017
+S08000015,NHS Ayrshire and Arran,Delayed Discharge Bed Occupancy (%),21.5,14.076335877862597
+S08000016,NHS Borders,Delayed Discharge Bed Occupancy (%),32.6,25.938931297709928
+S08000017,NHS Dumfries and Galloway,Delayed Discharge Bed Occupancy (%),36.4,30
+S08000019,NHS Forth Valley,Delayed Discharge Bed Occupancy (%),16.2,8.412213740458014
+S08000020,NHS Grampian,Delayed Discharge Bed Occupancy (%),11.9,3.816793893129772
+S08000022,NHS Highland,Delayed Discharge Bed Occupancy (%),31.5,24.763358778625957
+S08000024,NHS Lothian,Delayed Discharge Bed Occupancy (%),12.6,4.564885496183207
+S08000025,NHS Orkney,Delayed Discharge Bed Occupancy (%),13.1,5.099236641221374
+S08000026,NHS Shetland,Delayed Discharge Bed Occupancy (%),11.7,3.6030534351145036
+S08000028,NHS Western Isles,Delayed Discharge Bed Occupancy (%),23.8,16.534351145038173
+S08000029,NHS Fife,Delayed Discharge Bed Occupancy (%),15.1,7.236641221374046
+S08000030,NHS Tayside,Delayed Discharge Bed Occupancy (%),14.4,6.4885496183206115
+S08000031,NHS Greater Glasgow and Clyde,Delayed Discharge Bed Occupancy (%),10.2,2
+S08000032,NHS Lanarkshire,Delayed Discharge Bed Occupancy (%),14.2,6.2748091603053435
