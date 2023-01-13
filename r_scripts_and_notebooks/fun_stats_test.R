@@ -1,5 +1,8 @@
 stats_test <- function(smoothed_data){
 
+# library for analysis
+library(infer)
+  
 #calculate difference to create mvar
 smoothed_data <- smoothed_data %>% 
   mutate(mvar = param - moving_avg) 
@@ -39,10 +42,10 @@ p_value <- null_distribution %>%
 
 
 # If pvalue is less than alpha we can reject null hypothesis
-  if(p_value > alpha_test){
-    print("We cannot reject the null hypothesis. The average winter values in this data are the same as the average summer values")
-  }else{
-    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter values in this data are significantly different to the average winter values")}
+#  if(p_value > alpha_test){
+#    print("We cannot reject the null hypothesis. The average winter values in this data are the same as the #average summer values")
+#  }else{
+#    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter #values in this data are significantly different to the average winter values")}
 
 p_value 
   }

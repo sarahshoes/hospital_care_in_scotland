@@ -244,13 +244,19 @@ ui <- fluidPage(
                                         label = "Select Delay Reason",
                                         choices = unique(delayed_discharge$reason_for_delay),
                                          selected = "All Delay Reasons"),
+                     
                      selectInput(inputId = "stat_health_board",
                                  label = "Select Health Board",
                                  choices = health_board_list,
                                  selected = "All Scotland"),
+                     
+                     radioButtons(inputId = "stat_age_group",
+                                  label = "Select Age Group",
+                                  choices = unique(delayed_discharge$age_group),
+                                  selected = "All (18plus)")
                      ),
-               column(width = 9,
-                      plotOutput("discharge_delays_byreason2") 
+               column(width = 8,
+                      plotOutput("discharge_delays_byreason_x") 
                       )
                      ),
              fluidRow(
@@ -259,13 +265,13 @@ ui <- fluidPage(
              ),
              column(width=3,
                       plotOutput("boxplot_prepandemic")
-                    ),
+             ),
              column(width=3,
                     plotOutput("smooth_postpandemic")
-                    ),
+             ),
              column(width=3,
-                    plotOutput("boxplot_prepandemic")
-                    )
+                    plotOutput("boxplot_postpandemic")
+             )
              )
     )
     #end brackets for fluidpage and tabsetpanel

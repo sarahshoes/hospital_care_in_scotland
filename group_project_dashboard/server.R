@@ -211,11 +211,11 @@ server <- function(input, output) {
       })
       
 # Delayed Discharge  for statistical analysis  
-      output$discharge_delays_byreason2 <- renderPlot({
+      output$discharge_delays_byreason_x <- renderPlot({
          plotdata <- delayed_discharge %>% 
             filter(reason_for_delay %in% input$stat_reason_for_delay) %>% 
             filter(hb_name %in% input$stat_health_board) %>% 
-            filter(age_group == "All (18plus)")
+            filter(age_group %in% input$stat_age_group)
          plotmapping <- aes(x=mdate, y=percent_var, colour = reason_for_delay) 
          plottitle <- ("Number of delayed bed days - by reason for delay")
          plotylabel <- ("% change relative to 2018/19") 
@@ -226,18 +226,21 @@ server <- function(input, output) {
       output$smooth_prepandemic <- renderPlot({
          seldata <- delayed_discharge %>% 
             filter(hb_name %in% input$stat_health_board) %>% 
-            filter(age_group == "All (18plus)") %>% 
+            filter(age_group %in% input$stat_age_group) %>% 
             filter(reason_for_delay %in% input$stat_reason_for_delay) %>% 
-            #filter(mdate > as.Date("2020-04-01")) %>% 
+            filter(mdate < as.Date("2020-01-01")) %>% 
             rename(param = number_of_delayed_bed_days) %>% 
             select(mdate, param, iswinter) 
-         smoothed_data <- data_smoother(seldata[1],seldata)
-         # now for plot - could create function?
+         
+         smoothed_data1 <- data_smoother(seldata[1],seldata)
+         smoothed_data1 <- smoothed_data1 %>% 
+            mutate(mvar = param - moving_avg) 
+         # now for plot - could create function
          plotlim <- as.Date(c("2018-01-01","2019-12-31")) 
-         ggplot(smoothed_data) +
-            geom_line(aes(x = mdate, y = param), colour = "gray") +
-            geom_line(aes(x = mdate, y = moving_avg), colour = "red") +
-            geom_line(aes(x = mdate, y = mvar), colour = "green") +
+         ggplot(smoothed_data1) +
+            geom_line(aes(x = mdate, y = param), colour = palette$mycolours[1]) +
+            geom_line(aes(x = mdate, y = moving_avg), colour = palette$mycolours[2]) +
+            geom_line(aes(x = mdate, y = mvar+mean(moving_avg)), colour = palette$mycolours[3]) +
             scale_x_date(limits=plotlim, date_breaks="3 month", 
                          labels = scales::label_date_short(), expand = c(0,0)) +
             # add dashed lines to show the boundaries 
@@ -246,7 +249,124 @@ server <- function(input, output) {
             geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", linewidth = 0.5) + 
             geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", linewidth = 0.5) + 
             geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
-            geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) 
+            geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) +
+            theme_phs +
+            xlab("Date") +   
+            ylab("data(purple), trend(red), residual+mean (green)") +
+            ggtitle("Pre-pandemic Data") + 
+         #add rectangles to denote winter
+            annotate("rect", 
+                     xmin=c(ymd(plotlim[1]),ymd(20181001),ymd(20191001)),
+                     xmax=c(ymd(20180401),ymd(20190401),plotlim[2]), 
+                     ymin=c(-Inf,-Inf,-Inf), 
+                     ymax=c(Inf,Inf,Inf), 
+                     alpha=0.1, fill="gray")   
       })   
+      
+      # Delayed Discharge  for statistical analysis  
+      output$boxplot_prepandemic <- renderPlot({
+         seldata <- delayed_discharge %>% 
+            filter(hb_name %in% input$stat_health_board) %>% 
+            filter(age_group %in% input$stat_age_group) %>% 
+            filter(reason_for_delay %in% input$stat_reason_for_delay) %>% 
+            filter(mdate < as.Date("2020-01-01")) %>% 
+            rename(param = number_of_delayed_bed_days) %>% 
+            select(mdate, param, iswinter) 
+         
+         smoothed_data1 <- data_smoother(seldata[1],seldata)
+         smoothed_data1 <- smoothed_data1 %>% 
+            mutate(mvar = param - moving_avg) 
+         p_value1 <- stats_test(smoothed_data1)
+       
+         smoothed_data1 %>% 
+            ggplot() +
+            aes(x=iswinter, y=mvar) +
+            geom_boxplot() +
+            ylab("residual values (data - long term trend)") +
+            xlab("Season") +
+            scale_x_discrete(
+               labels=c("FALSE" = "Summer (Apr-Sep)", "TRUE" = "Winter (Oct-Mar)"), 
+               limits = c("FALSE","TRUE")) +
+            theme_phs +
+            if (p_value1 < 0.05){ggtitle(str_c("Seasonal Test  p_value=",as.character(p_value1)), 
+                                        subtitle = "Winter higher than Summer")
+            }else{
+               ggtitle(c("Seasonal Test",as.character(p_value1)), 
+                       subtitle = "No significant difference in Winter/Summer")     
+               }
+         
+      })   
+      # Delayed Discharge  for statistical analysis  
+      output$smooth_postpandemic <- renderPlot({
+         seldata <- delayed_discharge %>% 
+            filter(hb_name %in% input$stat_health_board) %>% 
+            filter(age_group %in% input$stat_age_group) %>% 
+            filter(reason_for_delay %in% input$stat_reason_for_delay) %>% 
+            filter(mdate > as.Date("2020-04-01")) %>% 
+            rename(param = number_of_delayed_bed_days) %>% 
+            select(mdate, param, iswinter) 
+         
+         smoothed_data2 <- data_smoother(seldata[1],seldata)
+         smoothed_data2 <- smoothed_data2 %>% 
+            mutate(mvar = param - moving_avg) 
+         # now for plot - could create function
+         plotlim <- as.Date(c("2020-01-01","2022-12-31")) 
+         ggplot(smoothed_data2) +
+            geom_line(aes(x = mdate, y = param), colour = palette$mycolours[1]) +
+            geom_line(aes(x = mdate, y = moving_avg), colour = palette$mycolours[2]) +
+            geom_line(aes(x = mdate, y = mvar+mean(moving_avg)), colour = palette$mycolours[3]) +
+            scale_x_date(limits=plotlim, date_breaks="3 month", 
+                         labels = scales::label_date_short(), expand = c(0,0)) +
+            # add dashed lines to show the boundaries 
+            geom_vline(xintercept=ymd(20201001),color="gray",linetype="dotted", linewidth = 0.5) +
+            geom_vline(xintercept=ymd(20211001),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20221001),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20200401),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20210401),color="gray",linetype="dotted", linewidth = 0.5) + 
+            geom_vline(xintercept=ymd(20220401),color="gray",linetype="dotted", linewidth = 0.5) +
+            theme_phs +
+            xlab("Date") +   
+            ylab("data(purple), trend(red), residual+mean (green)") +
+            ggtitle("Post-pandemic Data") + 
+            #add rectangles to denote winter
+            annotate("rect", 
+                     xmin=c(ymd(plotlim[1]),ymd(20201001),ymd(20211001),ymd(20221001)),
+                     xmax=c(ymd(20200401),ymd(20210401),ymd(20220401),plotlim[2]), 
+                     ymin=c(-Inf,-Inf,-Inf,-Inf), 
+                     ymax=c(Inf,Inf,Inf,Inf), 
+                     alpha=0.1, fill="gray")  
+      })   
+      
+      # Delayed Discharge  for statistical analysis  
+      output$boxplot_postpandemic <- renderPlot({
+         seldata <- delayed_discharge %>% 
+            filter(hb_name %in% input$stat_health_board) %>% 
+            filter(age_group %in% input$stat_age_group) %>% 
+            filter(reason_for_delay %in% input$stat_reason_for_delay) %>% 
+            filter(mdate > as.Date("2020-04-01")) %>% 
+            rename(param = number_of_delayed_bed_days) %>% 
+            select(mdate, param, iswinter) 
+         
+         smoothed_data2 <- data_smoother(seldata[1],seldata)
+         smoothed_data2 <- smoothed_data2 %>% 
+            mutate(mvar = param - moving_avg) 
+         p_value2 <- stats_test(smoothed_data2)
+         
+         smoothed_data2 %>% 
+            ggplot() +
+            aes(x=iswinter, y=mvar) +
+            geom_boxplot() +
+            ylab("residual values (data - long term trend)") +
+            xlab("Season") +
+            scale_x_discrete(
+               labels=c("FALSE" = "Summer (Apr-Sep)", "TRUE" = "Winter (Oct-Mar)"), 
+               limits = c("FALSE","TRUE")) +
+            theme_phs +
+            if (p_value2 < 0.05){ggtitle("Seasonal Test  p_value=",as.character(p_value2))
+            }else{
+               ggtitle("Seasonal Test", subtitle = "No significant difference in Winter/Summer")     
+            }
+      })   
+      
       
 }
