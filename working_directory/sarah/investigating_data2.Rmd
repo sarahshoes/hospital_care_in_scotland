@@ -1,7 +1,9 @@
 ---
 title: "Investigating Data - Covid Wider Impacts"
-output: html_notebook
-editor_options: 
+output:
+  pdf_document: default
+  html_notebook: default
+editor_options:
   chunk_output_type: inline
 ---
 
@@ -24,8 +26,7 @@ hb_codes <- read_csv(here::here("lookup_tables/health_board_codes.csv"))
 hb_codes <- clean_names(hb_codes)
 ```
 
-load in datafiles
-
+#load in datafiles
 ```{r}
 weekly_admissions_spec <- read_csv("Covid admissions by health board and speciality.csv")
 weekly_admissions_spec <- clean_names(weekly_admissions_spec)
@@ -52,9 +53,9 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
 weekly_admissions_spec <- left_join(weekly_admissions_spec,hb_codes)
 weekly_admissions_demog <- left_join(weekly_admissions_demog,hb_codes)
 weekly_admissions_dep <- left_join(weekly_admissions_dep,hb_codes) 
-``
+```
 
-do the analysis needed for identifying winter and 'crisis'
+#do the analysis needed for identifying winter and 'crisis'
 ```{r}
 weekly_admissions_spec %>% 
   distinct(hb_name)
@@ -62,7 +63,18 @@ weekly_admissions_spec %>%
 ```{r}
 skim(weekly_admissions_spec)
 ```
-
+```{r}
+weekly_admissions_demog <- weekly_admissions_demog %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0))
+```
 
 ```{r}
 weekly_admissions_spec <- weekly_admissions_spec %>% 
@@ -96,10 +108,6 @@ monthly_admissions_spec <- left_join(monthly_admissions_spec,hb_codes)
 monthly_admissions_spec <- monthly_admissions_spec %>% 
   mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
-```
-
-```{r}
-
 ```
 
 ```{r}
@@ -166,11 +174,6 @@ ggplot(data_rolling)+
   geom_line(aes(x = wdate, y = mvar), colour = "green") 
 ```
 
-#calculate difference to create mvar
-```{r}
-data_rolling <- data_rolling %>% 
-  mutate(mvar = number_admissions- moving_avg)
-```
 
 #now create a boxplot
 ```{r}
@@ -178,20 +181,6 @@ data_rolling %>%
   ggplot() +
   aes(x=iswinter, y=mvar) +
   geom_boxplot()
-```
-
-### Hypothesis Test
-
-Is summer is significantly different to winter?
-
-The null hypothesis is that the average value for summer is the same or lower than the average value for winter.
-
-H0 : mean winter - mean summer <= 0
-HA : mean winter - mean summer >0 
-
-we are setting alpha for this test to be 0.05
-```{r}
-alpha=0.05
 ```
 
 ```{r}
@@ -207,43 +196,6 @@ seasonal_avg <- data_rolling %>%
   summarise(mean= mean(mvar, na.rm=TRUE))
 seasonal_avg
 ```
-
-```{r}
-null_distribution <- data_rolling %>%
-  filter(iswinter) %>%  
-  specify(response = mvar) %>%
-  hypothesize(null = "point", mu = 6.04) %>%
-  generate(reps = 1000, type = "bootstrap") %>%
-  calculate(stat = "mean")
-```
-
-```{r}
-null_distribution %>%
-  visualise(bins = 30) + 
-shade_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
-            , direction = "less")
- 
-p_value <- null_distribution %>% 
-get_p_value(obs_stat = seasonal_avg$mean[seasonal_avg$iswinter]
-            , direction = "less")
-pull()
-```
-```{r}
-p_value 
-```
-If pvalue is less than alpha we can reject null hypothesis
-
-```{r}
-if(p_value > alpha){
- print("We cannot reject the null hypothesis. The average winter values are the same as the average summer values")
-}else{
-    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter values are significantly different to the average winter values")}
-```
-
-
-
-
-
 
 
 ```{r}
@@ -296,17 +248,6 @@ weekly_admissions_dep %>%
 ```
 note there is no 'all' category in this dataset
 
-plot total admissions - you should get the same overall trends from each dataset
-```{r}
-weekly_admissions_demog %>% 
-  filter(age_group == "All ages") %>% 
-  filter(sex =="All") %>% 
-  filter(admission_type == "All") %>% 
-  filter(hb_name =="All Scotland") %>% 
-ggplot() +
-aes(x=wdate, y = number_admissions) +
-geom_line(colour='red') 
-```
 
 
 ```{r}
@@ -497,19 +438,6 @@ some specialities have faced higher admission levels than others.
 Now look by health boards 
 
 ```{r}
-all_admissions_byhb <- weekly_admissions %>% 
-  filter(admission_type == "All") %>% 
-  filter(speciality=="All") %>% 
-  group_by(hb_name) %>% 
-  summarise(mean_percnt_var = mean(percent_variation),
-            min_percnt_var = min(percent_variation),
-            max_percnt_var = max(percent_variation)
-           ) %>%
-  #mutate(all_percent_variation = all_admissions/all_avg20182019)  
-  arrange(desc(max_percnt_var))
-all_admissions_byhb
-```
-```{r}
 weekly_admissions_spec %>% 
   filter(admission_type == "All") %>% 
   filter(speciality=="All") %>% 
@@ -599,7 +527,7 @@ weekly_admissions_spec %>%
 first attempt at a 'crisis' calculation
 
 ```{r}
-weekly_admissions %>% 
+weekly_admissions_spec %>% 
   filter(admission_type == "All") %>% 
   filter(speciality=="All") %>% 
   #filter(admission_type =="Emergency") %>% 
@@ -730,90 +658,3 @@ weekly_admissions_spec %>%
 ```
 
 
-#Section2 - repeat for demographic data
-
-bad days by age group
-
-```{r}
-weekly_admissions_demog %>% 
-  filter(sex=="All") %>% 
-  filter(admission_type =="All") %>% 
-  filter(hb_name=="All Scotland") %>% 
-  #filter(year == "2021") %>% 
-  #filter(iswinter) %>% 
-  group_by(age_group) %>% 
-  summarise(count_bad_days = sum(above_thresh), 
-            count_days = n()*7, 
-            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
-            mean_percentvar = mean(percent_variation), 
-            #trying a diff calc just to show its the same
-            percent_variation = 100*(sum(number_admissions)-sum(average20182019))
-                             /sum(average20182019)) 
-```
-```{r}
-weekly_admissions_spec %>% 
-  filter(speciality !="All") %>% 
-  filter(admission_type =="All") %>% 
-  filter(hb_name == "All Scotland") %>% 
-  #filter(year =="2022") %>% 
-  group_by(speciality) %>% 
-  summarise(count_bad_days = sum(above_thresh), 
-            count_days = n()*7, 
-            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
-            mean_percentvar =mean(percent_variation)) %>% 
-  ggplot() +
-  aes(x=speciality, y=pcnt_bad_days) +
-  geom_col() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-```
-
-
-
-```{r}
-weekly_admissions_demog %>% 
-  filter(sex=="All") %>% 
-  filter(admission_type =="All") %>% 
-  filter(hb_name=="All Scotland") %>% 
-  group_by(age_group) %>% 
-  summarise(count_bad_days = sum(above_thresh), 
-            count_days = n()*7, 
-            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
-            mean_percentvar =mean(percent_variation)) %>% 
-  ggplot() +
-  aes(x=age_group, y=pcnt_bad_days) +
-  geom_col() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-```
-
-```{r}
-weekly_admissions_demog %>% 
-  filter(age_group=="All ages") %>% 
-  filter(admission_type =="All") %>% 
-  filter(hb_name=="All Scotland") %>% 
-  group_by(sex) %>% 
-  summarise(count_bad_days = sum(above_thresh), 
-            count_days = n()*7, 
-            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
-            mean_percentvar =mean(percent_variation)) %>% 
-  ggplot() +
-  aes(x=sex, y=pcnt_bad_days) +
-  geom_col() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-no obvious difference between sexes
-
-```{r}
-weekly_admissions_dep %>% 
-  filter(admission_type =="All") %>% 
-  filter(hb_name=="All Scotland") %>% 
-  group_by(simd_quintile, year) %>% 
-  summarise(count_bad_days = sum(above_thresh), 
-            count_days = n()*7, 
-            pcnt_bad_days = 100*(sum(above_thresh)/(n()*7)), 
-            mean_percentvar =mean(percent_variation)) %>% 
-  ggplot() +
-  aes(x=simd_quintile, y=pcnt_bad_days) +
-  geom_col() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  facet_grid(~year)
-```

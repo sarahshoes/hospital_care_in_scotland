@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 ```{r}
@@ -87,7 +89,7 @@ smoothed_data <- smoothed_data %>%
 ```{r}
 plotlim <- as.Date(c("2018-01-01","2022-12-31")) 
 ggplot(smoothed_data) +
-  geom_line(aes(x = mdate, y = c(param, moving_avg, mvar)) 
+  geom_line(aes(x = mdate, y = c(param, moving_avg, mvar)))
 
   scale_x_date(limits=plotlim, date_breaks="3 month", 
                labels = scales::label_date_short(), expand = c(0,0)) +
@@ -116,7 +118,8 @@ smoothed_data %>%
 
 Is summer is significantly different to winter?
 
-The null hypothesis is that the average value for summer is the same or lower than the average value for winter.
+The null hypothesis is that the average value for summer is the same
+or lower than the average value for winter.
 
 H0 : mean winter - mean summer <= 0
 HA : mean winter - mean summer >0 
@@ -170,9 +173,12 @@ If pvalue is less than alpha we can reject null hypothesis
 
 ```{r}
 if(p_value > alpha_test){
- print("We cannot reject the null hypothesis. The average winter values in this data are the same as the average summer values")
+ print("We cannot reject the null hypothesis. The average winter values in 
+       this data are the same as the average summer values")
 }else{
-    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter values in this data are significantly different to the average winter values")}
+    print("We can reject the null hypothesis in favour of the alternative 
+          hypothesis. The average winter values in this data are 
+          significantly different to the average winter values")}
 ```
 ```
 
