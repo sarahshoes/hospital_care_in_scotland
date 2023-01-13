@@ -137,7 +137,7 @@ server <- function(input, output) {
      mutate(percentage_var = (total_waiting_by_month - avg_2018_2019$avg_num_waiting)
             / avg_2018_2019$avg_num_waiting * 100) %>% 
      
-     timeseriesplot(aes(month_ending, percentage_var, colour = patient_type), 
+     timeseriesplot_z(aes(month_ending, percentage_var, colour = patient_type), 
                     "Number of People on Waiting Lists for Treatment", 
                     "% change relative to 2018/19") 
    })
@@ -195,7 +195,7 @@ server <- function(input, output) {
                          group = admission_type, colour = admission_type)
       plottitle <- ("Change in length of hospital stay (compared to 2018/19)")
       plotylabel <- ("% change relative to 2018/19")
-      timeseriesplot(plotdata,plotmapping,plottitle,plotylabel)
+      timeseriesplot_z(plotdata,plotmapping,plottitle,plotylabel)
       })
       
 # Length of stay (admission type)
