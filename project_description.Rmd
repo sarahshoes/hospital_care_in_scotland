@@ -15,13 +15,18 @@ output:
 Sarah Hughes, Malcolm Speight and Fiona Carson
 
 ## Roles & responsibilities of each member
-Sarah worked on the following datasets: Delayed Discharge Data, by health board, age and reason for delay. 
-Hospital Admissions, by speciality, by age and buy index of deprivation.
+
+Sarah worked on the following datasets: 
+Delayed Discharge Data, by health board, age group and reason for delay. 
+Hospital Admissions, by health board, speciality, by age, sex and index of deprivation.
+Covid 19 Admissions
+Adding the following to the dashboard:
+Seasonal Statistics, plots and functions 
+function to standardise formats for graphs
 
 Malcolm worked on …
 
 Fiona worked on …
-
 Everyone worked on the dashboard layout and the project plan.
 
 ## Brief description of dashboard topic
@@ -29,17 +34,16 @@ Our dashboard is based on NHS Scotland data. Our brief was to investigate to wha
 
 The dashboard outlines our topic in terms of a journey through the hospital system from admission, to treatment and then finally discharge. 
 
-Our dashboard contains a front page summary, followed by a further tabs which cover admission, treatment and discharge. 
-
+Our dashboard contains a front page summary which also allows data to be investigated by healthboard, followed by a further tabs which cover admission, treatment and discharge. We have included a tab for statistical analysis of the winter/summer difference.
 
 ## Stages of the project
 A large amount of background reading was conducted at the start of the project to help from the questions in the brief. Crises in the NHS is topical at the moment and there are a large number of media reports available. 
-
 The data links provided in the brief were investigated and other data was also sourced from the Public Health Scotland website. This stage of the project involved high level analysis such as determining what variables were in the data and what time periods the data was collected over.
 
 The git folder structure was set up and the repository shared. 
 
 Once the data was better understood we discussed the key datasets that would help answer the brief. These key datasets were divided among team members and then analysed in detail to determine trends in time and by geography, age and deprivation. 
+
 Planning the structure of the dashboard was conducted on pen and paper. Once this was agreed, a more detailed dashboard outline was created and shared through Miro. 
 
 Cleaning and wrangling the data was a time consuming task, which was followed by preparing suitable graphs. A graph theme, colour palette and graph plotting function were created to simply the visualisation step and ensure our plots were consistent.
@@ -60,6 +64,7 @@ Trello (planning & task allocation)
 Git/GitHub (collaboration & version control)
 Miro (creating dashboard outline)
 R Studio (data analysis, creating dashboard and documentation)
+Keynote (for presentation)
 
 ## How did you gather and synthesise requirements for the project?
 We synthesised the information given in the brief by …
@@ -73,13 +78,16 @@ According to the About tab on the dataset page/dedicated page online, the data q
 The dataset may/may not be biased because …
 
 In general the data quality is very good with very little missing data. Some issues were encountered where the continuity of the data was affected by changes at hospital level e.g. changes in the definition of emergency departments due to Covid, the exclusion of certain diagnostic tests from outpatient activity from Oct 2019 onwards. 
+
+For the hospital admissions data, its is known that some hospitals do not contribute to the datset, for example the Golden Jubilee Hospital. PHS Scotland flag that the Forth Valley dataset is incomplete and therefore Forth Valley data should be treated with caution.
+
+For the Covid admissions data, quality flag c indicates data that cannot be revealed at this granularity because of confidentiality issues (the possibility of inadvertantly revealing individual data about someone). Where values wee flagged with c, we have interpolated this as 1 record. The age group data were then further combined and only the aggregated data have been saved. 
+
 For the treatment times data, there were issues with numbers on the waiting lists from NHS Tayside Q2 2017 to Q2 2018 and low values for Q3-4 2018. The NHS Scotland data was also recorded as zero (or very low) for this these quarters. This meant the NHS Scotland data had be calculated manually by summing the totals from all the health boards. 
 
 There are two treatment waiting times datasets (completed treatment and patients still waiting) which will both be biased. The completed treatment dataset will be skewed towards shorter wait times, as the more urgent cases will be dealt with quicker. The opposite will be true for the list of patients still waiting - these will be the less urgent cases who will have to wait longer. This issue was highlighted in a recent incident where a government dashboard only used the competed treatment data to report waiting times (https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/).
 
 To clean the datasets we …
-
-
 
 
 ## How is the data stored and structured
