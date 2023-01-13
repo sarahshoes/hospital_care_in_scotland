@@ -291,7 +291,7 @@ server <- function(input, output) {
             if (p_value1 < 0.05){ggtitle(str_c("Seasonal Test  p_value=",as.character(p_value1)), 
                                         subtitle = "Winter higher than Summer")
             }else{
-               ggtitle(c("Seasonal Test",as.character(p_value1)), 
+               ggtitle(str_c("Seasonal Test  p_value=",as.character(p_value1)), 
                        subtitle = "No significant difference in Winter/Summer")     
                }
          
@@ -362,9 +362,11 @@ server <- function(input, output) {
                labels=c("FALSE" = "Summer (Apr-Sep)", "TRUE" = "Winter (Oct-Mar)"), 
                limits = c("FALSE","TRUE")) +
             theme_phs +
-            if (p_value2 < 0.05){ggtitle("Seasonal Test  p_value=",as.character(p_value2))
+            if (p_value2 < 0.05){ggtitle(str_c("Seasonal Test  p_value=",as.character(p_value2)), 
+                                         subtitle = "Winter higher than Summer")
             }else{
-               ggtitle("Seasonal Test", subtitle = "No significant difference in Winter/Summer")     
+               ggtitle(str_c("Seasonal Test  p_value=",as.character(p_value2)), 
+                       subtitle = "No significant difference in Winter/Summer")     
             }
       })   
       
