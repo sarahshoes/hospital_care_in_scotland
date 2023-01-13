@@ -235,7 +235,7 @@ ui <- fluidPage(
                column(width=6,
                       plotOutput("discharge_delays_byreason")
                )
-             )
+             ),
     ),
     tabPanel("Seasonal Statistics",
              fluidRow(
@@ -259,6 +259,11 @@ ui <- fluidPage(
                       plotOutput("discharge_delays_byreason_x") 
                       )
                      ),
+             fluidRow(
+               column(width = 6, 
+                      tags$h2("Statistical Analysis")
+               )
+             ),
              fluidRow(
                column(width=3,
                       plotOutput("smooth_prepandemic")
