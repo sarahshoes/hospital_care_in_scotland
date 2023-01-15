@@ -9,38 +9,36 @@ output:
     df_print: paged
 ---
 
-# Project Description
-
 ## Names of group members
 Sarah Hughes, Malcolm Speight and Fiona Carson
 
 ## Roles & responsibilities of each member
-**Sarah** 
+**Sarah**   
 Worked on the following datasets:   
 - Delayed Discharge Data, by health board, age group and reason for delay.  
 - Hospital Admissions, by health board, speciality, by age, sex and index of deprivation.  
-- Covid 19 Admissions. 
+- Covid 19 Admissions.   
 Added the following to the dashboard:  
 - Seasonal Statistics, plots and functions   
 - function to standardise formats for graphs  
 
-**Malcolm** 
+**Malcolm**  
 Worked on the following datasets:  
 - Bed Occupancy   
 - Hospital Admissions  
 - Length of Patient Stay   
 
-**Fiona**
+**Fiona**  
 Worked on the following datasets:  
 - A&E waiting times  
 - Ongoing waiting lists  
-- Data for summary tab. 
+- Data for summary tab  
 Added the following to the dashboard:  
-- Setting up original layout
+- Setting up original layout  
 - Plots from the above datasets  
 - Summary tab data and map  
 
-Everyone worked on the dashboard layout and the project plan.
+**Everyone** worked on the dashboard layout and the project plan.
 
 ## Brief description of dashboard topic
 Our dashboard is based on NHS Scotland data. Our brief was to investigate to what extent the 'winter crises' reported in the media are real and determine how Covid has affected acute care in Scotland. 
@@ -71,12 +69,12 @@ The app was extensively tested to ensure it worked as it should and all data was
 Finally the documentation was completed and a presentation prepared. 
 
 ## Which tools were used in the project
-Zoom (daily stand-ups and catch ups early and late afternoon)
-Slack (for arranging meetings, asking questions and updating team on minor issues / changes)
-Trello (planning & task allocation)
-Git/GitHub (collaboration & version control)
-Miro (creating dashboard outline)
-R Studio (data analysis, creating dashboard and documentation)
+Zoom (daily stand-ups and catch ups early and late afternoon)  
+Slack (for arranging meetings, asking questions and updating team on minor issues / changes)  
+Trello (planning & task allocation)  
+Git/GitHub (collaboration & version control)  
+Miro (creating dashboard outline)  
+R Studio (data analysis, creating dashboard and documentation)  
 Keynote (for presentation)
 
 ## How did you gather and synthesise requirements for the project?

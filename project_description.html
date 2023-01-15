@@ -2736,33 +2736,38 @@ border-radius: 0px;
 </div>
 
 
-<div id="project-description" class="section level1">
-<h1>Project Description</h1>
 <div id="names-of-group-members" class="section level2">
 <h2>Names of group members</h2>
 <p>Sarah Hughes, Malcolm Speight and Fiona Carson</p>
 </div>
 <div id="roles-responsibilities-of-each-member" class="section level2">
 <h2>Roles &amp; responsibilities of each member</h2>
-<p>Sarah worked on the following datasets:<br />
-Delayed Discharge Data, by health board, age group and reason for
+<p><strong>Sarah</strong><br />
+Worked on the following datasets:<br />
+- Delayed Discharge Data, by health board, age group and reason for
 delay.<br />
-Hospital Admissions, by health board, speciality, by age, sex and index
-of deprivation.<br />
-Covid 19 Admissions. Adding the following to the dashboard:<br />
-Seasonal Statistics, plots and functions<br />
-function to standardise formats for graphs</p>
-<p>Malcolm worked on the following datasets:<br />
-Bed Occupancy<br />
-Hospital Admissions<br />
-Length of Patient Stay</p>
-<p>Fiona worked on the following datasets:<br />
-A&amp;E waiting times<br />
-Ongoing waiting lists<br />
-Data for summary tab. Adding the following to the dashboard:<br />
-Setting up original layout Plots from the above datasets<br />
-Summary tab data and map</p>
-<p>Everyone worked on the dashboard layout and the project plan.</p>
+- Hospital Admissions, by health board, speciality, by age, sex and
+index of deprivation.<br />
+- Covid 19 Admissions.<br />
+Added the following to the dashboard:<br />
+- Seasonal Statistics, plots and functions<br />
+- function to standardise formats for graphs</p>
+<p><strong>Malcolm</strong><br />
+Worked on the following datasets:<br />
+- Bed Occupancy<br />
+- Hospital Admissions<br />
+- Length of Patient Stay</p>
+<p><strong>Fiona</strong><br />
+Worked on the following datasets:<br />
+- A&amp;E waiting times<br />
+- Ongoing waiting lists<br />
+- Data for summary tab<br />
+Added the following to the dashboard:<br />
+- Setting up original layout<br />
+- Plots from the above datasets<br />
+- Summary tab data and map</p>
+<p><strong>Everyone</strong> worked on the dashboard layout and the
+project plan.</p>
 </div>
 <div id="brief-description-of-dashboard-topic" class="section level2">
 <h2>Brief description of dashboard topic</h2>
@@ -2773,14 +2778,14 @@ real and determine how Covid has affected acute care in Scotland.</p>
 hospital system from admission, to treatment and then finally
 discharge.</p>
 <p>Our dashboard contains a front page summary which also allows data to
-be investigated by healthboard, followed by a further tabs which cover
-admission, treatment and discharge. We have included a tab for
+be investigated by health board, followed by further tabs which cover
+admission, treatment and discharge. We have also included a tab for
 statistical analysis of the winter/summer difference.</p>
 </div>
 <div id="stages-of-the-project" class="section level2">
 <h2>Stages of the project</h2>
 <p>A large amount of background reading was conducted at the start of
-the project to help from the questions in the brief. Crises in the NHS
+the project to help with the questions in the brief. Crises in the NHS
 is topical at the moment and there are a large number of media reports
 available.</p>
 <p>The data links provided in the brief were investigated and other data
@@ -2798,10 +2803,10 @@ paper. Once this was agreed, a more detailed dashboard outline was
 created and shared through Miro.</p>
 <p>Cleaning and wrangling the data was a time consuming task, which was
 followed by preparing suitable graphs. A graph theme, colour palette and
-graph plotting function were created to simply the visualisation step
-and ensure our plots were consistent.</p>
+plotting function were created to simply the visualisation step and
+ensure our plots were consistent.</p>
 <p>The outline of an R Shiny app was created and then populated
-according the original plan.</p>
+according to the original plan.</p>
 <p>It was difficult to visualise the contents of our front page summary
 tab at the start of the project so this was designed and built after the
 rest of the app was working.</p>
@@ -2812,12 +2817,14 @@ prepared.</p>
 </div>
 <div id="which-tools-were-used-in-the-project" class="section level2">
 <h2>Which tools were used in the project</h2>
-<p>Zoom (daily stand-ups and catch ups early and late afternoon) Slack
-(for arranging meetings, asking questions and updating team on minor
-issues / changes) Trello (planning &amp; task allocation) Git/GitHub
-(collaboration &amp; version control) Miro (creating dashboard outline)
-R Studio (data analysis, creating dashboard and documentation) Keynote
-(for presentation)</p>
+<p>Zoom (daily stand-ups and catch ups early and late afternoon)<br />
+Slack (for arranging meetings, asking questions and updating team on
+minor issues / changes)<br />
+Trello (planning &amp; task allocation)<br />
+Git/GitHub (collaboration &amp; version control)<br />
+Miro (creating dashboard outline)<br />
+R Studio (data analysis, creating dashboard and documentation)<br />
+Keynote (for presentation)</p>
 </div>
 <div id="how-did-you-gather-and-synthesise-requirements-for-the-project" class="section level2">
 <h2>How did you gather and synthesise requirements for the project?</h2>
@@ -2869,7 +2876,7 @@ therefore Forth Valley data should be treated with caution.</p>
 <p>For the Covid admissions data, quality flag c indicates data that
 cannot be revealed at this granularity because of confidentiality issues
 (the possibility of inadvertantly revealing individual data about
-someone). Where values wee flagged with c, we have interpolated this as
+someone). Where values were flagged with c, we have interpolated this as
 1 record. The age group data were then further combined and only the
 aggregated data have been saved.</p>
 <p>For the treatment times data, there were issues with numbers on the
@@ -2889,7 +2896,13 @@ data to report waiting times (<a href="https://www.heraldscotland.com/news/23092
 <p>The datasets in general required only moderate cleaning.
 Transformations were mainly limited to extracting dates from text
 formats such as “2020Q2” and the calculation of change in value relative
-to a pre-COVID average (2018/19).</p>
+to a pre-COVID average (2018/19). For A&amp;E waiting times the totals
+across all of Scotland didn’t exist in the dataset and as mentioned
+above there were issues with the Scotland data in the waiting times
+datset, therefore the Scotland totals were calculated from the data for
+each health board for these datasets. Some steps were also carried out
+to standardise the health board names across the datasets to allow a
+single health board list to be used for selection on the dashboard.</p>
 </div>
 <div id="how-is-the-data-stored-and-structured" class="section level2">
 <h2>How is the data stored and structured</h2>
@@ -2915,8 +2928,7 @@ data. As described in the data bias section different waiting times will
 be calculated depending on whether you use the completed or patients
 still waiting datasets. This could lead to patients having unrealistic
 expectations for how quickly they will be seen for a particular
-condition.</p>
-<p>The datasets are covered by the Open Government License: <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="uri">http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/</a>
+condition. The datasets are covered by the Open Government License: <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="uri">http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/</a>
 In summary this means the data can be copied, published, transmitted,
 adapted and even exploited commercially or non-commercially but the
 source of the information must be acknowledged.</p>
@@ -2925,7 +2937,6 @@ the data. The licence does not grant the user of the data any official
 status or patronage. Further, the provider of the information is not
 liable for any errors in the information nor any loss or damage caused
 by its use.</p>
-</div>
 </div>
 
 
