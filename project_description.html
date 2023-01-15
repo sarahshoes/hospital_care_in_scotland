@@ -2613,17 +2613,23 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+content: "";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "\e258";
-font-family: 'Glyphicons Halflings';
+content: "";
 border: none;
+}
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "";
+font-family: 'Glyphicons Halflings';
+display: inline-block;
+padding: 10px;
+border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -2738,10 +2744,25 @@ border-radius: 0px;
 </div>
 <div id="roles-responsibilities-of-each-member" class="section level2">
 <h2>Roles &amp; responsibilities of each member</h2>
-<p>Sarah worked on …</p>
-<p>Malcolm worked on …</p>
-<p>Fiona worked on …</p>
-<p>Everyone worked on …</p>
+<p>Sarah worked on the following datasets:<br />
+Delayed Discharge Data, by health board, age group and reason for
+delay.<br />
+Hospital Admissions, by health board, speciality, by age, sex and index
+of deprivation.<br />
+Covid 19 Admissions. Adding the following to the dashboard:<br />
+Seasonal Statistics, plots and functions<br />
+function to standardise formats for graphs</p>
+<p>Malcolm worked on the following datasets:<br />
+Bed Occupancy<br />
+Hospital Admissions<br />
+Length of Patient Stay</p>
+<p>Fiona worked on the following datasets:<br />
+A&amp;E waiting times<br />
+Ongoing waiting lists<br />
+Data for summary tab. Adding the following to the dashboard:<br />
+Setting up original layout Plots from the above datasets<br />
+Summary tab data and map</p>
+<p>Everyone worked on the dashboard layout and the project plan.</p>
 </div>
 <div id="brief-description-of-dashboard-topic" class="section level2">
 <h2>Brief description of dashboard topic</h2>
@@ -2751,8 +2772,10 @@ real and determine how Covid has affected acute care in Scotland.</p>
 <p>The dashboard outlines our topic in terms of a journey through the
 hospital system from admission, to treatment and then finally
 discharge.</p>
-<p>Our dashboard contains a front page summary, followed by a further
-tabs which cover admission, treatment and discharge.</p>
+<p>Our dashboard contains a front page summary which also allows data to
+be investigated by healthboard, followed by a further tabs which cover
+admission, treatment and discharge. We have included a tab for
+statistical analysis of the winter/summer difference.</p>
 </div>
 <div id="stages-of-the-project" class="section level2">
 <h2>Stages of the project</h2>
@@ -2793,37 +2816,115 @@ prepared.</p>
 (for arranging meetings, asking questions and updating team on minor
 issues / changes) Trello (planning &amp; task allocation) Git/GitHub
 (collaboration &amp; version control) Miro (creating dashboard outline)
-R Studio (data analysis, creating dashboard and documentation)</p>
+R Studio (data analysis, creating dashboard and documentation) Keynote
+(for presentation)</p>
 </div>
 <div id="how-did-you-gather-and-synthesise-requirements-for-the-project" class="section level2">
 <h2>How did you gather and synthesise requirements for the project?</h2>
-<p>We synthesised the information given in the brief by … We prioritised
-…</p>
+<p>Gathering information about the issue, initially from the brief, but
+also by collecting reports and articles in the media and from research
+bodies allowed us to better understand the issues faced by the NHS and
+how they were interpreted by other organisations. Obtaining more
+information about the issue and the ways it has been approached by
+different organisations, made it more likely that we would be able to
+devise an effective representation of the problem of our own.</p>
+<p>We decomposed the complex healthcare process in to three simple
+steps: admission, activity and discharge. By modelling the process in
+this way, it allowed us to better understand and frame the data and
+information we had gathered from different sources. We were able to see
+where in the flow of patients, each set of data referred to and how this
+could help us answer the questions raised in the brief.</p>
+<p>We prioritised the potential blockages in the system, the causes of
+these and their impact on earlier stages in the journey a patient would
+make as they progressed through the healthcare process within a hospital
+setting.</p>
 </div>
 <div id="motivations-for-using-the-data-you-have-chosen" class="section level2">
 <h2>Motivations for using the data you have chosen</h2>
-<p>We used the dataset on … to answer … and because it was …</p>
+<p>We used the dataset on Hospital Admissions (by age, deprivation,
+medical specialty and admission type) to capture who was being admitted
+to the hospital and why? Where were the patients coming from and could
+these be categorised by deprivation or age?</p>
+<p>Data sets on A&amp;E Admission Times and Waiting Lists provided a
+rich source of information on how quickly patients were being attended
+to or processed through the system.</p>
+<p>COVID admissions provided an insight in to the extent to which COVID
+was still placing a burden on NHS resources.</p>
+<p>Bed Occupancy and Length of Stay data provided a measure of available
+capacity within the hospital system, as did Patient Discharge
+information.</p>
 </div>
 <div id="data-quality-and-potential-bias-including-a-brief-summary-of-data-cleaning-and-transformations" class="section level2">
 <h2>Data quality and potential bias, including a brief summary of data
 cleaning and transformations</h2>
-<p>According to the About tab on the dataset page/dedicated page online,
-the data quality … The dataset may/may not be biased because … To clean
-the datasets we …</p>
+<p>In general the data quality is very good with very little missing
+data. Some issues were encountered where the continuity of the data was
+affected by changes at hospital level e.g. changes in the definition of
+emergency departments due to Covid, the exclusion of certain diagnostic
+tests from outpatient activity from Oct 2019 onwards.</p>
+<p>For the hospital admissions data, its is known that some hospitals do
+not contribute to the datset, for example the Golden Jubilee Hospital.
+PHS Scotland flag that the Forth Valley dataset is incomplete and
+therefore Forth Valley data should be treated with caution.</p>
+<p>For the Covid admissions data, quality flag c indicates data that
+cannot be revealed at this granularity because of confidentiality issues
+(the possibility of inadvertantly revealing individual data about
+someone). Where values wee flagged with c, we have interpolated this as
+1 record. The age group data were then further combined and only the
+aggregated data have been saved.</p>
+<p>For the treatment times data, there were issues with numbers on the
+waiting lists from NHS Tayside Q2 2017 to Q2 2018 and low values for
+Q3-4 2018. The NHS Scotland data was also recorded as zero (or very low)
+for this these quarters. This meant the NHS Scotland data had be
+calculated manually by summing the totals from all the health
+boards.</p>
+<p>There are two treatment waiting times datasets (completed treatment
+and patients still waiting) which will both be biased. The completed
+treatment dataset will be skewed towards shorter wait times, as the more
+urgent cases will be dealt with quicker. The opposite will be true for
+the list of patients still waiting - these will be the less urgent cases
+who will have to wait longer. This issue was highlighted in a recent
+incident where a government dashboard only used the competed treatment
+data to report waiting times (<a href="https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/" class="uri">https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/</a>).</p>
+<p>The datasets in general required only moderate cleaning.
+Transformations were mainly limited to extracting dates from text
+formats such as “2020Q2” and the calculation of change in value relative
+to a pre-COVID average (2018/19).</p>
 </div>
 <div id="how-is-the-data-stored-and-structured" class="section level2">
 <h2>How is the data stored and structured</h2>
-<p>[Hint: This page offers a good starting point for understanding the
-data structure: <a href="https://guides.statistics.gov.scot/article/34-understanding-the-data-structure" class="uri">https://guides.statistics.gov.scot/article/34-understanding-the-data-structure</a>]
-The data is in the form of … This means … Benefits of storing the data
-like this are …</p>
+<p>The data is stored in the form of a NoSQL database that stores data
+in ‘triples’. That is, statements that combine three bits of information
+in the form Subject-Predicate-Object, such as “David-teaches-Coding”.
+Each statement is called a triple and each data node can be identified
+with a unique URL.</p>
+<p>Benefits of storing the data like this are: (1) cost: triple store
+databases are less costly than relational databases (1) flexibility: as
+a form of NoSQL database, there is no need to define a schema in
+advance. This also makes altering the data model an easy task. (2)
+non-proprietary: uses a standard format that can be easy implemented
+across different platforms. (3) easy sharing: as triple-stores use URLs,
+sharing and linking to data is easy. (4) smart-searching: supports
+searches that bring back related results, not just those that are exact
+matches to the query.</p>
 </div>
 <div id="ethical-and-legal-considerations-of-the-data" class="section level2">
 <h2>Ethical and legal considerations of the data</h2>
-<p>[Hint: this page contains information on the Open Government License
-which covers most datasets on statistics.gov.scot: <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="uri">http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/</a>]
-There are no/There may be ethical considerations, because … The datasets
-are covered by the Open Government License, which means …</p>
+<p>There are some ethical considerations around publishing waiting time
+data. As described in the data bias section different waiting times will
+be calculated depending on whether you use the completed or patients
+still waiting datasets. This could lead to patients having unrealistic
+expectations for how quickly they will be seen for a particular
+condition.</p>
+<p>The datasets are covered by the Open Government License: <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="uri">http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/</a>
+In summary this means the data can be copied, published, transmitted,
+adapted and even exploited commercially or non-commercially but the
+source of the information must be acknowledged.</p>
+<p>Although covered by license, there is no endoresment or warranty with
+the data. The licence does not grant the user of the data any official
+status or patronage. Further, the provider of the information is not
+liable for any errors in the information nor any loss or damage caused
+by its use.</p>
 </div>
 </div>
 
