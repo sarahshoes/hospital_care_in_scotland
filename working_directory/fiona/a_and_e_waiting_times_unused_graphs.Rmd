@@ -146,7 +146,7 @@ data %>%
 Use aggregate numbers in first place as there is more data for this
 Only discharge numbers for episodes though 
 
-### 2018/2019 averages by month
+### Create 2018/2019 averages by month
 ```{r}
 avg_2018_2019 <- waiting_times %>% 
   filter(date < "2020-01-01") %>% 
@@ -160,16 +160,16 @@ avg_2018_2019 <- waiting_times %>%
 ```
 
 
-Adding 2018/2019 averages into waiting times dataframe 
+Adding 2018/2019 averages into waiting times dataframe,  and then plotting to determine 
 ```{r}
 waiting_times %>% 
   filter(date >= "2020-01-01") %>% 
   group_by(date) %>% 
-  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>% 
-  mutate(year = year(date),
+  summarise(num_meeting_target_by_month = sum(number_meeting_target_aggregate)) %>%   mutate(year = year(date),
          month = month(date), .after = date) %>% 
   left_join(avg_2018_2019, by = "month") %>% 
-  mutate(percent_variation = ((num_meeting_target_by_month - avg_2018_2019)/avg_2018_2019)*100) %>% 
+  mutate(percent_variation = ((num_meeting_target_by_month -
+                                 avg_2018_2019)/avg_2018_2019)*100) %>% 
   
   ggplot(aes(date, percent_variation)) + 
   geom_col() +
@@ -177,8 +177,6 @@ waiting_times %>%
   labs(title = "Percentage Variation in Number Meeting 4 Hour 
        Target (Attendance Number)",
        subtitle = "Compared to 2018 / 2019 Average")
-
-
 ```
 
 Q Is it valid to say the number meeting target was lower if the volume of people overall was much lower? Should it all be done in percentage?
