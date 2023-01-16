@@ -1,18 +1,31 @@
 ---
 title: "Investigating Data - Covid Wider Impacts"
+author: "Sarah Hughes" 
 output:
   pdf_document: default
-  html_notebook: default
-editor_options:
-  chunk_output_type: inline
+  html_document: default
 ---
 
-Looking at wider covid impacts data
-weekly variability - related to 2018/19 baseline
+# evidence of meeting PDA outcome 2.5. Exploratory data analysis
 
+```{r setup, include=FALSE}
+# setup chunk
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Data Notes\
+First look at the wider covid impacts data. 
+
+About the data.  
+weekly variability - related to 2018/19 baseline.  
 revised version - now extracting all Scotland more easily.
 
-```{r}
+```{r include = FALSE}
+# include = false removes chunks we dont want to include in the output
+# message = false shows chunks but removes output messages
+```
+
+```{r message = FALSE}
 library("tidyverse")
 library("janitor")
 library("lubridate")
@@ -20,14 +33,14 @@ library("skimr")
 library("infer")
 ```
 
-#read in healthboard codes
-```{r}
+read in healthboard codes
+```{r message = FALSE}
 hb_codes <- read_csv(here::here("lookup_tables/health_board_codes.csv"))
 hb_codes <- clean_names(hb_codes)
 ```
 
-#load in datafiles
-```{r}
+load in datafiles
+```{r message = FALSE}
 weekly_admissions_spec <- read_csv("Covid admissions by health board and speciality.csv")
 weekly_admissions_spec <- clean_names(weekly_admissions_spec)
 
@@ -48,21 +61,31 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   rename("speciality_qf"= "specialty_qf") 
 ```
 
-# merge hbnames into datafiles
-```{r}
+merge hbnames into datafiles
+```{r message = FALSE}
 weekly_admissions_spec <- left_join(weekly_admissions_spec,hb_codes)
 weekly_admissions_demog <- left_join(weekly_admissions_demog,hb_codes)
 weekly_admissions_dep <- left_join(weekly_admissions_dep,hb_codes) 
 ```
 
-#do the analysis needed for identifying winter and 'crisis'
 ```{r}
-weekly_admissions_spec %>% 
-  distinct(hb_name)
+# for some reason this line is causing pdf error -?? as Neringa
+#skim(weekly_admissions_spec)
 ```
+do the mutates needed for identifying winter and 'crisis'
 ```{r}
-skim(weekly_admissions_spec)
+weekly_admissions_dep <- weekly_admissions_dep %>% 
+  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
+  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
+  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
+  mutate(wdate = ymd(week_ending)) %>% 
+  # identify "All Scotland" data
+  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
+  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
+  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
+  mutate(above_thresh = ifelse(percent_variation>0,7,0))
 ```
+
 ```{r}
 weekly_admissions_demog <- weekly_admissions_demog %>% 
   mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
@@ -89,7 +112,8 @@ weekly_admissions_spec <- weekly_admissions_spec %>%
   mutate(above_thresh = ifelse(percent_variation>0,7,0))
 ```
 
-```{r}
+How would we make monthly data?
+```{r message = FALSE}
 monthly_admissions_spec <- weekly_admissions_spec
 
 monthly_admissions_spec <- monthly_admissions_spec %>% 
@@ -98,11 +122,9 @@ monthly_admissions_spec <- monthly_admissions_spec %>%
   mutate(mdate = as.Date(make_datetime(year, month, 15))) %>% 
   ungroup()
 ```
-#merge hbnames into datafiles
+
 ```{r}
 monthly_admissions_spec <- left_join(monthly_admissions_spec,hb_codes)
-#monthly_admissions_demog <- left_join(monthly_admissions_demog,hb_codes)
-#monthly_admissions_dep <- left_join(monthly_admissions_dep,hb_codes) 
 ```
 ```{r}
 monthly_admissions_spec <- monthly_admissions_spec %>% 
@@ -110,6 +132,7 @@ monthly_admissions_spec <- monthly_admissions_spec %>%
   mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) 
 ```
 
+plot weekly data
 ```{r}
 weekly_admissions_spec %>% 
   filter(speciality == "All") %>% 
@@ -119,8 +142,7 @@ ggplot() +
 aes(x=wdate, y = number_admissions) +
 geom_line(colour='red') 
 ```
-check results
-
+check results - plot monthly data
 ```{r}
 monthly_admissions_spec%>% 
   filter(speciality == "All") %>% 
@@ -138,8 +160,7 @@ filter(month==8) %>%
   filter(admission_type == "All") %>% 
   filter(hb_name =="All Scotland") 
 ```
-
-
+try using smoother?
 ```{r}
 library(slider)
 
@@ -160,56 +181,14 @@ data_rolling <- weekly_admissions_spec %>%
 data_rolling
 ```
 
-#calculate difference to create mvar
-```{r}
-data_rolling <- data_rolling %>% 
-  mutate(mvar = number_admissions- moving_avg)
-```
-
 # plot - check the smoother makes sense and tweak values if they dont
 ```{r}
 ggplot(data_rolling)+
   geom_line(aes(x = wdate, y = number_admissions), colour = "gray") +
-  geom_line(aes(x = wdate, y = moving_avg), colour = "red") +
-  geom_line(aes(x = wdate, y = mvar), colour = "green") 
+  geom_line(aes(x = wdate, y = moving_avg), colour = "red") 
 ```
+this is a smoothed version of weekly data - its not the right way to create monthly values
 
-
-#now create a boxplot
-```{r}
-data_rolling %>% 
-  ggplot() +
-  aes(x=iswinter, y=mvar) +
-  geom_boxplot()
-```
-
-```{r}
-data_rolling %>% 
-  filter(iswinter) %>% 
-  ggplot() +
-  aes(x = mvar) +
-  geom_histogram(col = "white")
-```
-```{r}
-seasonal_avg <- data_rolling %>%
-  group_by(iswinter) %>% 
-  summarise(mean= mean(mvar, na.rm=TRUE))
-seasonal_avg
-```
-
-
-```{r}
-weekly_admissions_dep <- weekly_admissions_dep %>% 
-  mutate(year = as.integer(str_sub(week_ending,1,4))) %>% 
-  mutate(month = as.integer(str_sub(week_ending,5,6))) %>% 
-  mutate(day = as.integer(str_sub(week_ending,7,8))) %>% 
-  mutate(wdate = ymd(week_ending)) %>% 
-  # identify "All Scotland" data
-  mutate(hb_name = ifelse(hb=="S92000003","All Scotland",hb_name)) %>% 
-  mutate(hb_name = ifelse(is.na(hb_name),"NHS Region Unknown",hb_name)) %>% 
-  mutate(iswinter = ifelse(month %in% c(4,5,6,7,8,9),FALSE,TRUE)) %>% 
-  mutate(above_thresh = ifelse(percent_variation>0,7,0))
-```
 
 take a look at what is in each dataset
 
@@ -217,6 +196,7 @@ take a look at what is in each dataset
 weekly_admissions_spec %>% 
   distinct(hb_name)
 ```
+
 14 health boards plus 'all scotland' and an NA - need to work out what to do with this
 
 ```{r}
@@ -248,8 +228,6 @@ weekly_admissions_dep %>%
 ```
 note there is no 'all' category in this dataset
 
-
-
 ```{r}
 weekly_admissions_spec %>% 
   filter(speciality == "All") %>% 
@@ -259,23 +237,12 @@ ggplot() +
 aes(x=wdate, y = number_admissions) +
 geom_line(colour='red') 
 ```
-same graph as above!
 
 weekly hospital admissions hover around 14000 per week
 expect 168,000 per quarter?
 
 pre=pandemic hospital admissions hovered around 15500 per week
 expect 186,000 per quarter
-
-```{r}
-weekly_admissions_spec %>% 
-  filter(speciality == "All") %>% 
-  filter(admission_type == "All") %>% 
-  filter(hb_name =="All Scotland") %>% 
-ggplot() +
-aes(x=wdate, y = percent_variation) +
-geom_line(colour='red') 
-```
 
 Overall(all specialities, all admissions, all healthboards) admissions are only at 90% of pre-pandemic levels
 
@@ -393,6 +360,7 @@ aes(x=wdate, y = percent_variation, colour=speciality) +
 geom_line() +
 scale_colour_brewer(palette = "Set1") 
 ```
+we cant present data like this - its just too busy. how would we illustrate these differences - better with a barplot
 
 ```{r}
 weekly_admissions_spec %>% 
@@ -435,7 +403,7 @@ weekly_admissions_spec %>%
 some specialities have faced higher admission levels than others.
 
 
-Now look by health boards 
+Now look by health boards. high variability i some health boards. is this true variability - e.g indicator of crisis persiod or just data artefact? values are small so more affected by transformation to %percentage var. especially when related to weekly values 
 
 ```{r}
 weekly_admissions_spec %>% 
@@ -446,7 +414,7 @@ weekly_admissions_spec %>%
   aes(x=wdate, y=percent_variation, colour = hb_name)+
   geom_line()
 ```
-
+try different visualisations
 ```{r}
 weekly_admissions_spec %>% 
   filter(admission_type == "All") %>% 
@@ -459,7 +427,7 @@ weekly_admissions_spec %>%
 ```
 
 
-for some health boards a significant number of admissions levels are above the levels seen in 2018-19. could we parhaps try and use this as an indicator?
+for some health boards a significant number of admissions levels are above the levels seen in 2018-19. could we perhaps try and use this as an indicator?
 
 Need to think more carefully about what the data in 'region unknown' means 
 
@@ -475,7 +443,7 @@ weekly_admissions_spec %>%
 ```
 How is NA calculated - still need to check??
 
-
+summarise admissions by health board - need to show how they differ.
 ```{r}
 weekly_admissions_spec %>% 
   filter(admission_type == "All") %>% 
@@ -524,7 +492,7 @@ weekly_admissions_spec %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-first attempt at a 'crisis' calculation
+first attempt at a 'crisis' calculation. this will be affected by varialibility - need a smoothed or monthly version for summary
 
 ```{r}
 weekly_admissions_spec %>% 

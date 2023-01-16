@@ -40,12 +40,5 @@ p_value <- null_distribution %>%
     get_p_value(obs_stat = observed_stat
                 , direction = "greater")
 
-
-# If pvalue is less than alpha we can reject null hypothesis
-#  if(p_value > alpha_test){
-#    print("We cannot reject the null hypothesis. The average winter values in this data are the same as the #average summer values")
-#  }else{
-#    print("We can reject the null hypothesis in favour of the alternative hypothesis. The average winter #values in this data are significantly different to the average winter values")}
-
 p_value 
   }
