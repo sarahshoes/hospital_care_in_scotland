@@ -28,7 +28,10 @@ Set out the project/dashboard plan on Miro.
 Worked on the following datasets:  
 - Bed Occupancy   
 - Hospital Admissions  
-- Length of Patient Stay   
+- Length of Patient Stay \
+Added the following plots to the dashboard: \
+- Bed occupancy \
+- Length of patient stay
 
 **Fiona**  
 Set up the repository on Github.   
