@@ -2613,23 +2613,17 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before {
-content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "\e259";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "";
-border: none;
-}
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "";
+content: "\e258";
 font-family: 'Glyphicons Halflings';
-display: inline-block;
-padding: 10px;
-border-right: 1px solid #ddd;
+border: none;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -2756,7 +2750,10 @@ Added the following to the dashboard:<br />
 Worked on the following datasets:<br />
 - Bed Occupancy<br />
 - Hospital Admissions<br />
-- Length of Patient Stay</p>
+- Length of Patient Stay<br />
+Added the following plots to the dashboard:<br />
+- Bed occupancy<br />
+- Length of patient stay</p>
 <p><strong>Fiona</strong><br />
 Worked on the following datasets:<br />
 - A&amp;E waiting times<br />
