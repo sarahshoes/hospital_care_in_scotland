@@ -2613,23 +2613,17 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before {
-content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "\e259";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "";
-border: none;
-}
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "";
+content: "\e258";
 font-family: 'Glyphicons Halflings';
-display: inline-block;
-padding: 10px;
-border-right: 1px solid #ddd;
+border: none;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -2742,7 +2736,8 @@ border-radius: 0px;
 </div>
 <div id="roles-responsibilities-of-each-member" class="section level2">
 <h2>Roles &amp; responsibilities of each member</h2>
-<p><strong>Sarah</strong><br />
+<p><strong>Sarah</strong>.<br />
+Set up the Trello board for task management.<br />
 Worked on the following datasets:<br />
 - Delayed Discharge Data, by health board, age group and reason for
 delay.<br />
@@ -2752,12 +2747,14 @@ index of deprivation.<br />
 Added the following to the dashboard:<br />
 - Seasonal Statistics, plots and functions<br />
 - function to standardise formats for graphs</p>
-<p><strong>Malcolm</strong><br />
-Worked on the following datasets:<br />
+<p><strong>Malcolm</strong>.<br />
+Set out the project/dashboard plan on Miro. Worked on the following
+datasets:<br />
 - Bed Occupancy<br />
 - Hospital Admissions<br />
 - Length of Patient Stay</p>
 <p><strong>Fiona</strong><br />
+Set up the repository on Github.<br />
 Worked on the following datasets:<br />
 - A&amp;E waiting times<br />
 - Ongoing waiting lists<br />
@@ -2802,9 +2799,11 @@ by geography, age and deprivation.</p>
 paper. Once this was agreed, a more detailed dashboard outline was
 created and shared through Miro.</p>
 <p>Cleaning and wrangling the data was a time consuming task, which was
-followed by preparing suitable graphs. A graph theme, colour palette and
-plotting function were created to simply the visualisation step and
-ensure our plots were consistent.</p>
+followed by preparing suitable graphs. Getting the datasets into
+standard formats where possible was important to help make the dahsboard
+buil smoother. A graph theme, colour palette and plotting function were
+created to simplify the visualisation step and ensure our plots were
+consistent.</p>
 <p>The outline of an R Shiny app was created and then populated
 according to the original plan.</p>
 <p>It was difficult to visualise the contents of our front page summary
@@ -2865,10 +2864,11 @@ information.</p>
 <h2>Data quality and potential bias, including a brief summary of data
 cleaning and transformations</h2>
 <p>In general the data quality is very good with very little missing
-data. Some issues were encountered where the continuity of the data was
-affected by changes at hospital level e.g. changes in the definition of
-emergency departments due to Covid, the exclusion of certain diagnostic
-tests from outpatient activity from Oct 2019 onwards.</p>
+data, the datasets in general required only moderate cleaning. Some
+issues were encountered where the continuity of the data was affected by
+changes at hospital level e.g. changes in the definition of emergency
+departments due to Covid, the exclusion of certain diagnostic tests from
+outpatient activity from Oct 2019 onwards.</p>
 <p>For the hospital admissions data, its is known that some hospitals do
 not contribute to the datset, for example the Golden Jubilee Hospital.
 PHS Scotland flag that the Forth Valley dataset is incomplete and
@@ -2876,9 +2876,10 @@ therefore Forth Valley data should be treated with caution.</p>
 <p>For the Covid admissions data, quality flag c indicates data that
 cannot be revealed at this granularity because of confidentiality issues
 (the possibility of inadvertantly revealing individual data about
-someone). Where values were flagged with c, we have interpolated this as
-1 record. The age group data were then further combined and only the
-aggregated data have been saved.</p>
+someone). Where values were NA and flagged with c, we have imputed the
+data as a count of 1. The age group data were then further combined and
+only the aggregated data have been saved, to ensure that there are no
+confidentiality breaches.</p>
 <p>For the treatment times data, there were issues with numbers on the
 waiting lists from NHS Tayside Q2 2017 to Q2 2018 and low values for
 Q3-4 2018. The NHS Scotland data was also recorded as zero (or very low)
@@ -2893,16 +2894,27 @@ the list of patients still waiting - these will be the less urgent cases
 who will have to wait longer. This issue was highlighted in a recent
 incident where a government dashboard only used the competed treatment
 data to report waiting times (<a href="https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/" class="uri">https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/</a>).</p>
-<p>The datasets in general required only moderate cleaning.
-Transformations were mainly limited to extracting dates from text
-formats such as “2020Q2” and the calculation of change in value relative
-to a pre-COVID average (2018/19). For A&amp;E waiting times the totals
-across all of Scotland didn’t exist in the dataset and as mentioned
-above there were issues with the Scotland data in the waiting times
-datset, therefore the Scotland totals were calculated from the data for
-each health board for these datasets. Some steps were also carried out
-to standardise the health board names across the datasets to allow a
-single health board list to be used for selection on the dashboard.</p>
+<p>For all datasets it was necessary to create a value for the date in a
+standard format, In the original data files the dates were in text
+formats such as weekending “20200101” or quarter “2020Q2”.</p>
+<p>For some datasets it was necessary to simplify and aggregate the
+categories to allow for easier presentations. For example where are
+large number of age catergories were provided, they were reduced to a
+simpler set showing the younger, middle and older age groups.</p>
+<p>Data wrangling steps were needed to transform the data and ensure
+standardisation of presentations. For each dataset, the pre-Covid
+average values (avg_20182019) in each data category were calculated as
+the overall mean of all values in 2018/19. The change was calculated as
+value - avg_20182019. The percentage variance in the data relative to
+the pre-pandemic average was calculated as 100*((value -
+avg_20182019)/avg_20182019).</p>
+<p>For A&amp;E waiting times the totals across all of Scotland didn’t
+exist in the dataset and as mentioned above there were issues with the
+Scotland data in the waiting times datset, therefore the Scotland totals
+were calculated from the data for each health board for these datasets.
+Some steps were also carried out to standardise the health board names
+across the datasets to allow a single health board list to be used for
+selection on the dashboard.</p>
 </div>
 <div id="how-is-the-data-stored-and-structured" class="section level2">
 <h2>How is the data stored and structured</h2>
@@ -2923,20 +2935,29 @@ matches to the query.</p>
 </div>
 <div id="ethical-and-legal-considerations-of-the-data" class="section level2">
 <h2>Ethical and legal considerations of the data</h2>
+<p>The datasets are covered by the Open Government License: <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="uri">http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/</a>
+In summary this means the data can be copied, published, transmitted,
+adapted and even exploited commercially or non-commercially but the
+source of the information must be acknowledged.</p>
+<p>Although covered by license, there is no endorsement or warranty with
+the data. The licence does not grant the user of the data any official
+status or patronage. Further, the provider of the information is not
+liable for any errors in the information nor any loss or damage caused
+by its use.</p>
+<p>Some of the datasets had flags for confidentiality, meaning that
+values were low enough that they could identify and individual. This
+meant that patient numbers are underestimated in some of teh health
+boards with lower patient numbers. To limit the effect that this would
+have we imputed missing values as 1 (making the assumption that at least
+one patient was there), but only in cased were we were aggregating
+further. Once aggregated there are no further issues with
+confidentiality.</p>
 <p>There are some ethical considerations around publishing waiting time
 data. As described in the data bias section different waiting times will
 be calculated depending on whether you use the completed or patients
 still waiting datasets. This could lead to patients having unrealistic
 expectations for how quickly they will be seen for a particular
-condition. The datasets are covered by the Open Government License: <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="uri">http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/</a>
-In summary this means the data can be copied, published, transmitted,
-adapted and even exploited commercially or non-commercially but the
-source of the information must be acknowledged.</p>
-<p>Although covered by license, there is no endoresment or warranty with
-the data. The licence does not grant the user of the data any official
-status or patronage. Further, the provider of the information is not
-liable for any errors in the information nor any loss or damage caused
-by its use.</p>
+condition.</p>
 </div>
 
 

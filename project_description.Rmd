@@ -13,7 +13,8 @@ output:
 Sarah Hughes, Malcolm Speight and Fiona Carson
 
 ## Roles & responsibilities of each member
-**Sarah**   
+**Sarah**.    
+Set up the Trello board for task management.  
 Worked on the following datasets:   
 - Delayed Discharge Data, by health board, age group and reason for delay.  
 - Hospital Admissions, by health board, speciality, by age, sex and index of deprivation.  
@@ -22,13 +23,15 @@ Added the following to the dashboard:
 - Seasonal Statistics, plots and functions   
 - function to standardise formats for graphs  
 
-**Malcolm**  
+**Malcolm**.   
+Set out the project/dashboard plan on Miro. 
 Worked on the following datasets:  
 - Bed Occupancy   
 - Hospital Admissions  
 - Length of Patient Stay   
 
 **Fiona**  
+Set up the repository on Github.   
 Worked on the following datasets:  
 - A&E waiting times  
 - Ongoing waiting lists  
@@ -58,7 +61,7 @@ Once the data was better understood we discussed the key datasets that would hel
 
 Planning the structure of the dashboard was conducted on pen and paper. Once this was agreed, a more detailed dashboard outline was created and shared through Miro. 
 
-Cleaning and wrangling the data was a time consuming task, which was followed by preparing suitable graphs. A graph theme, colour palette and plotting function were created to simply the visualisation step and ensure our plots were consistent.
+Cleaning and wrangling the data was a time consuming task, which was followed by preparing suitable graphs. Getting the datasets into standard formats where possible was important to help make the dahsboard buil smoother. A graph theme, colour palette and plotting function were created to simplify the visualisation step and ensure our plots were consistent.
 
 The outline of an R Shiny app was created and then populated according to the original plan.
 
@@ -94,17 +97,23 @@ COVID admissions provided an insight in to the extent to which COVID was still p
 Bed Occupancy and Length of Stay data provided a measure of available capacity within the hospital system, as did Patient Discharge information.  
 
 ## Data quality and potential bias, including a brief summary of data cleaning and transformations
-In general the data quality is very good with very little missing data. Some issues were encountered where the continuity of the data was affected by changes at hospital level e.g. changes in the definition of emergency departments due to Covid, the exclusion of certain diagnostic tests from outpatient activity from Oct 2019 onwards. 
+In general the data quality is very good with very little missing data, the datasets in general required only moderate cleaning. Some issues were encountered where the continuity of the data was affected by changes at hospital level e.g. changes in the definition of emergency departments due to Covid, the exclusion of certain diagnostic tests from outpatient activity from Oct 2019 onwards. 
 
 For the hospital admissions data, its is known that some hospitals do not contribute to the datset, for example the Golden Jubilee Hospital. PHS Scotland flag that the Forth Valley dataset is incomplete and therefore Forth Valley data should be treated with caution.
 
-For the Covid admissions data, quality flag c indicates data that cannot be revealed at this granularity because of confidentiality issues (the possibility of inadvertantly revealing individual data about someone). Where values were flagged with c, we have interpolated this as 1 record. The age group data were then further combined and only the aggregated data have been saved. 
+For the Covid admissions data, quality flag c indicates data that cannot be revealed at this granularity because of confidentiality issues (the possibility of inadvertantly revealing individual data about someone). Where values were NA and flagged with c, we have imputed the data as a count of 1. The age group data were then further combined and only the aggregated data have been saved, to ensure that there are no confidentiality breaches. 
 
 For the treatment times data, there were issues with numbers on the waiting lists from NHS Tayside Q2 2017 to Q2 2018 and low values for Q3-4 2018. The NHS Scotland data was also recorded as zero (or very low) for this these quarters. This meant the NHS Scotland data had be calculated manually by summing the totals from all the health boards. 
 
 There are two treatment waiting times datasets (completed treatment and patients still waiting) which will both be biased. The completed treatment dataset will be skewed towards shorter wait times, as the more urgent cases will be dealt with quicker. The opposite will be true for the list of patients still waiting - these will be the less urgent cases who will have to wait longer. This issue was highlighted in a recent incident where a government dashboard only used the competed treatment data to report waiting times (https://www.heraldscotland.com/news/23092654.snp-rapped-misleading-patients-waiting-times/).
 
-The datasets in general required only moderate cleaning. Transformations were mainly limited to extracting dates from text formats such as “2020Q2” and the calculation of change in value relative to a pre-COVID average (2018/19). For A&E waiting times the totals across all of Scotland didn't exist in the dataset and as mentioned above there were issues with the Scotland data in the waiting times datset, therefore the Scotland totals were calculated from the data for each health board for these datasets. Some steps were also carried out to standardise the health board names across the datasets to allow a single health board list to be used for selection on the dashboard. 
+For all datasets it was necessary to create a value for the date in a standard format, In the original data files the dates were in text formats such as weekending "20200101" or quarter  “2020Q2”. 
+
+For some datasets it was necessary to simplify and aggregate the categories to allow for easier presentations. For example where are large number of age catergories were provided, they were reduced to a simpler set showing the younger, middle and older age groups.
+
+Data wrangling steps were needed to transform the data and ensure standardisation of presentations. For each dataset, the pre-Covid average values (avg_20182019) in each data category were calculated as the overall mean of all values in 2018/19. The change was calculated as value - avg_20182019. The percentage variance in the data relative to the pre-pandemic average was calculated as 100*((value - avg_20182019)/avg_20182019).
+
+For A&E waiting times the totals across all of Scotland didn't exist in the dataset and as mentioned above there were issues with the Scotland data in the waiting times datset, therefore the Scotland totals were calculated from the data for each health board for these datasets. Some steps were also carried out to standardise the health board names across the datasets to allow a single health board list to be used for selection on the dashboard. 
 
 ## How is the data stored and structured
 The data is stored in the form of a NoSQL database that stores data in ‘triples’. That is, statements that combine three bits of information in the form Subject-Predicate-Object, such as "David-teaches-Coding”. Each statement is called a triple and each data node can be identified with a unique URL. 
@@ -117,10 +126,13 @@ Benefits of storing the data like this are:
 (4) smart-searching: supports searches that bring back related results, not just those that are exact matches to the query.
 
 ## Ethical and legal considerations of the data
-There are some ethical considerations around publishing waiting time data. As described in the data bias section different waiting times will be calculated depending on whether you use the completed or patients still waiting datasets. This could lead to patients having unrealistic expectations for how quickly they will be seen for a particular condition. 
 The datasets are covered by the Open Government License: http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
 In summary this means the data can be copied, published, transmitted, adapted and even exploited commercially or non-commercially but the source of the information must be acknowledged. 
 
-Although covered by license, there is no endoresment or warranty with the data. The licence does not grant the user of the data any official status or patronage. Further, the provider of the information is not liable for any errors in the information nor any loss or damage caused by its use. 
+Although covered by license, there is no endorsement or warranty with the data. The licence does not grant the user of the data any official status or patronage. Further, the provider of the information is not liable for any errors in the information nor any loss or damage caused by its use. 
+
+Some of the datasets had flags for confidentiality, meaning that values were low enough that they could identify and individual. This meant that patient numbers are underestimated in some of teh health boards with lower patient numbers. To limit the effect that this would have we imputed missing values as 1 (making the assumption that at least one patient was there), but only in cased were we were aggregating further. Once aggregated there are no further issues with confidentiality.
+
+There are some ethical considerations around publishing waiting time data. As described in the data bias section different waiting times will be calculated depending on whether you use the completed or patients still waiting datasets. This could lead to patients having unrealistic expectations for how quickly they will be seen for a particular condition. 
 
 
