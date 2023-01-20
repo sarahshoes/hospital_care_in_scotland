@@ -24,7 +24,7 @@ Added the following to the dashboard:
 - function to standardise formats for graphs  
 
 **Malcolm**.   
-Set out the project/dashboard plan on Miro. 
+Set out the project/dashboard plan on Miro.   
 Worked on the following datasets:  
 - Bed Occupancy   
 - Hospital Admissions  
