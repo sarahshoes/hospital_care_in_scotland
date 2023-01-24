@@ -37,7 +37,7 @@ detail by simd
 difference between simd 1 and simd 5
 
 ## A+E Waiting times
-
+The target was 95% which means ....
 
 ## Delayed Discharges
 
