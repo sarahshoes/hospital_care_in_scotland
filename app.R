@@ -26,7 +26,6 @@ health_board_list <- read_csv(here::here("lookup_tables/health_board_codes.csv")
   pull()
 
 # A&E WAITING TIMES
-
 waiting_times <- read_csv(here::here("clean_data/a_and_e_data_clean.csv")) %>% 
   janitor::clean_names()
 
@@ -81,15 +80,19 @@ ui <- fluidPage(
   titlePanel("Hospital Care in Scotland"),
   tabsetPanel(
     tabPanel("Summary",
+             fluidRow(br()
+               
+             ),
              fluidRow(
-               column(4,
+               column(3,
                       leafletOutput("map")
                ),
-               column(8, 
+               column(8, br(), br(),
                       #   tags$h2("Covid Admissions")
                       tableOutput("summary_table")
                )
              ),
+             fluidRow(br()),
              fluidRow(
                column(4, 
                       selectInput(inputId = "map_data_to_display",
