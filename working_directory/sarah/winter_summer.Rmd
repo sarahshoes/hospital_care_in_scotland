@@ -7,6 +7,9 @@ output:
 
 # evidence of meeting PDA outcome 2.6.  
 # Statistical analyses to identify patterns, trends and relationships in the dataset
+# evidence of meeting PDA outcome 2.7.
+# Interpreting the results of statistical analysis
+
 
 ```{r setup, include=FALSE}
 # setup chunk
@@ -104,7 +107,7 @@ smoothed_data <- smoothed_data %>%
   mutate(mvar = param - moving_avg) 
 ```
 
-plot - check the smoother makes sense and tweak values if they dont
+plot - check the smoother makes sense and tweak values if they don't
 line plot can be added to the app 
 - show pre pandemic and post pandemic in different plots
 in this plot seasonal var much greater than long term var
@@ -140,23 +143,25 @@ smoothed_data %>%
     labels=c("FALSE" = "Summer (Apr-Sep)", "TRUE" = "Winter (Oct-Mar)"), 
     limits = c("FALSE","TRUE"))
 ```
+This box plot shows that for this dataset, the median values in summer were lower than the median values in winter, so there is a suggestion that there could be a seasonal variability here. However it is necessary to do a statistical test to determine if these differences are statistically significant.
 
 ### Hypothesis Test
 
 Is summer is significantly different to winter?
 
 The null hypothesis is that the average value for summer is the same
-or lower than the average value for winter.
+as the average value for winter. The alternative hypothesis is that winter was significantly different 
 
-H0 : mean winter - mean summer <= 0
-HA : mean winter - mean summer >0 
+H0 : mean winter - mean summer = 0
+HA : mean winter - mean summer != 0 
 
-we are setting alpha for this test to be 0.05
+we are setting alpha for this test to be 0.05. This is the level that we need out p-value to be below in order to consider that our test is significant. alpha is the false positive rate, it shows us how unusual the result is.
+
 ```{r}
 alpha_test=0.05
 ```
 
-there is maybe not enough data here to do a good analysis
+the sample size here is quite low 
 ```{r}
 smoothed_data %>% 
   ggplot() +
@@ -194,11 +199,15 @@ get_p_value(obs_stat = observed_stat
 pull()
 ```
 
+This plot shows the null distribution, the red line is the observed statistic (difference in means of ~529). The red line is close to the edge of the null distribution.
+
 ```{r}
 p_value 
 ```
 If pvalue is less than alpha we can reject null hypothesis
 If pvalue is greater than alpha we cannot reject null hypothesis
+
+in this case the p_value of 0.369 is greater than 0.05 and this means we cannot reject the null hypothesis. We cannot say that the two samples means are significantly different to each other. So for this dataste there is no significant difference between summer and winter values.
 
 ```{r}
 if(p_value > alpha_test){
@@ -214,9 +223,9 @@ if(p_value > alpha_test){
 smoother not perfect, hard to remove long term trend in a short dataset
 maybe need to smooth less? this will do for now though ...
 
-## repeat of code with diff filter ##
+## repeat of code with diff dataset ##
 
-this is an example where we definitely expect winter summer to be different
+The case below is an an example where we definitely expect winter summer to be different
 
 ```{r}
 seldata <- delayed_discharge %>% 
@@ -295,16 +304,17 @@ smoothed_data %>%
     labels=c("FALSE" = "Summer (Apr-Sep)", "TRUE" = "Winter (Oct-Mar)"), 
     limits = c("FALSE","TRUE"))
 ```
+The boxplot here shows that the median value on winter is higher than the median value for summer months. The distribution of samples is also different with much less overalp than in the previous examples. It is is likely that these samples are statistically different but we need to run the test in order to be sure. 
 
 ### Hypothesis Test
 
 Is summer is significantly different to winter?
 
 The null hypothesis is that the average value for summer is the same
-or lower than the average value for winter.
+as the average value for winter. The alternative hypothesis is that winter was significantly higher
 
-H0 : mean winter - mean summer <= 0
-HA : mean winter - mean summer >0 
+H0 : mean winter - mean summer <=0
+HA : mean winter - mean summer > 0 
 
 we are setting alpha for this test to be 0.05
 ```{r}
@@ -347,12 +357,16 @@ get_p_value(obs_stat = observed_stat
             , direction = "greater") %>% 
 pull()
 ```
+This plot shows the null distribution, the red line is the observed statistic (difference in means of ~652)
 
 ```{r}
 p_value 
 ```
 If pvalue is less than alpha we can reject null hypothesis
 If pvalue is greater than alpha we cannot reject null hypothesis
+
+
+In this case the p_value of 0.039 is less than 0.05. This means that we can reject the null hypothesis in favour of the alternative hypothesis. We can say that the two samples means are significantly different to each other. We can therefore say that for this dataste the winter values are significantly higher than teh summer values.
 
 ```{r}
 if(p_value > alpha_test){
